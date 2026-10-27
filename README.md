@@ -44,7 +44,7 @@ tests/               pytest suite (offline) and the docs checks
 | Formatting (ruff) | yes | yes | yes | yes |
 | Lint, complexity ≤ 10, ≤ 50 statements per function (ruff); types (pyright, strict in `src/`) | | yes | yes | yes |
 | Tests, branch coverage ≥ 85 %, suite ≤ 60 s | | yes | yes | yes |
-| Doc size limits (AGENTS.md ≤ 100 lines), no broken local links | | yes | yes | yes |
+| Doc size limits (AGENTS.md ≤ 100 lines; `ideas/` exempt), no broken local links | | yes | yes | yes |
 | No `.env` files, no private keys | | yes | yes | yes |
 | Secret scan of staged changes (gitleaks) | | | yes | |
 

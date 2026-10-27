@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {".git", ".venv", ".pytest_cache", ".ruff_cache", "data", "htmlcov", "node_modules"}
 MAX_LINES = {"AGENTS.md": 100, "README.md": 300}  # AGENTS.md loads into every session
 MAX_LINES_DEFAULT = 800
+SIZE_EXEMPT_DIRS = {"ideas"}  # raw working notes; links are still checked
 LINK = re.compile(r"\]\(([^)#\s]+)")  # markdown link target, anchor stripped
 IMPORT = re.compile(r"(?:^|\s)@([\w./-]+\.md)\b")  # Claude Code @import
 
@@ -30,6 +31,15 @@ def _rel(path: Path) -> str:
     return path.relative_to(ROOT).as_posix()
 
 
+def size_checked(path: Path) -> bool:
+    return path.relative_to(ROOT).parts[0] not in SIZE_EXEMPT_DIRS
+
+
+def test_size_checked_skips_ideas() -> None:
+    assert not size_checked(ROOT / "ideas" / "notes.md")
+    assert size_checked(ROOT / "docs" / "ideas.md")
+
+
 def test_broken_refs_detects_missing_targets(tmp_path: Path) -> None:
     (tmp_path / "ok.md").write_text("")
     doc = tmp_path / "doc.md"
@@ -46,7 +56,8 @@ def test_docs_within_size_limits() -> None:
     too_long = {
         _rel(p): n
         for p in markdown_files()
-        if (n := len(p.read_text(encoding="utf-8").splitlines()))
+        if size_checked(p)
+        and (n := len(p.read_text(encoding="utf-8").splitlines()))
         > MAX_LINES.get(_rel(p), MAX_LINES_DEFAULT)
     }
     assert too_long == {}
