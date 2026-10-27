@@ -1,7 +1,7 @@
 [project]
-name = "claude-dev-schema"
+name = "risk-pilot"
 version = "0.1.0"
-description = "Blueprint for precise, token-efficient Python development with Claude Code."
+description = "Evidence-based risk-management tool"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"
