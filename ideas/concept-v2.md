@@ -94,12 +94,12 @@ Die vier genannten Probleme sind keine Fachmodule, sondern Prüfsteine für den 
 |---|---|---|---|---|
 | **Terminplanung** | Netzplan: Vorgänge in Serie (Summe) und parallel (Maximum) | Unsichere Dauern, Ereignisse (Nacharbeit), `max` | Fertigstellungstermin | Kritischer Pfad, Kritikalität, P(Termin gehalten) |
 | **Kernfusionskraftwerk** | Technologien mit unsicherem Reifezeitpunkt, Scheitern möglich, gegenseitige Beschleunigung oder Blockade | Ereignisse, bedingte Verteilungen, Schwellen, nichtlineare Ausdrücke, Zeithorizont | Jahr der ersten kommerziellen Anlage | Anteil „nicht im Horizont“, Kritikalität der Technologien, Tornado |
-| **Bahnreise** | Verspätung → Anschluss erreicht oder nicht → Ausweichoption | Mischverteilungen, Bedingungen (`if`), Auswahl der besten Alternative (`min`) | Ankunftszeit | P(Ankunft vor X), mehrgipflige Verteilung, Sweep der Umstiegszeit |
+| **Bahnreise** | Verspätung → Anschluss erreicht oder nicht → Ausweichoption | Mischverteilungen, Bedingungen (`where`), Auswahl der besten Alternative (`min`) | Ankunftszeit | P(Ankunft vor X), mehrgipflige Verteilung, Sweep der Umstiegszeit |
 | **Portfolio** | Korrelierte Renditen, multiplikative Entwicklung über die Zeit | Korrelationsgruppen, Lognormal, Szenarioparameter (Gewichte) | Endvermögen | P(Verlust), VaR/ES, Szenariovergleich (Gewichte, Krisenkorrelation) |
 
 **Daraus abgeleitete Kernanforderungen:**
 
-1. Lineare **und** nichtlineare funktionale Abhängigkeiten (`max`, `min`, `if`, Schwellen,
+1. Lineare **und** nichtlineare funktionale Abhängigkeiten (`max`, `min`, `where`, Schwellen,
    Potenzen, Interpolationstabellen).
 2. **Bedingte Verteilungen:** Parameter einer Verteilung dürfen von anderen Knoten abhängen.
 3. **Ereignisse und diskrete Verzweigungen** mit Mischverteilungen als Ergebnis.
@@ -133,7 +133,7 @@ Die vier genannten Probleme sind keine Fachmodule, sondern Prüfsteine für den 
 ### 4.2 Drei Arten von Abhängigkeiten
 
 1. **Funktional (Ausdruck)** – bevorzugt. Lineare und nichtlineare Zusammenhänge:
-   `kosten = dauer * tagessatz + if(nacharbeit, 50_000, 0)`.
+   `kosten = dauer * tagessatz + where(nacharbeit, 50_000, 0)`.
 2. **Bedingte Verteilung** – Parameter verweisen auf andere Knoten:
    `entwicklungszeit_B ~ Lognormal(mean = 12 - 4 * durchbruch_A, sd = 3)`.
 3. **Statistisch (Korrelationsgruppe)** – nur wenn kein Wirkungsmodell bekannt ist. Gaussian
@@ -150,7 +150,7 @@ Zyklus abgewiesen. Rückkopplungen über die Zeit sind erst mit der Periodendime
 - **Syntax:** Python-ähnliche Ausdrücke, geparst mit `ast` und gegen eine Whitelist geprüft,
   ausgewertet vektorisiert mit NumPy über alle Iterationen gleichzeitig.
 - **Operatoren:** `+ - * / ** %`, Vergleiche, `and or not`.
-- **Funktionen (Startumfang):** `min, max, abs, exp, log, sqrt, floor, ceil, clip, if(c, a, b),
+- **Funktionen (Startumfang):** `min, max, abs, exp, log, sqrt, floor, ceil, clip, where(c, a, b),
   interp(x, xs, ys)` (stückweise linear, für nichtlineare Kennlinien), `sum(...)`.
 - **Kritikalitätserfassung:** `max` und `min` merken pro Iteration, welches Argument gewonnen hat
   (Basis für kritische Pfade, Abschnitt 6.3).
@@ -234,7 +234,7 @@ Wege:
   - Parameterwerte und Konstanten (inkl. Entscheidungen),
   - Verteilungsfamilie oder -parameter eines Knotens,
   - Ereigniswahrscheinlichkeiten,
-  - Strukturvarianten über Schalterkonstanten (`if(variante_b, …, …)`) oder alternativen Ausdruck,
+  - Strukturvarianten über Schalterkonstanten (`where(variante_b, …, …)`) oder alternativen Ausdruck,
   - Korrelationswerte.
 - **Vererbung:** Ändert sich das Hauptszenario, erben Unterszenarien die Änderung, sofern sie den
   Wert nicht selbst überschreiben. „Loslösen“ macht ein Unterszenario zur vollständigen Kopie.
@@ -420,7 +420,7 @@ nodes:
   B: {type: uncertain, dist: normal, mean: 15, sd: 3}
   C: {type: uncertain, dist: normal, mean: 24, sd: 4}
   nacharbeit: {type: event, p: 0.2}
-  pfad1: {type: derived, expr: "A + B + if(nacharbeit, 5, 0)"}
+  pfad1: {type: derived, expr: "A + B + where(nacharbeit, 5, 0)"}
   ende: {type: output, expr: "max(pfad1, C)", target: {le: 30}}
 scenarios:
   basis: {}

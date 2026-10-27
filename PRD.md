@@ -27,6 +27,8 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - Bayessche Inferenz, automatische „beste Verteilung“, Datenfit über Quantil-Fit hinaus.
 - Automatische Szenariomischung oder Szenariowahrscheinlichkeiten.
 - Mischverteilungen als Familie, Sobol-Indizes, LHS- oder Quasi-Monte-Carlo-Sampling.
+- Einheitenprüfung (z. B. `d + EUR` als Fehler, Umrechnung d ↔ h); `unit` ist bis dahin Freitext.
+- Englische Oberfläche (Meldungskatalog ist ab M1 dafür vorbereitet).
 - Anlageberatung, Derivatebewertung, Marktpreisprozesse.
 
 ## 3. Constraints
@@ -63,6 +65,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Deliverable:** Modellschema (Knotentypen `constant`, `uncertain`, `event`, `choice`, `derived`,
   `output`), YAML-Lader (Adapter), Ausdruckssprache, Verteilungsregister, vektorisierte Engine,
   Grundstatistik; `examples/t1_faltung.yaml` und `examples/t2_terminplan.yaml`.
+  Pflichtenheft: [docs/specs/m1-rechenkern.md](docs/specs/m1-rechenkern.md).
 - **Acceptance criteria:**
   1. Verteilungen: uniform, triangular, pert (λ Standard 4), normal, truncnormal, lognormal, beta,
      student_t, exponential, gamma, weibull, bernoulli, discrete, poisson. Jede kontinuierliche
@@ -74,8 +77,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   3. Ungültige Parameter (z. B. sd ≤ 0, min > max, Modus außerhalb, p ∉ [0, 1], ν ≤ 2) führen zu
      einem Validierungsfehler, der Knoten-ID und Parameter nennt.
   4. Ausdrücke: Operatoren `+ - * / ** %`, Vergleiche, `and or not`, Funktionen `min, max, abs,
-     exp, log, sqrt, floor, ceil, clip, if, interp, sum`. Attribute, Indizes, Lambdas, Aufrufe
-     unbekannter Funktionen, unbekannte Namen und Ausdrücke über der Längen-/Tiefengrenze werden mit
+     exp, log, sqrt, floor, ceil, clip, where, interp, sum` (`where(c, a, b)` wie in NumPy; `if`
+     ist in Python ein Schlüsselwort). Attribute, Indizes, Lambdas, Aufrufe unbekannter
+     Funktionen, unbekannte Namen und Ausdrücke über der Längen-/Tiefengrenze werden mit
      Fehlermeldung (Knoten, Ursache) abgewiesen.
   5. Verteilungsparameter dürfen Ausdrücke anderer Knoten sein (bedingte Verteilungen).
   6. Zyklen werden mit Angabe der beteiligten Knoten abgewiesen.
