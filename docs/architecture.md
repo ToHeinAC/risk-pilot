@@ -5,7 +5,7 @@
 | Layer | Where | Rule |
 |---|---|---|
 | Core logic | `src/app/` except `adapters/` and `ui/` | Pure functions, fully typed, no I/O. Unit-tested directly. |
-| Adapters | `src/app/adapters/` | The only place for file and process I/O: model files, runs, settings, shutdown. |
+| Adapters | `src/app/adapters/` | The only place for file and process I/O: model files, CSV columns, runs, settings, shutdown. |
 | Entry point | `src/app/ui/` (Streamlit) | Thin: read widgets, call core and adapters, render. Tested with AppTest. |
 
 Core packages (M1, [spec](specs/m1-rechenkern.md)):
@@ -13,11 +13,11 @@ Core packages (M1, [spec](specs/m1-rechenkern.md)):
 | Package | Role |
 |---|---|
 | `errors.py`, `messages.py` | Issue/Notice with stable codes and parameters; German message catalogue, `render()` |
-| `model/` | Pydantic schema, YAML text <-> model, reference graph and typed edges (`graph.edges`, M4), `compile_model`; `scenarios.py` (M3): chain, effective model, validation, diff, editing |
+| `model/` | Pydantic schema, YAML text <-> model, reference graph and typed edges (`graph.edges`, M4), `compile_model`; `scenarios.py` (M3): chain, effective model, validation, diff, editing; M5: `correlations.py` (group checks, Spearman -> latent, matrix factor), `edits.py` (quantiles -> piecewise, CSV values -> empirical) |
 | `expr/` | Expression language: AST whitelist, static types, vectorised evaluation, function registry; `activity.py` (M4): which references decide a result per iteration |
-| `dists/` | Distribution families (inversion sampling), registry |
-| `engine/` | One random stream per node, `simulate` (`keep="all"` holds every node's array for the M4 analyses) |
-| `analysis/` | Summary statistics with intervals, analytic references for T1/T2; `compare.py` (M3): paired differences, batch means, P(B better); M4 ([spec](specs/m4-struktur.md)): `criticality.py` (decisive path, index, constellations), `tornado.py`, `sweep.py`, `sensitivity.py` (Spearman), `riskmatrix.py` (Wilson, Welch) |
+| `dists/` | Distribution families (inversion sampling), registry; M5: `piecewise`, `empirical`, input mode `quantiles` with `fit.py` (least squares, deviation relative to P90 − P10) |
+| `engine/` | One random stream per node, `simulate` (`keep="all"` holds every node's array for the M4 analyses); `copula.py` (M5): correlated uniforms from the members' own streams, achieved ρ |
+| `analysis/` | Summary statistics with intervals (M5: horizon, VaR/ES, multimodality), analytic references for T1–T4; `compare.py` (M3): paired differences, batch means, P(B better); M4 ([spec](specs/m4-struktur.md)): `criticality.py` (decisive path, index, constellations), `tornado.py`, `sweep.py`, `sensitivity.py` (Spearman), `riskmatrix.py` (Wilson, Welch) |
 | `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); no Streamlit import |
 | `lessons/` (M2) | Learning path: manifest schema, knob (`with_value`), analytic checks per lesson, reading list |
 

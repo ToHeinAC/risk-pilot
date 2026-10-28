@@ -29,6 +29,7 @@ def body() -> None:
             "scenario_id": run.scenario_id,
             "scenario_name": run.scenario,
             "effective_hash": content_hash(run.compiled.model),
+            "correlations": {g: m.tolist() for g, m in run.result.correlations.items()},
         }
         path = runs.save_run(
             settings.runs_dir(),

@@ -5,7 +5,7 @@ import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -82,4 +82,6 @@ def load_run(path: Path) -> StoredRun:
 
 def as_result(stored: StoredRun) -> SimulationResult:
     """The stored run as a simulation result (for the result view)."""
-    return SimulationResult(stored.samples, stored.meta, {}, ())
+    stored_rho = cast(dict[str, list[list[float]]], stored.meta.get("correlations") or {})
+    reached = {gid: np.asarray(m, dtype=np.float64) for gid, m in stored_rho.items()}
+    return SimulationResult(stored.samples, stored.meta, {}, (), reached)

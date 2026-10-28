@@ -21,6 +21,7 @@ def _output_tab(runs: dict[str, state.RunView], ref: str, output: str) -> None:
     unit = node.unit
     better = node.better if isinstance(node, OutputNode) else None
     a = base.result.samples[output]
+    views.horizon_hint(base.compiled.model, output)
     samples = {run.scenario: run.result.samples[output] for run in runs.values()}
     for sid, run in runs.items():
         if sid == ref:

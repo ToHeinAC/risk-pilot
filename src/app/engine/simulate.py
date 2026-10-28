@@ -6,7 +6,7 @@
 import platform
 from collections import Counter
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from importlib.metadata import version
 from typing import Any, Literal
@@ -15,6 +15,7 @@ import numpy as np
 import scipy
 from numpy.typing import NDArray
 
+from app.engine.copula import achieved, correlated_uniforms
 from app.engine.streams import GENERATOR, STREAM_DERIVATION, uniforms
 from app.errors import Issue, Notice, SimulationError
 from app.expr.evaluate import EvalError
@@ -30,6 +31,7 @@ class SimulationResult:
     meta: Mapping[str, object]
     canonical: Mapping[str, Mapping[str, object]]
     warnings: tuple[Notice, ...]
+    correlations: Mapping[str, Array] = field(default_factory=dict[str, Array])  # achieved ρ_s
 
 
 @dataclass(frozen=True)
@@ -37,6 +39,7 @@ class _Run:
     values: dict[str, Array]
     n: int
     seed: int
+    copula: dict[str, NDArray[np.float64]] = field(default_factory=dict[str, NDArray[np.float64]])
 
     def full(self, x: Array) -> Array:
         """Broadcast a (possibly scalar) result to one value per iteration."""
@@ -49,11 +52,14 @@ class _Run:
             return np.full(self.n, body.value)
         if isinstance(body, CExpr):
             return self.full(body.expr.evaluate(self.values))
-        u = uniforms(self.seed, node.id, self.n)
+        u = self.copula.get(node.id)
+        if u is None:
+            u = uniforms(self.seed, node.id, self.n)
         if isinstance(body, CChoice):
             return np.searchsorted(body.cum, u, side="right").astype(np.float64)
         if isinstance(body, CEvent):
-            return self.event(node.id, body, u)
+            # In a group, a high latent value means "occurs", so ρ > 0 couples it with high values.
+            return self.event(node.id, body, 1 - u if node.id in self.copula else u)
         return self.uncertain(node.id, body, u)
 
     def event(self, node_id: str, body: CEvent, u: NDArray[np.float64]) -> Array:
@@ -142,7 +148,10 @@ def simulate(
     if not _is_int(seed) or seed < 0:
         raise SimulationError(Issue("sim.seed_range", params={"seed": seed}))
     run = _Run({}, n, seed)
+    for group in compiled.groups:
+        run.copula.update(correlated_uniforms(seed, group, n))
     pending = Counter(ref for refs in compiled.refs.values() for ref in refs)
+    pending.update(node for group in compiled.groups for node in group.nodes)
     samples: dict[str, Array] = {}
     notices = list(compiled.notices)
     for node_id in compiled.order:
@@ -159,7 +168,10 @@ def simulate(
         if node.tracked or keep == "all":
             samples[node_id] = x
         _release(run.values, compiled.refs[node_id], pending, samples)
-    return SimulationResult(samples, _meta(compiled, n, seed), compiled.canonical, tuple(notices))
+    reached = {g.id: achieved(run.values, g) for g in compiled.groups}
+    return SimulationResult(
+        samples, _meta(compiled, n, seed), compiled.canonical, tuple(notices), reached
+    )
 
 
 def _release(

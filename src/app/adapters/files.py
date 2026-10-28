@@ -1,6 +1,8 @@
-"""File adapter for model files: read, list, copy as template, save atomically."""
+"""File adapter: model files (read, list, copy as template, save atomically) and CSV import."""
 
+import csv
 import hashlib
+import io
 import os
 import re
 from pathlib import Path
@@ -84,3 +86,48 @@ def save_model_text(path: Path, text: str, expected_hash: str | None) -> None:
     temporary = path.with_name(path.name + ".tmp")
     temporary.write_text(text, encoding="utf-8")
     os.replace(temporary, path)
+
+
+def _csv_rows(data: bytes) -> tuple[list[list[str]], str]:
+    try:
+        text = data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise InputError(Issue("csv.encoding")) from None
+    try:
+        delimiter = csv.Sniffer().sniff(text.splitlines()[0], delimiters=",;\t").delimiter
+    except (csv.Error, IndexError):
+        delimiter = ","
+    return list(csv.reader(io.StringIO(text), delimiter=delimiter)), delimiter
+
+
+def csv_columns(data: bytes) -> list[str]:
+    """Header names of an uploaded CSV file."""
+    rows, _ = _csv_rows(data)
+    return rows[0] if rows else []
+
+
+def csv_column(data: bytes, column: str) -> tuple[list[float], int]:
+    """Numbers of one column and the count of empty cells skipped.
+
+    With ``;`` or tab as delimiter a decimal comma is accepted. A cell that is no number stops
+    the import with its line number; nothing is guessed.
+    """
+    rows, delimiter = _csv_rows(data)
+    header = rows[0] if rows else []
+    if column not in header:
+        raise InputError(Issue("csv.column", params={"column": column, "columns": header}))
+    index = header.index(column)
+    values: list[float] = []
+    skipped = 0
+    for line, row in enumerate(rows[1:], start=2):
+        cell = row[index].strip() if index < len(row) else ""
+        if not cell:
+            skipped += 1
+            continue
+        try:
+            values.append(float(cell.replace(",", ".") if delimiter != "," else cell))
+        except ValueError:
+            raise InputError(
+                Issue("csv.number", line=line, params={"value": cell, "column": column})
+            ) from None
+    return values, skipped

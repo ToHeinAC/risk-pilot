@@ -19,7 +19,7 @@ _FIELDS = {
     "event": {"p", "bounds"},
     "choice": {"options"},
     "derived": {"expr", "bounds"},
-    "output": {"expr", "target", "better", "bounds"},
+    "output": {"expr", "target", "better", "bounds", "horizon", "loss_reference"},
 }
 
 Data = dict[str, Any]
@@ -80,6 +80,13 @@ def effective_model(model: Model, scenario_id: str) -> Model:
     for sid in ids[1:]:
         _apply(data, model.scenarios[sid].overrides)
     top = model.model_dump(mode="json", exclude_unset=True, exclude={"scenarios", "nodes"})
+    groups = {gid: dict(g) for gid, g in top.get("correlations", {}).items()}
+    for sid in (i for i in ids if i != BASIS):  # a detached root keeps its frozen matrices
+        for gid, fields in (model.scenarios[sid].correlations or {}).items():
+            if gid in groups:
+                groups[gid].update(fields)
+    if groups:
+        top["correlations"] = groups
     try:
         return Model.model_validate({**top, "nodes": data})
     except ValidationError as exc:
@@ -135,11 +142,20 @@ def _same_values(model: Model, sid: str, scenario: Scenario) -> list[Notice]:
     ]
 
 
+def _correlation_issues(model: Model, sid: str, scenario: Scenario) -> list[Issue]:
+    """Scenarios may replace the matrix (and reason) of an existing group, nothing else."""
+    issues: list[Issue] = []
+    for gid, fields in (scenario.correlations or {}).items():
+        if gid not in model.correlations:
+            issues.append(Issue("scenario.corr_unknown", scenario=sid, params={"group": gid}))
+        elif set(fields) - {"spearman", "why"}:
+            issues.append(Issue("scenario.corr_field", scenario=sid, params={"group": gid}))
+    return issues
+
+
 def _check(model: Model, sid: str, compile_scenarios: bool) -> tuple[list[Issue], list[Notice]]:
     scenario = model.scenarios[sid]
-    issues: list[Issue] = []
-    if scenario.correlations is not None:
-        issues.append(Issue("scenario.unsupported", scenario=sid, params={"key": "correlations"}))
+    issues = _correlation_issues(model, sid, scenario)
     try:
         chain(model, sid)
     except ModelError as exc:
@@ -174,9 +190,11 @@ def diff(model: Model, scenario_id: str) -> list[DiffRow]:
     """Exactly the overrides of a scenario, each against its parent's effective value."""
     scenario = model.scenarios[scenario_id]
     parent_id = scenario.detached_from or BASIS if scenario.nodes is not None else scenario.parent
-    parent = _nodes_data(effective_model(model, parent_id).nodes)
+    parent_model = effective_model(model, parent_id)
+    parent = _nodes_data(parent_model.nodes)
+    matrices = _correlation_rows(parent_model, scenario)
     if scenario.nodes is not None:
-        return _detached_diff(parent, _nodes_data(scenario.nodes))
+        return _detached_diff(parent, _nodes_data(scenario.nodes)) + matrices
     rows: list[DiffRow] = []
     for node_id, fields in scenario.overrides.items():
         for name, value in fields.items():
@@ -187,6 +205,19 @@ def diff(model: Model, scenario_id: str) -> list[DiffRow]:
                 "inaktiv" if fields.get("inactive") else "gleich" if before == value else "geändert"
             )
             rows.append(DiffRow(node_id, name, before, value, fields.get("why"), status))
+    return rows + matrices
+
+
+def _correlation_rows(parent: Model, scenario: Scenario) -> list[DiffRow]:
+    """Replaced matrices of correlation groups; the group ID stands in the node column."""
+    rows: list[DiffRow] = []
+    for gid, fields in (scenario.correlations or {}).items():
+        if "spearman" not in fields or gid not in parent.correlations:
+            continue
+        before = parent.correlations[gid].spearman
+        after = fields["spearman"]
+        status = "gleich" if before == after else "geändert"
+        rows.append(DiffRow(gid, "spearman", before, after, fields.get("why"), status))
     return rows
 
 
@@ -275,13 +306,17 @@ def detach(model: Model, sid: str) -> Model:
     """Freeze the effective model into the scenario; later parent changes no longer apply."""
     data = _scenarios_data(model)
     entry = data[sid]
-    nodes = _nodes_data(effective_model(model, sid).nodes)
+    effective = effective_model(model, sid)
     data[sid] = {
         "name": entry["name"],
         "why": entry["why"],
-        "nodes": nodes,
+        "nodes": _nodes_data(effective.nodes),
         "detached_from": entry.get("parent", BASIS),
     }
+    if effective.correlations:
+        data[sid]["correlations"] = {
+            gid: {"spearman": g.spearman} for gid, g in effective.correlations.items()
+        }
     return _with_scenarios(model, data)
 
 

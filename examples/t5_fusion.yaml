@@ -1,0 +1,52 @@
+# Tutorial T5: illustrative values, not research results.
+schema_version: 1
+model: t5_fusion
+title: "Wann kommt das Fusionskraftwerk?"
+description: "Schlüsseltechnologien reifen unsicher, können scheitern und beschleunigen sich gegenseitig."
+illustrative: true
+settings: {n: 20000, seed: 20261028}
+nodes:
+  magnete: {type: uncertain, dist: piecewise, probs: [0, 0.1, 0.5, 0.9, 1], values: [2028, 2031, 2036, 2045, 2060], unit: Jahr, name: "Magnete reif"}
+  durchbruch: {type: event, p: 0.3, name: "Durchbruch bei Magneten"}
+  plasma_basis: {type: uncertain, dist: piecewise, probs: [0, 0.1, 0.5, 0.9, 1], values: [2032, 2036, 2042, 2055, 2075], unit: Jahr, name: "Plasma reif (ohne Durchbruch)"}
+  plasma: {type: derived, expr: "plasma_basis - 5 * durchbruch", unit: Jahr, name: "Plasma reif"}
+  material: {type: uncertain, dist: piecewise, probs: [0, 0.1, 0.5, 0.9, 1], values: [2033, 2038, 2045, 2058, 2080], unit: Jahr, name: "Materialien qualifiziert"}
+  tritium: {type: uncertain, dist: piecewise, probs: [0, 0.1, 0.5, 0.9, 1], values: [2032, 2036, 2043, 2056, 2078], unit: Jahr, name: "Tritium-Brüten reif"}
+  f_plasma: {type: event, p: 0.1, name: "Plasma scheitert"}
+  f_material: {type: event, p: 0.15, name: "Materialien scheitern"}
+  f_tritium: {type: event, p: 0.1, name: "Tritium-Brüten scheitert"}
+  gescheitert: {type: derived, expr: "f_plasma or f_material or f_tritium", name: "Eine Technologie scheitert"}
+  foerderung: {type: constant, value: 1, name: "Förderung (relativ)"}
+  bauzeit: {type: derived, expr: "interp(foerderung, [0.5, 1, 1.5], [15, 10, 7])", unit: Jahre, name: "Bauzeit je Anlage"}
+  demo: {type: derived, expr: "max(magnete, plasma, material, tritium) + bauzeit", unit: Jahr, name: "Demonstrationsanlage"}
+  kommerziell:
+    type: output
+    expr: "where(gescheitert, 2200, demo + bauzeit)"
+    unit: Jahr
+    target: {le: 2060}
+    horizon: 2100
+    name: "Erste kommerzielle Anlage"
+correlations:
+  werkstoffe:
+    nodes: [material, tritium]
+    spearman: [[1, 0.5], [0.5, 1]]
+    why: "Beides hängt an der Werkstoffforschung (illustrativ)"
+scenarios:
+  foerderung:
+    name: "hohe Förderung"
+    why: "Mehr Geld verkürzt die Bauzeit."
+    overrides:
+      foerderung: {value: 1.5, why: "Annahme (illustrativ)"}
+  materialproblem:
+    name: "Materialproblem"
+    why: "Die Materialqualifikation dauert länger und scheitert öfter."
+    overrides:
+      material: {values: [2038, 2045, 2055, 2070, 2095], why: "Annahme (illustrativ)"}
+      f_material: {p: 0.4, why: "Annahme (illustrativ)"}
+  beides:
+    name: "hohe Förderung und Materialproblem"
+    why: "Beide Annahmen zusammen."
+    parent: foerderung
+    overrides:
+      material: {values: [2038, 2045, 2055, 2070, 2095], why: "Annahme (illustrativ)"}
+      f_material: {p: 0.4, why: "Annahme (illustrativ)"}

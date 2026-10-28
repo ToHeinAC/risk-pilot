@@ -54,3 +54,17 @@ def test_list_runs_newest_first_and_by_model(tmp_path: Path) -> None:
     assert runs.list_runs(tmp_path, "other") == []
     assert runs.list_runs(tmp_path / "missing") == []
     assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_achieved_correlations_survive_reload(tmp_path: Path) -> None:
+    meta = {
+        "model_id": "m",
+        "model_hash": "0" * 64,
+        "timestamp": "2026-10-28T12:00:00+00:00",
+        "n": 2,
+        "seed": 0,
+    }
+    extra = {"correlations": {"g": [[1.0, 0.5], [0.5, 1.0]]}}
+    path = runs.save_run(tmp_path, meta, "x", {"y": np.zeros(2)}, {}, extra)
+    result = runs.as_result(runs.load_run(path))
+    assert result.correlations["g"].tolist() == [[1.0, 0.5], [0.5, 1.0]]

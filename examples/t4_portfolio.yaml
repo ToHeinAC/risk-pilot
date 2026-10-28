@@ -1,0 +1,48 @@
+# Tutorial T4: illustrative values, not research results or investment advice.
+schema_version: 1
+model: t4_portfolio
+title: "Portfolio aus drei Anlagen"
+description: "Buy-and-Hold über zehn Jahre; die Log-Renditen hängen über eine Korrelationsgruppe zusammen."
+illustrative: true
+settings: {n: 100000, seed: 20261028}
+nodes:
+  w0: {type: constant, value: 100000, unit: EUR, name: "Startvermögen"}
+  jahre: {type: constant, value: 10, unit: Jahre, name: "Anlagedauer"}
+  w_aktien: {type: constant, value: 0.6, name: "Anteil Aktien"}
+  w_anleihen: {type: constant, value: 0.3, name: "Anteil Anleihen"}
+  w_gold: {type: constant, value: 0.1, name: "Anteil Gold"}
+  l_aktien: {type: uncertain, dist: normal, mean: "jahre * 0.06", sd: "sqrt(jahre) * 0.18", name: "Log-Rendite Aktien"}
+  l_anleihen: {type: uncertain, dist: normal, mean: "jahre * 0.02", sd: "sqrt(jahre) * 0.05", name: "Log-Rendite Anleihen"}
+  l_gold: {type: uncertain, dist: normal, mean: "jahre * 0.03", sd: "sqrt(jahre) * 0.15", name: "Log-Rendite Gold"}
+  vermoegen:
+    type: output
+    expr: "w0 * (w_aktien * exp(l_aktien) + w_anleihen * exp(l_anleihen) + w_gold * exp(l_gold))"
+    unit: EUR
+    better: higher
+    loss_reference: 100000
+    name: "Endvermögen"
+correlations:
+  markt:
+    nodes: [l_aktien, l_anleihen, l_gold]
+    spearman:
+      - [1.0, 0.2, 0.1]
+      - [0.2, 1.0, 0.3]
+      - [0.1, 0.3, 1.0]
+    why: "Grobe Erfahrungswerte (illustrativ)"
+scenarios:
+  defensiv:
+    name: "defensiv"
+    why: "Mehr Anleihen, weniger Aktien."
+    overrides:
+      w_aktien: {value: 0.3, why: "Entscheidung"}
+      w_anleihen: {value: 0.6, why: "Entscheidung"}
+  krise:
+    name: "Krisenkorrelation"
+    why: "In Krisen laufen alle Anlagen gleich."
+    correlations:
+      markt: {spearman: [[1, 0.8, 0.8], [0.8, 1, 0.8], [0.8, 0.8, 1]], why: "Stresstest (illustrativ)"}
+  volatil:
+    name: "hohe Volatilität"
+    why: "Aktien schwanken anderthalbmal so stark."
+    overrides:
+      l_aktien: {sd: "sqrt(jahre) * 0.27", why: "Stresstest (illustrativ)"}

@@ -27,8 +27,16 @@ Open <http://localhost:8642>. **Stop it** with "App beenden" in the sidebar: it 
 sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the terminal works too.
 
 - **Tutorials** (`examples/`): T1 sum of two uniforms, T2 mini schedule, each with its analytic
-  solution shown next to the simulation. Read-only; "Als Vorlage kopieren" creates your own
-  model in `data/models/`.
+  solution shown next to the simulation; T3 train connection (two-peaked arrival), T4 portfolio
+  of three assets (correlation group, VaR/ES), T5 fusion power plant (piecewise maturity years,
+  failure events, horizon 2100). T3–T5 carry illustrative numbers. Read-only; "Als Vorlage
+  kopieren" creates your own model in `data/models/`.
+- **Dependencies and inputs** (M5, [spec](docs/specs/m5-abhaengigkeiten.md)): correlation groups
+  under `correlations:` (Spearman input, Gaussian copula, invalid matrices are rejected, never
+  repaired; achieved ρ shown after the run), distributions `piecewise` (quantile pairs) and
+  `empirical` (value list, CSV import on the model page), input mode `quantiles` (P10/P50/P90
+  for normal, lognormal, gamma, weibull, with the fit's deviation), `horizon` and
+  `loss_reference` on outputs.
 - **Lernpfad** (`examples/lernpfad/`): eleven short lessons on dependency patterns (series,
   parallel AND/OR, k-out-of-n, event branch, threshold, conditional distribution, multiplicative
   chain, Jensen, common cause, capstone). Each has a prediction, a knob that reruns with the same

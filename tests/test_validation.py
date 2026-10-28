@@ -43,7 +43,7 @@ def test_invalid_parameter_carries_value_and_rule() -> None:
 def test_unknown_distribution_and_mode() -> None:
     found = issues(
         "  a: {type: uncertain, dist: normall, mean: 1, sd: 1}\n"
-        "  b: {type: uncertain, dist: normal, input: quantiles, mean: 1, sd: 1}\n"
+        "  b: {type: uncertain, dist: normal, input: percentiles, mean: 1, sd: 1}\n"
         "  y: {type: output, expr: '1'}\n"
     )
     assert [(i.code, i.node_id) for i in found] == [

@@ -87,3 +87,28 @@ def test_copy_records_its_template() -> None:
         assert files.template_of(files.read_text(copy)) == "t2_terminplan"
         assert files.template_of(files.read_text(again)) == "t2_terminplan"
     assert files.template_of(files.read_text(T2)) is None
+
+
+def test_csv_column_reads_numbers_skips_blanks() -> None:
+    data = b"datum;dauer;notiz\n2026-01-01;3,5;a\n2026-01-02;;b\n2026-01-03;4;c\n"
+    assert files.csv_columns(data) == ["datum", "dauer", "notiz"]
+    assert files.csv_column(data, "dauer") == ([3.5, 4.0], 1)
+    comma = b"x,y\n1.5,2\n2.5,3\n"
+    assert files.csv_column(comma, "x") == ([1.5, 2.5], 0)
+
+
+def test_csv_column_reports_line_of_bad_number() -> None:
+    with pytest.raises(InputError) as exc:
+        files.csv_column(b"x\n1\nzwei\n", "x")
+    assert exc.value.issue.code == "csv.number"
+    assert exc.value.issue.line == 3
+    with pytest.raises(InputError) as exc:
+        files.csv_column(b"x\n1\n", "y")
+    assert exc.value.issue.code == "csv.column"
+
+
+def test_csv_in_another_encoding_is_reported() -> None:
+    data = "größe\n1\n".encode("latin-1")
+    with pytest.raises(InputError) as exc:
+        files.csv_columns(data)
+    assert exc.value.issue.code == "csv.encoding"

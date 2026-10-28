@@ -589,3 +589,41 @@ def test_analysis_tabs_explain_question_reading_and_limit() -> None:
     ):
         assert question in page
     assert "Wann welche Auswertung?" in labels
+
+
+def test_tutorials_t3_to_t5_listed_copyable_and_marked_illustrative() -> None:
+    at = start()
+    for stem in ("t3_bahn", "t4_portfolio", "t5_fusion"):
+        assert has_button(at, f"open_{stem}")
+    at.text_input(key="copy_id_t3_bahn").input("meine_bahn").run()
+    at.button(key="copy_t3_bahn").click().run()
+    assert files.load_model(settings.models_dir() / "meine_bahn.yaml").illustrative
+    assert "Illustrative Zahlen" in texts(open_model(start(), "t4_portfolio"))
+
+
+def test_results_show_correlations_losses_horizon_and_peaks() -> None:
+    page = texts(simulate(open_model(start(), "t4_portfolio"), 20_000))
+    assert "Erreichte Rangkorrelation" in page
+    assert "Illustrative Zahlen" in page
+    assert "VaR 95 %" in page
+    page = texts(simulate(open_model(start(), "t5_fusion"), 5_000))
+    assert "nicht erreicht" in page
+    assert "> Horizont" in page
+    assert "mehrere Gipfel" in texts(simulate(open_model(start(), "t3_bahn"), 20_000))
+
+
+def test_quantile_conflict_offers_piecewise_in_own_model() -> None:
+    at = own_model(
+        "schema_version: 1\nmodel: eigen\nnodes:\n"
+        "  x: {type: uncertain, dist: normal, input: quantiles, p10: 2031, p50: 2038, p90: 2060}\n"
+        "  y: {type: output, expr: x}\n"
+    )
+    assert "passen nicht zu einer normal-Verteilung" in texts(at)
+    assert at.button(key="to_piecewise_x").disabled  # no made-up bounds (E4, E7)
+    at.number_input(key="piecewise_p0_x").set_value(2025.0).run()
+    at.number_input(key="piecewise_p100_x").set_value(2090.0).run()
+    at.button(key="to_piecewise_x").click().run()
+    assert not at.exception
+    draft = str(at.text_area(key="editor").value)
+    assert "dist: piecewise" in draft
+    assert "2090" in draft

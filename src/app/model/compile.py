@@ -10,10 +10,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from app.dists.base import Family, ParamSpec, fill_defaults
+from app.dists.families import QUANTILES
+from app.dists.fit import CONFLICT, fit_quantiles
 from app.dists.registry import families, get_family
 from app.errors import Issue, ModelError, Notice
 from app.expr.evaluate import Const, Expr, Table
 from app.expr.parser import BOOL, NUM, ExprIssue, VarType, choice_type, compile_expr
+from app.model.correlations import Group, check_groups
 from app.model.graph import collect_refs, topo_order
 from app.model.schema import (
     Bounds,
@@ -81,6 +84,7 @@ class CompiledModel:
     canonical: Mapping[str, Mapping[str, object]]
     notices: tuple[Notice, ...]
     refs: Mapping[str, frozenset[str]]
+    groups: tuple[Group, ...] = ()  # correlation groups, checked
 
 
 def model_hash(model: Model) -> str:
@@ -172,6 +176,12 @@ class _Compiler:
         _check_names(node_id, node, specs, given)
         exprs = self.param_exprs(node_id, specs, given)
         literal = all(isinstance(e, Const | Table) for e in exprs.values())
+        if node.input == QUANTILES and not literal:
+            name = next(k for k, e in exprs.items() if not isinstance(e, Const | Table))
+            rule = "eine Zahl (im Modus quantiles keine Ausdrücke)"
+            raise _Fail(
+                [Issue("param.invalid", node_id, name, params={"value": given[name], "rule": rule})]
+            )
         self.check_literals(node_id, node, family, exprs, given)
         if literal:
             self.record_canonical(node_id, node, family, exprs, given)
@@ -246,10 +256,29 @@ class _Compiler:
             "given": dict(given),
             "canonical": {k: v.tolist() for k, v in canonical.items()},
         }
+        if node.input == QUANTILES:
+            self.notices.append(_fit_notice(node_id, family.name, arrays))
         if family.name == "uniform" and float(arrays["low"]) == float(arrays["high"]):
             self.notices.append(
                 Notice("uniform.degenerate", node_id, params={"value": float(arrays["low"])})
             )
+
+
+def _fit_notice(node_id: str, family: str, arrays: Mapping[str, NDArray[np.float64]]) -> Notice:
+    """How far the fitted family misses the three given quantiles (relative to P90 − P10)."""
+    fit = fit_quantiles(family, (float(arrays["p10"]), float(arrays["p50"]), float(arrays["p90"])))
+    code = "fit.conflict" if fit.deviation > CONFLICT else "fit.deviation"
+    params = {
+        "dist": family,
+        "deviation": _de(fit.deviation * 100, 2) + " %",
+        "given": " / ".join(_de(v) for v in fit.given),
+        "fitted": " / ".join(_de(v) for v in fit.fitted),
+    }
+    return Notice(code, node_id, params=params)
+
+
+def _de(x: float, digits: int = 4) -> str:
+    return f"{x:.{digits}g}".replace(".", ",")
 
 
 def _numbers_only(value: ParamValue) -> bool:
@@ -329,7 +358,8 @@ def compile_model(model: Model) -> CompiledModel:
         target = node.target if isinstance(node, OutputNode) else None
         tracked = node.track or isinstance(node, OutputNode)
         nodes[node_id] = CNode(node_id, node.type, vtype, body, node.bounds, target, tracked)
-    issues += _structure_issues(model)
+    groups, group_issues, group_notices = check_groups(model)
+    issues += group_issues + _structure_issues(model)
     if issues:
         raise ModelError(issues)
     return CompiledModel(
@@ -338,6 +368,7 @@ def compile_model(model: Model) -> CompiledModel:
         nodes,
         model_hash(model),
         compiler.canonical,
-        tuple(compiler.notices),
+        tuple(compiler.notices + group_notices),
         {k: frozenset(v) for k, v in refs.items()},
+        tuple(groups),
     )

@@ -1,11 +1,17 @@
 """Summaries per output and the before/after table of the learning path."""
 
 import math
+from collections.abc import Mapping
+from itertools import combinations
+
+import numpy as np
+from numpy.typing import NDArray
 
 from app.analysis.stats import Summary, summarize
 from app.engine.simulate import SimulationResult
 from app.messages import t
 from app.model.compile import CompiledModel
+from app.model.schema import OutputNode
 from app.present.text import number, percent
 
 Row = tuple[str, str, str, str]
@@ -13,11 +19,17 @@ Row = tuple[str, str, str, str]
 
 def summaries_for(compiled: CompiledModel, result: SimulationResult) -> dict[str, Summary]:
     """Statistics of every output, with its target if it has one."""
-    return {
-        node_id: summarize(result.samples[node_id], target=node.target)
-        for node_id, node in compiled.nodes.items()
-        if node.type == "output"
-    }
+    summaries: dict[str, Summary] = {}
+    for node_id in compiled.nodes:  # dependency order, as before
+        node = compiled.model.nodes[node_id]
+        if isinstance(node, OutputNode):
+            summaries[node_id] = summarize(
+                result.samples[node_id],
+                target=node.target,
+                horizon=node.horizon,
+                loss_reference=node.loss_reference,
+            )
+    return summaries
 
 
 def _signed(value: float, unit: str) -> str:
@@ -91,3 +103,18 @@ def change_sentence(metric: str, before: Summary, after: Summary, unit: str | No
         return t("result.change_same", label=label, before=fmt(b))
     key = "result.change_up" if a > b else "result.change_down"
     return t(key, label=label, amount=amount, before=fmt(b), after=fmt(a))
+
+
+def correlation_rows(
+    compiled: CompiledModel, achieved: Mapping[str, NDArray[np.float64]]
+) -> list[tuple[str, str, str, str]]:
+    """(group, pair, target ρ, achieved ρ) per pair of every correlation group."""
+    names = {i: node.name or i for i, node in compiled.model.nodes.items()}
+    rows: list[tuple[str, str, str, str]] = []
+    for group in compiled.groups:
+        reached = achieved.get(group.id)
+        for i, j in combinations(range(len(group.nodes)), 2):
+            pair = f"{names[group.nodes[i]]} – {names[group.nodes[j]]}"
+            got = number(float(reached[i, j])) if reached is not None else "–"
+            rows.append((group.id, pair, number(float(group.spearman[i, j])), got))
+    return rows

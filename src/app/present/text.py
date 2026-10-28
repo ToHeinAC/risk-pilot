@@ -3,8 +3,12 @@
 import math
 from collections.abc import Mapping
 from datetime import datetime
+from typing import Any
 
-from app.analysis.stats import Proportion, QuantileEstimate, Summary
+import numpy as np
+from numpy.typing import NDArray
+
+from app.analysis.stats import Proportion, QuantileEstimate, Summary, multimodal
 from app.messages import t
 from app.model.schema import Target
 
@@ -42,16 +46,42 @@ def _unit(unit: str | None) -> str:
     return f" {unit}" if unit else ""
 
 
-def quantile_sentence(q: QuantileEstimate, unit: str | None, conf: float) -> str:
+def _bound(value: float, horizon: float | None) -> str:
+    """An interval bound, or "> Horizont" beyond the horizon."""
+    if horizon is not None and value > horizon:
+        return t("result.beyond_value", horizon=number(horizon))
+    return number(value)
+
+
+def quantile_sentence(
+    q: QuantileEstimate, unit: str | None, conf: float, horizon: float | None = None
+) -> str:
+    if horizon is not None and q.value > horizon:
+        return t("result.quantile_beyond", pct=number(q.q * 100), horizon=number(horizon))
     return t(
         "result.quantile",
         pct=number(q.q * 100),
         value=number(q.value),
         lo=number(q.lo),
-        hi=number(q.hi),
+        hi=_bound(q.hi, horizon),
         unit=_unit(unit),
         conf=number(conf * 100),
     )
+
+
+def beyond_sentence(horizon: float, prop: Proportion, unit: str | None) -> str:
+    return t(
+        "result.beyond",
+        horizon=f"{number(horizon)}{_unit(unit)}",
+        p=percent(prop.p),
+        lo=number(prop.lo * 100),
+        hi=number(prop.hi * 100),
+    )
+
+
+def multimodal_sentence(median: float, mode: float, unit: str | None) -> str:
+    u = _unit(unit)
+    return t("result.multimodal", median=f"{number(median)}{u}", mode=f"{number(mode)}{u}")
 
 
 def target_sentence(target: Target, prop: Proportion, unit: str | None) -> str:
@@ -95,31 +125,88 @@ def _relative(s: Summary) -> str:
     return percent(s.se / abs(s.mean))
 
 
+def _moment_rows(s: Summary, u: str) -> list[tuple[str, str]]:
+    """Mean, sd and relative precision; with censored values not as numbers (they'd be biased)."""
+    if s.beyond is not None and s.beyond.k > 0:
+        hidden = t("result.censored", p=percent(s.beyond.p))
+        return [(t("result.mean"), hidden), (t("result.sd"), hidden), (t("result.relative"), "–")]
+    return [
+        (t("result.mean"), f"{number(_num(s.mean))}{u} ± {number(s.se)} ({t('result.se')})"),
+        (t("result.sd"), f"{number(_num(s.sd))}{u}"),
+        (t("result.relative"), _relative(s)),
+    ]
+
+
+def _quantile_value(q: QuantileEstimate, u: str, horizon: float | None) -> str:
+    if horizon is not None and q.value > horizon:
+        return t("result.beyond_value", horizon=number(horizon))
+    return f"{number(q.value)}{u} [{number(q.lo)} … {_bound(q.hi, horizon)}]"
+
+
+def _loss_rows(s: Summary, u: str) -> list[tuple[str, str]]:
+    if s.loss is None:
+        return []
+    var, pct = s.loss.var, number(s.loss.var.q * 100)
+    return [
+        _proportion_row(t("result.p_loss"), s.loss.p_loss),
+        (t("result.var", pct=pct), f"{number(var.value)}{u} [{number(var.lo)} … {number(var.hi)}]"),
+        (
+            t("result.es", pct=pct),
+            f"{number(s.loss.es)}{u} ± {number(s.loss.es_se)} ({t('result.se')})",
+        ),
+    ]
+
+
 def metric_rows(s: Summary, unit: str | None) -> list[tuple[str, str]]:
     """(label, value) rows for the metrics table of one output."""
     if s.share is not None:
         return [_proportion_row(t("result.share_label"), s.share)]
     u = _unit(unit)
+    moments = _moment_rows(s, u)
     rows = [
-        (t("result.mean"), f"{number(s.mean or math.nan)}{u} ± {number(s.se)} ({t('result.se')})"),
-        (t("result.median"), f"{number(s.median or math.nan)}{u}"),
-        (t("result.sd"), f"{number(s.sd or math.nan)}{u}"),
-        (t("result.relative"), _relative(s)),
+        moments[0],
+        (t("result.median"), _capped(_num(s.median), u, s.horizon)),
+        *moments[1:],
     ]
     rows += [
-        (
-            t("result.quantile_label", pct=number(q.q * 100)),
-            f"{number(q.value)}{u} [{number(q.lo)} … {number(q.hi)}]",
-        )
+        (t("result.quantile_label", pct=number(q.q * 100)), _quantile_value(q, u, s.horizon))
         for q in s.quantiles
     ]
     rows += [
-        (t("result.min"), f"{number(s.min or math.nan)}{u}"),
-        (t("result.max"), f"{number(s.max or math.nan)}{u}"),
+        (t("result.min"), _capped(_num(s.min), u, s.horizon)),
+        (t("result.max"), _capped(_num(s.max), u, s.horizon)),
     ]
     if s.target is not None:
         rows.append(_proportion_row(t("result.target_label"), s.target))
-    return rows
+    if s.beyond is not None:
+        rows.append(_proportion_row(t("result.beyond_label"), s.beyond))
+    return rows + _loss_rows(s, u)
+
+
+def _num(x: float | None) -> float:
+    """A missing value as NaN (shown as "–"); a true 0 stays 0."""
+    return math.nan if x is None else x
+
+
+def multimodal_hint(x: NDArray[Any], s: Summary, unit: str | None) -> str | None:
+    """The several-peaks hint, judged on the values within the horizon only."""
+    values = np.asarray(x, dtype=np.float64)
+    if s.horizon is not None:
+        values = values[values <= s.horizon]
+    peaks = multimodal(values)
+    if peaks is None:
+        return None
+    median = _num(s.median)
+    if s.horizon is not None and median > s.horizon:
+        return None  # the typical case lies beyond the horizon; the horizon line says so
+    return multimodal_sentence(median, peaks[1], unit)
+
+
+def _capped(value: float, u: str, horizon: float | None) -> str:
+    """A value with unit, or "> Horizont" beyond the horizon."""
+    if horizon is not None and value > horizon:
+        return t("result.beyond_value", horizon=number(horizon))
+    return f"{number(value)}{u}"
 
 
 def precision_hints(s: Summary) -> list[str]:

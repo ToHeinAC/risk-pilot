@@ -46,6 +46,13 @@ _DE: dict[str, str] = {
     "{above} über dem Maximum. Die Werte wurden nicht verändert.",
     "uniform.degenerate": "{node}: Gleichverteilung mit gleichen Grenzen, wird als Konstante "
     "{value} ausgewertet.",
+    "fit.deviation": "{node}: Quantil-Fit {dist} trifft P10/P50/P90 = {given} mit {fitted}; "
+    "größte Abweichung {deviation} der Spanne P90 − P10.",
+    "fit.conflict": "{node}: Die drei Werte P10/P50/P90 = {given} passen nicht zu einer "
+    "{dist}-Verteilung: Der beste Fit liefert {fitted}, die größte Abweichung beträgt "
+    "{deviation} der Spanne P90 − P10 (mehr als 2 %). Eine Stützstellen-Verteilung (piecewise) "
+    "übernimmt die Werte genau.",
+    "fit.bounds": "{node}: P0 muss unter P10 = {p10} liegen und P100 über P90 = {p90}.",
     "stats.single_sample": "Nur eine Iteration: kein Standardfehler bestimmbar.",
     "stats.quantile_range": "Quantil {q} liegt nicht strikt zwischen 0 und 1.",
     "files.exists": "Ein Modell „{name}“ gibt es schon. Vorschlag: „{suggestion}“.",
@@ -57,12 +64,40 @@ _DE: dict[str, str] = {
     "scenario.field_invalid": "{node}: Das Feld „{field}“ lässt sich in einem Szenario nicht "
     "überschreiben.",
     "scenario.type_change": "{node}: Der Knotentyp lässt sich in einem Szenario nicht ändern.",
-    "scenario.unsupported": "„{key}“ wird in Szenarien erst ab Meilenstein M5 unterstützt.",
+    "scenario.corr_unknown": "Die Korrelationsgruppe „{group}“ gibt es nicht.",
+    "scenario.corr_field": "Korrelationsgruppe „{group}“: In Szenarien lassen sich nur "
+    "„spearman“ und „why“ überschreiben.",
+    "corr.too_small": "Korrelationsgruppe „{group}“ braucht mindestens zwei Knoten.",
+    "corr.node_unknown": "Korrelationsgruppe „{group}“: Knoten „{name}“ gibt es nicht.",
+    "corr.node_type": "Korrelationsgruppe „{group}“: {node} hat den Typ „{type}“; erlaubt sind "
+    "unsichere Knoten und Ereignisse.",
+    "corr.node_twice": "{node} steht in mehreren Korrelationsgruppen ({groups}); erlaubt ist eine.",
+    "corr.shape": "Korrelationsgruppe „{group}“: Die Matrix muss {k} Zeilen mit je {k} "
+    "Werten haben.",
+    "corr.diagonal": "Korrelationsgruppe „{group}“: Auf der Diagonale muss überall 1 stehen.",
+    "corr.range": "Korrelationsgruppe „{group}“: Rangkorrelationen müssen zwischen −1 und 1 "
+    "liegen.",
+    "corr.asymmetric": "Korrelationsgruppe „{group}“: Die Matrix ist nicht symmetrisch (Zeile "
+    "{row}, Spalte {col}).",
+    "corr.not_psd": "Korrelationsgruppe „{group}“: Die Matrix ist nicht positiv semidefinit "
+    "(kleinster Eigenwert {eig}), die Paare widersprechen sich. Sie wird nicht repariert; bitte "
+    "die Werte anpassen.",
+    "corr.latent_not_psd": "Korrelationsgruppe „{group}“: Nach der Umrechnung der "
+    "Rangkorrelation für die Copula (2·sin(π·ρ/6)) ist die Matrix nicht positiv semidefinit "
+    "(kleinster Eigenwert {eig}). Sie wird nicht repariert; bitte die Werte etwas abschwächen.",
+    "corr.discrete_ties": "Korrelationsgruppe „{group}“ enthält diskrete Knoten ({nodes}): "
+    "Wegen gleicher Werte (Bindungen) liegt die erreichte Rangkorrelation unter dem Ziel.",
     "scenario.inactive": "{node}: Override ist inaktiv (Knoten gibt es nicht mehr) und wird nicht "
     "angewandt.",
     "scenario.same_value": "{node}: Override von „{field}“ hat denselben Wert wie das "
     "Eltern-Szenario.",
     "files.changed": "Die Datei „{name}“ wurde seit dem Öffnen verändert. Bitte neu laden.",
+    "csv.encoding": "Die CSV-Datei ist nicht in UTF-8 gespeichert. Bitte als „CSV UTF-8“ "
+    "exportieren und erneut hochladen.",
+    "csv.column": "Die CSV-Datei hat keine Spalte „{column}“ (vorhanden: {columns}).",
+    "csv.number": "CSV-Spalte „{column}“{at_line}: „{value}“ ist keine Zahl. Der Import wurde "
+    "abgebrochen.",
+    "csv.too_many": "Die Spalte hat {count} Werte; übernehmen lassen sich 1 bis {limit}.",
 }
 
 CATALOG: dict[str, dict[str, str]] = {"de": _DE}
@@ -140,6 +175,28 @@ UI: dict[str, dict[str, str]] = {
         "compare.points": "{diff} Prozentpunkte [{lo} … {hi}]",
         "compare.better": "Im Modell ist „{b}“ in {p} der Iterationen besser als „{a}“ "
         "({lo} … {hi} %), in {ties} gleich und in {worse} schlechter.",
+        "result.beyond": "Im Modell wird der Horizont {horizon} in {p} der Iterationen nicht "
+        "erreicht ({lo} … {hi} %).",
+        "result.beyond_label": "Anteil nicht im Horizont",
+        "result.beyond_value": "> Horizont {horizon}",
+        "result.quantile_beyond": "Im Modell liegen weniger als {pct} % der Werte innerhalb des "
+        "Horizonts {horizon}: P{pct} liegt jenseits des Horizonts.",
+        "result.censored": "nicht bestimmbar: {p} jenseits des Horizonts",
+        "result.p_loss": "P(Verlust)",
+        "result.var": "VaR {pct} %",
+        "result.es": "ES {pct} %",
+        "result.multimodal": "Die Verteilung hat mehrere Gipfel: Median ({median}) und häufigster "
+        "Bereich ({mode}) fallen auseinander; der Mittelwert beschreibt hier keinen typischen "
+        "Fall.",
+        "result.all_beyond": "Alle Werte liegen jenseits des Horizonts; Histogramm und Kurve "
+        "zeigen nur Rohwerte, die im Modell als „nicht erreicht“ gelten.",
+        "result.corr_title": "Erreichte Rangkorrelation (Spearman) der Korrelationsgruppen",
+        "result.corr_group": "Gruppe",
+        "result.corr_pair": "Paar",
+        "result.corr_target": "Ziel ρ",
+        "result.corr_achieved": "erreicht ρ",
+        "result.horizon_raw": "Hinweis: {name} hat einen Horizont ({horizon}); diese Seite rechnet "
+        "mit den Rohwerten, auch jenseits des Horizonts.",
         "result.relative": "Relative Genauigkeit (SE / |Mittelwert|)",
         "result.change_up": "{label} steigt um {amount} (von {before} auf {after}).",
         "result.change_down": "{label} sinkt um {amount} (von {before} auf {after}).",
@@ -314,6 +371,16 @@ UI: dict[str, dict[str, str]] = {
         "ui.problems_one": "1 Problem",
         "ui.problems_many": "{n} Probleme",
         "ui.page_analyse": "Analyse",
+        "model.p0": "P0 (kleinster möglicher Wert)",
+        "model.p100": "P100 (größter möglicher Wert)",
+        "model.to_piecewise": "Als Stützstellen-Verteilung übernehmen",
+        "model.csv_title": "Werte aus CSV übernehmen (empirische Verteilung)",
+        "model.csv_file": "CSV-Datei",
+        "model.csv_column": "Spalte",
+        "model.csv_node": "Knoten",
+        "model.csv_import": "Werte übernehmen",
+        "model.csv_done": "{n} Werte in „{node}“ übernommen ({skipped} leere Zellen übersprungen). "
+        "Noch nicht gespeichert.",
         "analysis.intro": "Struktur-Auswertungen eines Szenarios: Graph und Rangkorrelation "
         "rechnen aus einem Lauf, Tornado und Sweep starten eigene Läufe mit demselben Seed.",
         "analysis.output": "Ausgabe",

@@ -1,4 +1,4 @@
-"""The 14 built-in families. Sampling is by inversion: ``ppf`` maps uniforms to values."""
+"""The 16 built-in families. Sampling is by inversion: ``ppf`` maps uniforms to values."""
 
 # numpy stubs mark ArrayLike as partially Unknown under pythonVersion 3.11 (Buffer type).
 # pyright: reportUnknownMemberType=false
@@ -9,16 +9,34 @@ import numpy as np
 from scipy import special, stats
 
 from app.dists.base import FloatArray, Frozen, Params, ParamSpec, Violation, violation
+from app.dists.fit import fit_quantiles
 
 P = ParamSpec
 Kind = Literal["continuous", "discrete"]
 _LOW_HIGH = (P("low"), P("high"))
 _THREE = (P("low"), P("mode"), P("high"))
 _MEAN_SD = (P("mean"), P("sd"))
+_QUANTILES = (P("p10"), P("p50"), P("p90"))
+QUANTILES = "quantiles"  # input mode: P10/P50/P90, literal numbers only (fitted when compiled)
 
 
 def _arr(x: Any) -> FloatArray:
     return np.asarray(x, dtype=np.float64)
+
+
+def _quantile_checks(p: Params, positive: bool) -> list[Violation]:
+    checks = [
+        violation("p50", "p10 < p50", p["p50"] <= p["p10"]),
+        violation("p90", "p50 < p90", p["p90"] <= p["p50"]),
+    ]
+    if positive:
+        checks.insert(0, violation("p10", "p10 > 0", p["p10"] <= 0))
+    return checks
+
+
+def _quantile_canonical(family: str, p: Params) -> dict[str, FloatArray]:
+    given = (float(p["p10"]), float(p["p50"]), float(p["p90"]))
+    return {k: _arr(v) for k, v in fit_quantiles(family, given).canonical.items()}
 
 
 class _Base:
@@ -107,9 +125,16 @@ class Pert(_Base):
 
 class Normal(_Base):
     NAME = "normal"
-    MODES: ClassVar = {"params": _MEAN_SD, "mean_sd": _MEAN_SD}
+    MODES: ClassVar = {"params": _MEAN_SD, "mean_sd": _MEAN_SD, QUANTILES: _QUANTILES}
+
+    def to_canonical(self, mode: str, p: Params) -> dict[str, FloatArray]:
+        if mode == QUANTILES:
+            return _quantile_canonical(self.NAME, p)
+        return {"mean": p["mean"], "sd": p["sd"]}
 
     def check(self, mode: str, p: Params) -> list[Violation]:
+        if mode == QUANTILES:
+            return _quantile_checks(p, positive=False)
         return [violation("sd", "sd > 0", p["sd"] <= 0)]
 
     def ppf(self, u: FloatArray, c: Params) -> FloatArray:
@@ -149,15 +174,19 @@ class TruncNormal(_Base):
 
 class LogNormal(_Base):
     NAME = "lognormal"
-    MODES: ClassVar = {"params": (P("mu"), P("sigma")), "mean_sd": _MEAN_SD}
+    MODES: ClassVar = {"params": (P("mu"), P("sigma")), "mean_sd": _MEAN_SD, QUANTILES: _QUANTILES}
 
     def to_canonical(self, mode: str, p: Params) -> dict[str, FloatArray]:
+        if mode == QUANTILES:
+            return _quantile_canonical(self.NAME, p)
         if mode == "params":
             return {"mu": p["mu"], "sigma": p["sigma"]}
         sigma2 = np.log1p(p["sd"] ** 2 / p["mean"] ** 2)
         return {"mu": _arr(np.log(p["mean"]) - sigma2 / 2), "sigma": _arr(np.sqrt(sigma2))}
 
     def check(self, mode: str, p: Params) -> list[Violation]:
+        if mode == QUANTILES:
+            return _quantile_checks(p, positive=True)
         if mode == "params":
             return [violation("sigma", "sigma > 0", p["sigma"] <= 0)]
         return [
@@ -255,15 +284,23 @@ class Exponential(_Base):
 
 class Gamma(_Base):
     NAME = "gamma"
-    MODES: ClassVar = {"params": (P("shape"), P("scale")), "mean_sd": _MEAN_SD}
+    MODES: ClassVar = {
+        "params": (P("shape"), P("scale")),
+        "mean_sd": _MEAN_SD,
+        QUANTILES: _QUANTILES,
+    }
 
     def to_canonical(self, mode: str, p: Params) -> dict[str, FloatArray]:
+        if mode == QUANTILES:
+            return _quantile_canonical(self.NAME, p)
         if mode == "params":
             return {"shape": p["shape"], "scale": p["scale"]}
         mean, sd = p["mean"], p["sd"]
         return {"shape": _arr(mean**2 / sd**2), "scale": _arr(sd**2 / mean)}
 
     def check(self, mode: str, p: Params) -> list[Violation]:
+        if mode == QUANTILES:
+            return _quantile_checks(p, positive=True)
         fields = ("shape", "scale") if mode == "params" else ("mean", "sd")
         return [violation(f, f"{f} > 0", p[f] <= 0) for f in fields]
 
@@ -276,9 +313,16 @@ class Gamma(_Base):
 
 class Weibull(_Base):
     NAME = "weibull"
-    MODES: ClassVar = {"params": (P("shape"), P("scale"), P("loc", 0.0))}
+    MODES: ClassVar = {"params": (P("shape"), P("scale"), P("loc", 0.0)), QUANTILES: _QUANTILES}
+
+    def to_canonical(self, mode: str, p: Params) -> dict[str, FloatArray]:
+        if mode == QUANTILES:
+            return _quantile_canonical(self.NAME, p)
+        return {"shape": p["shape"], "scale": p["scale"], "loc": p["loc"]}
 
     def check(self, mode: str, p: Params) -> list[Violation]:
+        if mode == QUANTILES:
+            return _quantile_checks(p, positive=True)
         return [violation(f, f"{f} > 0", p[f] <= 0) for f in ("shape", "scale")]
 
     def ppf(self, u: FloatArray, c: Params) -> FloatArray:
@@ -349,6 +393,55 @@ class Poisson(_Base):
         return stats.poisson(c["rate"])
 
 
+def _increasing(x: FloatArray) -> bool:
+    return bool(np.all(np.diff(x) > 0))
+
+
+class Piecewise(_Base):
+    """Expert curve from quantile pairs: CDF linear between (value, prob), P0 and P100 given."""
+
+    NAME = "piecewise"
+    MODES: ClassVar = {"params": (P("probs", is_list=True), P("values", is_list=True))}
+
+    def check(self, mode: str, p: Params) -> list[Violation]:
+        probs, values = p["probs"], p["values"]
+        ends = probs.size >= 2 and float(probs[0]) == 0.0 and float(probs[-1]) == 1.0
+        return [
+            violation("probs", "mindestens zwei Stützstellen", probs.size < 2),
+            violation("probs", "beginnt mit 0 und endet mit 1", probs.size >= 2 and not ends),
+            violation("probs", "streng steigend", not _increasing(probs)),
+            violation(
+                "values", "gleich viele Werte wie Wahrscheinlichkeiten", values.size != probs.size
+            ),
+            violation("values", "streng steigend", not _increasing(values)),
+        ]
+
+    def ppf(self, u: FloatArray, c: Params) -> FloatArray:
+        return _arr(np.interp(u, c["probs"], c["values"]))
+
+    def reference(self, c: Mapping[str, float]) -> Frozen:  # pragma: no cover - list params
+        raise NotImplementedError("piecewise has list parameters; tests use its own CDF")
+
+
+class Empirical(_Base):
+    """Own data: each listed value with the same probability, drawn with replacement."""
+
+    NAME = "empirical"
+    KIND: ClassVar[Kind] = "discrete"
+    MODES: ClassVar = {"params": (P("values", is_list=True),)}
+
+    def check(self, mode: str, p: Params) -> list[Violation]:
+        return [violation("values", "mindestens ein Wert", p["values"].size == 0)]
+
+    def ppf(self, u: FloatArray, c: Params) -> FloatArray:
+        values = c["values"]
+        index = np.minimum((u * values.size).astype(np.int64), values.size - 1)
+        return _arr(values[index])
+
+    def reference(self, c: Mapping[str, float]) -> Frozen:  # pragma: no cover - list params
+        raise NotImplementedError("empirical has list parameters; tests use frequencies")
+
+
 BUILTIN = (
     Uniform(),
     Triangular(),
@@ -364,4 +457,6 @@ BUILTIN = (
     Bernoulli(),
     Discrete(),
     Poisson(),
+    Piecewise(),
+    Empirical(),
 )

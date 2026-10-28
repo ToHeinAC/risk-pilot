@@ -14,13 +14,16 @@ from app.errors import InputError, ModelError, SimulationError
 from app.messages import render, t
 from app.model.compile import CompiledModel, content_hash, model_hash
 from app.model.scenarios import effective_model, tree
-from app.model.schema import BASIS, Model
+from app.model.schema import BASIS, Model, OutputNode
 from app.model.yaml_io import model_from_yaml, model_to_yaml
 from app.present import figures
 from app.present.references import Curve, has_reference, tutorial_reference
-from app.present.results import summaries_for
+from app.present.results import correlation_rows, summaries_for
 from app.present.text import (
+    beyond_sentence,
     metric_rows,
+    multimodal_hint,
+    number,
     precision_hints,
     quantile_sentence,
     share_sentence,
@@ -29,6 +32,8 @@ from app.present.text import (
 )
 from app.present.validation import CheckResult
 from app.ui import state
+
+INFO_NOTICES = frozenset({"fit.deviation"})  # hints, not warnings (fit within 2 %)
 
 
 def chart(figure: object, key: str, target: DeltaGenerator | None = None) -> None:
@@ -210,8 +215,15 @@ def render_output(run: state.RunView, output: str) -> None:
     target = run.compiled.nodes[output].target
     if target is not None and summary.target is not None:
         st.markdown(target_sentence(target, summary.target, unit))
+    if summary.horizon is not None and summary.beyond is not None:
+        st.markdown(beyond_sentence(summary.horizon, summary.beyond, unit))
     for q in summary.quantiles:
-        st.markdown(quantile_sentence(q, unit, summary.conf))
+        st.markdown(quantile_sentence(q, unit, summary.conf, summary.horizon))
+    hint = multimodal_hint(x, summary, unit)
+    if hint is not None:
+        st.info(hint)
+    if summary.beyond is not None and summary.beyond.p == 1.0:
+        st.info(t("result.all_beyond"))
     st.markdown(table([t("ui.metric"), t("ui.value")], metric_rows(summary, unit)))
     for hint in precision_hints(summary):
         st.warning(hint)
@@ -224,12 +236,41 @@ def validity(run: state.RunView) -> None:
     st.caption(validity_line(run.result.meta, run.scenario))
 
 
+def illustrative(model: Model) -> None:
+    if model.illustrative:
+        st.info(t("lesson.illustrative"))
+
+
+def horizon_hint(model: Model, output: str) -> None:
+    """Comparison and analysis work on raw values, also beyond an output's horizon."""
+    node = model.nodes[output]
+    if isinstance(node, OutputNode) and node.horizon is not None:
+        name = node.name or output
+        st.caption(t("result.horizon_raw", name=name, horizon=number(node.horizon)))
+
+
+def correlations(run: state.RunView) -> None:
+    """Target against achieved rank correlation of every group (M5 AK 1)."""
+    rows = correlation_rows(run.compiled, run.result.correlations)
+    if rows:
+        st.subheader(t("result.corr_title"))
+        headers = [
+            t("result.corr_group"),
+            t("result.corr_pair"),
+            t("result.corr_target"),
+            t("result.corr_achieved"),
+        ]
+        st.markdown(table(headers, rows))
+
+
 def render_run(run: state.RunView) -> None:
     validity(run)
+    illustrative(run.compiled.model)
     for notice in run.result.warnings:
-        st.warning(render(notice))
+        (st.info if notice.code in INFO_NOTICES else st.warning)(render(notice))
     for text in run.notices:
         st.warning(text)
+    correlations(run)
     outputs = list(run.summaries)
     tabs = st.tabs([_output_name(run, o)[0] for o in outputs])
     for tab, output in zip(tabs, outputs, strict=True):

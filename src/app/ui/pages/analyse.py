@@ -296,6 +296,7 @@ def body() -> None:
     if base.key != key:
         st.info(t("analysis.stale"))
         return
+    views.horizon_hint(base.compiled.model, base.output)
     _tabs(base)
 
 

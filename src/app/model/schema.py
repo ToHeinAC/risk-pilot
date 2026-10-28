@@ -136,6 +136,8 @@ class OutputNode(_NodeBase):
     expr: str
     target: Target | None = None
     better: Literal["lower", "higher"] | None = None  # comparison direction without a target
+    horizon: float | None = None  # values above count as "nicht im Horizont erreicht"
+    loss_reference: float | None = None  # VaR/ES: loss = reference − value
 
 
 Node = Annotated[
@@ -163,6 +165,14 @@ class Settings(_Strict):
 BASIS = "basis"  # ID of the main scenario: the model's own nodes
 
 
+class CorrelationGroup(_Strict):
+    """Rank correlation (Spearman) between random nodes, sampled by a Gaussian copula."""
+
+    nodes: list[str]
+    spearman: list[list[float]]
+    why: str | None = None
+
+
 class Scenario(_Strict):
     """A sub-scenario: overrides on top of its parent, or (detached) a full set of nodes."""
 
@@ -172,7 +182,7 @@ class Scenario(_Strict):
     overrides: dict[str, dict[str, Any]] = {}
     nodes: dict[str, Node] | None = None
     detached_from: str | None = None
-    correlations: dict[str, Any] | None = None  # reserved for M5
+    correlations: dict[str, dict[str, Any]] | None = None  # group -> {spearman, why}
 
 
 class Model(_Strict):
@@ -181,5 +191,7 @@ class Model(_Strict):
     title: str | None = None
     description: str | None = None
     settings: Settings = Settings()
+    illustrative: bool = False  # didactic numbers, not research results
     nodes: dict[str, Node] = {}
+    correlations: dict[str, CorrelationGroup] = {}
     scenarios: dict[str, Scenario] = {}

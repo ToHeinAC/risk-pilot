@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from scipy import stats
 
-from app.analysis.stats import summarize, wilson
+from app.analysis.stats import multimodal, summarize, wilson
 from app.errors import InputError
 from app.model.schema import Target
 
@@ -102,3 +102,45 @@ def test_quantile_range(q: float) -> None:
 def test_default_quantiles() -> None:
     qs = [e.q for e in summarize(np.linspace(0, 1, 1000)).quantiles]
     assert qs == [0.05, 0.1, 0.5, 0.9, 0.95]
+
+
+def test_horizon_share_beyond_with_wilson() -> None:
+    rng = np.random.default_rng(3)
+    x = np.concatenate([rng.normal(2050, 5, 8000), np.full(2000, 2200.0)])
+    s = summarize(x, horizon=2100)
+    assert s.horizon == 2100
+    assert s.beyond is not None
+    assert (s.beyond.k, s.beyond.n) == (2000, 10_000)
+    assert s.beyond.lo < 0.2 < s.beyond.hi
+    assert summarize(x).beyond is None
+
+
+def test_all_values_beyond_horizon() -> None:
+    s = summarize(np.full(100, 2200.0), horizon=2100)
+    assert s.beyond is not None
+    assert s.beyond.p == 1.0
+    assert all(q.value > 2100 for q in s.quantiles)
+
+
+def test_var_and_es_of_a_normal() -> None:
+    x = np.random.default_rng(4).normal(100, 10, 200_000)
+    s = summarize(x, loss_reference=100)
+    assert s.loss is not None
+    assert s.loss.p_loss.p == pytest.approx(0.5, abs=0.01)
+    assert s.loss.var.value == pytest.approx(16.45, rel=0.02)
+    assert s.loss.var.lo < s.loss.var.value < s.loss.var.hi
+    assert s.loss.es == pytest.approx(20.63, rel=0.02)
+    assert s.loss.es_se > 0
+
+
+def test_multimodal_detected_only_for_separate_peaks() -> None:
+    rng = np.random.default_rng(5)
+    two = np.concatenate([rng.normal(0, 1, 60_000), rng.normal(10, 1, 40_000)])
+    found = multimodal(two)
+    assert found is not None
+    median, mode = found
+    assert median == pytest.approx(float(np.median(two)))
+    assert abs(mode) < 1  # the higher peak
+    assert multimodal(rng.normal(0, 1, 100_000)) is None
+    assert multimodal(rng.uniform(0, 1, 100_000) + rng.uniform(0, 1, 100_000)) is None
+    assert multimodal(np.full(10, 3.0)) is None

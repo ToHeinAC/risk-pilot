@@ -5,6 +5,7 @@
 import math
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
+from itertools import pairwise
 from typing import Any, Literal
 
 import numpy as np
@@ -36,6 +37,17 @@ class QuantileEstimate:
 
 
 @dataclass(frozen=True)
+class LossRisk:
+    """Losses against a reference value (e.g. the initial wealth), at level 95 %."""
+
+    reference: float
+    p_loss: Proportion  # P(value < reference)
+    var: QuantileEstimate  # reference − Q(5 %), interval from the quantile's interval
+    es: float  # reference − mean of the values ≤ Q(5 %)
+    es_se: float
+
+
+@dataclass(frozen=True)
 class Summary:
     """Numbers and method names only; texts for people come from the UI (M2)."""
 
@@ -54,6 +66,9 @@ class Summary:
     target: Proportion | None = None
     share: Proportion | None = None
     notices: tuple[Notice, ...] = ()
+    horizon: float | None = None
+    beyond: Proportion | None = None  # share of values beyond the horizon ("nicht erreicht")
+    loss: LossRisk | None = None
 
 
 def wilson(k: int, n: int, conf: float = 0.95) -> tuple[float, float]:
@@ -89,12 +104,58 @@ def hits(x: NDArray[np.float64], target: Target) -> NDArray[np.bool_]:
     return compare[target.op](x, target.value)
 
 
+VAR_LEVEL = 0.95
+
+
+def loss_risk(sorted_x: NDArray[np.float64], reference: float, conf: float) -> LossRisk:
+    """P(loss), value at risk and expected shortfall at VAR_LEVEL."""
+    q = 1 - VAR_LEVEL
+    cut = float(np.quantile(sorted_x, q, method="linear"))
+    lo, hi = quantile_ci(sorted_x, q, conf)
+    tail = sorted_x[sorted_x <= cut]
+    es_se = float(np.std(tail, ddof=1)) / math.sqrt(tail.size) if tail.size > 1 else math.nan
+    return LossRisk(
+        reference,
+        proportion(sorted_x < reference, conf),
+        QuantileEstimate(VAR_LEVEL, reference - cut, reference - hi, reference - lo),
+        reference - float(np.mean(tail)),
+        es_se,
+    )
+
+
+def multimodal(x: NDArray[Any], bins: int = 60) -> tuple[float, float] | None:
+    """(median, centre of the highest peak) if the density has two or more separate peaks.
+
+    Histogram smoothed over three bins; a peak counts if it reaches 10 % of the highest and the
+    density between two peaks falls below half of the smaller one.
+    """
+    values = np.asarray(x, dtype=np.float64)
+    if values.size < 2 or float(np.ptp(values)) == 0.0:
+        return None
+    counts, edges = np.histogram(values, bins=bins)
+    smooth = np.convolve(counts, np.ones(3) / 3, mode="same")
+    inner = smooth[1:-1]
+    is_peak = (inner > smooth[:-2]) & (inner >= smooth[2:]) & (inner >= 0.1 * smooth.max())
+    peaks = [int(i) + 1 for i in np.flatnonzero(is_peak)]
+    separate = [
+        (a, b)
+        for a, b in pairwise(peaks)
+        if smooth[a : b + 1].min() < 0.5 * min(smooth[a], smooth[b])
+    ]
+    if not separate:
+        return None
+    top = int(np.argmax(smooth))
+    return float(np.median(values)), float((edges[top] + edges[top + 1]) / 2)
+
+
 def summarize(
     x: NDArray[Any],
     *,
     quantiles: Sequence[float] = DEFAULT_QUANTILES,
     target: Target | None = None,
     conf: float = 0.95,
+    horizon: float | None = None,
+    loss_reference: float | None = None,
 ) -> Summary:
     """Mean with standard error, median, quantiles with CI, P(target) with Wilson interval."""
     for q in quantiles:
@@ -130,6 +191,9 @@ def summarize(
         quantiles=estimates,
         target=proportion(hits(x, target), conf) if target is not None else None,
         notices=notices,
+        horizon=horizon,
+        beyond=proportion(x > horizon, conf) if horizon is not None else None,
+        loss=loss_risk(sorted_x, loss_reference, conf) if loss_reference is not None else None,
     )
 
 

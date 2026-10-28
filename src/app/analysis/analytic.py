@@ -82,3 +82,29 @@ def clark_mean(m1: float, s1: float, m2: float, s2: float) -> float:
 def p_greater_normal(m1: float, s1: float, m2: float, s2: float) -> float:
     """P(X1 > X2) for independent normal X1, X2."""
     return float(special.ndtr((m1 - m2) / math.hypot(s1, s2)))
+
+
+def t3_connection(p_on_time: float, mean_delay: float, buffer: float) -> float:
+    """T3: P(connection) = p + (1 − p)·(1 − e^(−buffer / mean)) for an exponential delay."""
+    return p_on_time + (1 - p_on_time) * (1 - math.exp(-buffer / mean_delay))
+
+
+def portfolio_moments(
+    w0: float,
+    weights: list[float],
+    mus: list[float],
+    sigmas: list[float],
+    years: float,
+    spearman: FloatArray,
+) -> tuple[float, float]:
+    """T4: mean and sd of W = w0 Σ wᵢ exp(Lᵢ), Lᵢ ~ N(T μᵢ, T σᵢ²), Gaussian copula.
+
+    The copula's normals have the Pearson correlation 2 sin(π ρ_s / 6), which is exact here
+    because the log returns are themselves normal.
+    """
+    w, mu, sigma = np.asarray(weights), np.asarray(mus), np.asarray(sigmas)
+    rho = 2 * np.sin(np.pi * np.asarray(spearman) / 6)
+    expected = np.exp(years * mu + years * sigma**2 / 2)
+    cov = np.outer(expected, expected) * (np.exp(years * rho * np.outer(sigma, sigma)) - 1)
+    mean = w0 * float(w @ expected)
+    return mean, w0 * math.sqrt(float(w @ cov @ w))

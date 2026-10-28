@@ -1,0 +1,22 @@
+# Tutorial T3: illustrative values, not research results.
+schema_version: 1
+model: t3_bahn
+title: "Bahnreise mit Anschluss"
+description: "Zug 1 ist oft pünktlich; verpasst man den Anschluss, bleibt der nächste Zug oder der Bus."
+illustrative: true
+settings: {n: 100000, seed: 20261028}
+nodes:
+  puenktlich: {type: event, p: 0.6, name: "Zug 1 pünktlich"}
+  verspaetung: {type: uncertain, dist: exponential, input: mean, mean: 6, unit: min, name: "Verspätung Zug 1 (wenn unpünktlich)"}
+  zug1: {type: derived, expr: "where(puenktlich, 0, verspaetung)", unit: min, name: "Verspätung Zug 1"}
+  puffer: {type: constant, value: 5, unit: min, name: "Puffer (Umstiegszeit 7 − Mindestumstieg 2)"}
+  anschluss: {type: output, expr: "zug1 <= puffer", name: "Anschluss erreicht"}
+  zug2: {type: uncertain, dist: exponential, input: mean, mean: 3, unit: min, name: "Verspätung Anschlusszug"}
+  bus: {type: uncertain, dist: triangular, low: 33, mode: 35, high: 40, unit: min, name: "Bus (Ankunft nach Plan)"}
+  ankunft: {type: output, expr: "where(anschluss, zug2, min(60 + zug2, bus))", unit: min, target: {le: 15}, name: "Ankunft nach Plan"}
+scenarios:
+  frueher:
+    name: "früherer Zug"
+    why: "Ein früherer Zug 1 verlängert die Umstiegszeit auf 22 Minuten."
+    overrides:
+      puffer: {value: 20, why: "Umstiegszeit 22 − Mindestumstieg 2 (illustrativ)"}

@@ -10,6 +10,10 @@ from scipy import stats
 from app.analysis.analytic import dkw_epsilon, ks_distance
 from app.dists.base import Family, Params, fill_defaults
 from app.dists.registry import families, get_family
+from app.engine.simulate import simulate
+from app.errors import ModelError
+from app.model.compile import compile_model
+from app.model.yaml_io import model_from_yaml
 
 N = 100_000
 RNG_SEED = 20261027
@@ -28,7 +32,7 @@ def scalars(params: Params) -> dict[str, float]:
     return {k: float(v) for k, v in params.items()}
 
 
-def test_fourteen_families_registered() -> None:
+def test_sixteen_families_registered() -> None:
     assert sorted(families()) == sorted(
         [
             "uniform",
@@ -45,6 +49,8 @@ def test_fourteen_families_registered() -> None:
             "bernoulli",
             "discrete",
             "poisson",
+            "piecewise",
+            "empirical",
         ]
     )
 
@@ -273,3 +279,70 @@ def test_poisson_rate_zero_is_always_zero() -> None:
     family = get_family("poisson")
     assert family is not None
     assert np.all(family.ppf(uniforms(1000), {"rate": np.asarray(0.0)}) == 0.0)
+
+
+def lists(**given: list[float]) -> Params:
+    return {k: np.asarray(v, dtype=np.float64) for k, v in given.items()}
+
+
+def test_piecewise_meets_ks_criterion() -> None:
+    family = get_family("piecewise")
+    assert family is not None
+    assert family.kind == "continuous"
+    c = family.to_canonical(
+        "params", lists(probs=[0, 0.1, 0.5, 0.9, 1], values=[2030, 2034, 2040, 2052, 2080])
+    )
+    x = family.ppf(uniforms(), c)
+    assert ks_distance(x, lambda t: np.interp(t, c["values"], c["probs"])) < dkw_epsilon(N)
+    assert x.min() >= 2030
+    assert x.max() <= 2080
+
+
+@pytest.mark.parametrize(
+    ("probs", "values", "field"),
+    [
+        ([0, 0.5, 1], [1, 1, 2], "values"),
+        ([0, 0.5, 1], [3, 2, 4], "values"),
+        ([0, 0.5, 0.5, 1], [1, 2, 3, 4], "probs"),
+        ([0.1, 0.5, 1], [1, 2, 3], "probs"),
+        ([0, 0.5, 0.9], [1, 2, 3], "probs"),
+        ([0, 1], [1, 2, 3], "values"),
+        ([0], [1], "probs"),
+    ],
+)
+def test_invalid_piecewise(probs: list[float], values: list[float], field: str) -> None:
+    family = get_family("piecewise")
+    assert family is not None
+    violations = [
+        v for v in family.check("params", lists(probs=probs, values=values)) if v.mask.any()
+    ]
+    assert field in {v.field for v in violations}
+
+
+def test_empirical_resamples_with_replacement() -> None:
+    family = get_family("empirical")
+    assert family is not None
+    assert family.kind == "discrete"
+    c = family.to_canonical("params", lists(values=[5, 1, 1, 9]))
+    x = family.ppf(uniforms(), c)
+    for value, prob in ((1.0, 0.5), (5.0, 0.25), (9.0, 0.25)):
+        lo, hi = wilson(int(np.sum(x == value)), N)
+        assert lo <= prob <= hi, value
+    edge = family.ppf(np.array([2.0**-53, 1 - 2.0**-53]), c)
+    assert edge.tolist() == [5.0, 9.0]
+    assert [v.field for v in family.check("params", lists(values=[])) if v.mask.any()] == ["values"]
+
+
+def test_piecewise_and_empirical_in_a_model() -> None:
+    head = "schema_version: 1\nmodel: m\nnodes:\n"
+    ok = (
+        "  r: {type: uncertain, dist: piecewise, probs: [0, 0.5, 1], values: [1, 2, 4]}\n"
+        "  e: {type: uncertain, dist: empirical, values: [3, 4]}\n"
+        "  y: {type: output, expr: 'r + e'}\n"
+    )
+    x = simulate(compile_model(model_from_yaml(head + ok)), n=1000, seed=0).samples["y"]
+    assert 4 <= x.min() <= x.max() <= 8
+    bad = ok.replace("values: [1, 2, 4]", "values: [1, 2, 2]")
+    with pytest.raises(ModelError) as exc:
+        compile_model(model_from_yaml(head + bad))
+    assert [(i.code, i.field) for i in exc.value.issues] == [("param.invalid", "values")]

@@ -199,10 +199,11 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M3.
 
 ### M5 — Abhängigkeiten und Tutorials T3–T5
-- **Status:** planned
+- **Status:** in progress (implemented and tested; review and manual click-through pending)
 - **Deliverable:** Korrelationsgruppen, Stützstellen- und empirische Verteilung, Quantil-Fit,
   Horizont/Zensierung, `examples/t3_bahn.yaml`, `t4_portfolio.yaml`, `t5_fusion.yaml` mit als
   illustrativ gekennzeichneten Zahlen.
+  Pflichtenheft: [docs/specs/m5-abhaengigkeiten.md](docs/specs/m5-abhaengigkeiten.md).
 - **Acceptance criteria:**
   1. Korrelationsgruppen: Eingabe als Spearman-ρ, Umrechnung ρ_latent = 2 sin(π ρ_s / 6),
      Gaussian Copula. Asymmetrische, nicht positiv semidefinite Matrizen oder |ρ| > 1 werden

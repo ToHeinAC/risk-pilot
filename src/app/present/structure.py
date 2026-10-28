@@ -53,7 +53,7 @@ def missing_why(model: Model) -> dict[str, float]:
 def _digraph(model: Model, edges: Sequence[Edge]) -> "nx.DiGraph[str]":
     graph: nx.DiGraph[str] = nx.DiGraph()
     graph.add_nodes_from(model.nodes)
-    graph.add_edges_from((e.source, e.target) for e in edges)
+    graph.add_edges_from((e.source, e.target) for e in edges if e.kind != "korrelation")
     return graph
 
 

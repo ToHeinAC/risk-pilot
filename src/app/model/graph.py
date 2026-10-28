@@ -4,6 +4,7 @@ import ast
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from graphlib import CycleError, TopologicalSorter
+from itertools import combinations
 from typing import Literal
 
 from app.expr.parser import ExprIssue, parse_expression
@@ -55,7 +56,7 @@ def edges(model: Model) -> list[Edge]:
     """Edges of the dependency graph, sorted.
 
     ``ausdruck``: reference in ``expr``; ``parameter``: reference in a distribution parameter or
-    ``p``. ``korrelation`` (correlation groups) follows with M5, once the schema knows groups.
+    ``p``; ``korrelation``: every pair of a correlation group (undirected, smaller ID first).
     """
     ids = set(model.nodes)
     found: set[Edge] = set()
@@ -63,6 +64,9 @@ def edges(model: Model) -> list[Edge]:
         for field, text in expression_fields(node):
             kind: EdgeKind = "ausdruck" if field == "expr" else "parameter"
             found |= {Edge(ref, node_id, kind) for ref in _names(text) & ids}
+    for group in model.correlations.values():
+        members = sorted(set(group.nodes) & ids)
+        found |= {Edge(a, b, "korrelation") for a, b in combinations(members, 2)}
     return sorted(found)
 
 

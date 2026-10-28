@@ -117,7 +117,10 @@ def test_valid_scenarios_have_no_issues() -> None:
         ("  s: {name: S, why: W, overrides: {k: {mean: 1}}}\n", "scenario.field_invalid"),
         ("  s: {name: S, why: W, overrides: {k: {name: Neu}}}\n", "scenario.field_invalid"),
         ("  s: {name: S, why: W, overrides: {k: {type: derived}}}\n", "scenario.type_change"),
-        ("  s: {name: S, why: W, correlations: {}, overrides: {}}\n", "scenario.unsupported"),
+        (
+            "  s: {name: S, why: W, correlations: {zz: {spearman: [[1]]}}, overrides: {}}\n",
+            "scenario.corr_unknown",
+        ),
         ("  s: {name: S, why: W, overrides: {b: {sd: -1}}}\n", "param.invalid"),
         ("  s: {name: S, why: W, overrides: {k: {value: y}}}\n", "model.schema"),
         ("  s: {name: S, why: W, overrides: {a: {mean: 'y'}}}\n", "graph.cycle"),
