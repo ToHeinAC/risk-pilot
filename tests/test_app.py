@@ -572,3 +572,20 @@ def test_analysis_without_extremum_explains_empty_criticality() -> None:
     page = texts(analyse("t1_faltung"))
     assert "kein max, min oder where" in page
     assert "Das Modell hat keine Ereignisse." in page
+
+
+def test_analysis_tabs_explain_question_reading_and_limit() -> None:
+    at = analyse("t2_terminplan")
+    labels = [e.label for e in at.expander]
+    assert labels.count("Was zeigt dieser Reiter?") == 6
+    page = texts(at)
+    for question in (
+        "Wie hängen die Knoten zusammen?",
+        "Welche Knoten bestimmen das Ergebnis tatsächlich?",
+        "Welche unsichere Eingabe verschiebt das Ergebnis am stärksten?",
+        "Wie ändert sich das Ergebnis, wenn ich einen Wert gezielt verändere?",
+        "Welche Eingaben laufen mit dem Ergebnis gleich?",
+        "Welche Ereignisse sind wahrscheinlich und folgenreich?",
+    ):
+        assert question in page
+    assert "Wann welche Auswertung?" in labels

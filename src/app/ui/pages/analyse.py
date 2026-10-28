@@ -274,6 +274,8 @@ def body() -> None:
         st.error(t("ui.sim_blocked"))
         return
     st.caption(t("analysis.intro"))
+    with st.expander(t("analysis.guide_label")):
+        st.markdown(t("analysis.guide"))
     labels = views.scenario_labels(checked)
     sid = str(
         st.selectbox(
@@ -297,13 +299,16 @@ def body() -> None:
     _tabs(base)
 
 
+TABS = ("graph", "crit", "tornado", "sweep", "rho", "risk")
+
+
 def _tabs(base: Base) -> None:
-    tabs = st.tabs(
-        [t(f"analysis.tab_{name}") for name in ("graph", "crit", "tornado", "sweep", "rho", "risk")]
-    )
+    tabs = st.tabs([t(f"analysis.tab_{name}") for name in TABS])
     pages = (_graph_tab, _criticality_tab, _tornado_tab, _sweep_tab, _rho_tab, _risk_tab)
-    for tab, page in zip(tabs, pages, strict=True):
+    for tab, name, page in zip(tabs, TABS, pages, strict=True):
         with tab:
+            with st.expander(t("analysis.help_label")):
+                st.markdown(t(f"analysis.help_{name}"))
             page(base)
 
 

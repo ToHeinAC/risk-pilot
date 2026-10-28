@@ -317,6 +317,59 @@ UI: dict[str, dict[str, str]] = {
         "analysis.intro": "Struktur-Auswertungen eines Szenarios: Graph und Rangkorrelation "
         "rechnen aus einem Lauf, Tornado und Sweep starten eigene Läufe mit demselben Seed.",
         "analysis.output": "Ausgabe",
+        "analysis.guide_label": "Wann welche Auswertung?",
+        "analysis.guide": "- **Graph:** zuerst – stimmt die Struktur, fehlen Begründungen?\n"
+        "- **Kritikalität:** bei Wettläufen (max/min) und Verzweigungen (where): welcher Pfad "
+        "entscheidet wie oft?\n"
+        "- **Tornado:** wo lohnt genaueres Schätzen? Rangfolge der unsicheren Eingaben nach "
+        "Wirkung auf die Kennzahl.\n"
+        "- **Sweep:** was-wäre-wenn für einen einzelnen Planwert, z. B. ab welcher Dauer das "
+        "Ziel kippt.\n"
+        "- **Rangkorrelation:** schneller Überblick aus einem Lauf, welche Eingaben mit dem "
+        "Ergebnis gleichlaufen.\n"
+        "- **Risikomatrix:** Ereignisse nach Wahrscheinlichkeit und Folge einordnen.",
+        "analysis.help_label": "Was zeigt dieser Reiter?",
+        "analysis.help_graph": "**Frage:** Wie hängen die Knoten zusammen?\n\n"
+        "**Lesart:** Pfeile laufen von links (Eingaben) nach rechts (Ausgabe). Das Symbol zeigt "
+        "den Knotentyp, die Linienart, ob ein Knoten in einer Formel oder in einem "
+        "Verteilungsparameter steckt. Die Farbe zeigt die gewählte Einfärbung; blasse Knoten "
+        "wirken nicht auf die Ausgabe.\n\n"
+        "**Grenze:** Der Graph zeigt Struktur, keine Stärke der Wirkung.",
+        "analysis.help_crit": "**Frage:** Welche Knoten bestimmen das Ergebnis tatsächlich?\n\n"
+        "**Lesart:** Bei max/min zählt nur der Gewinner, bei where nur der gewählte Zweig. Der "
+        "Index ist der Anteil der Iterationen, in denen ein Knoten so auf dem entscheidenden "
+        "Pfad liegt – wie der Kritikalitätsindex im Terminplan. Die Konstellationen zeigen, "
+        "welche Eingaben gemeinsam entscheiden.\n\n"
+        "**Grenze:** Ein Index von 100 % heißt nicht „wichtig“, nur „immer beteiligt“; wie stark "
+        "ein Knoten wirkt, zeigen Tornado und Sweep.",
+        "analysis.help_tornado": "**Frage:** Welche unsichere Eingabe verschiebt das Ergebnis am "
+        "stärksten?\n\n"
+        "**Lesart:** Je Eingabe wird das Modell zweimal gerechnet, mit der Eingabe fest auf "
+        "ihrem P10 und ihrem P90; alles andere bleibt zufällig wie im Ausgangslauf. Der Balken "
+        "reicht von der Kennzahl bei P10 bis zu der bei P90; oben steht die Eingabe mit dem "
+        "größten Ausschlag.\n\n"
+        "**Grenze:** Jede Eingabe wird einzeln bewegt; Wechselwirkungen mehrerer Eingaben zeigt "
+        "der Tornado nicht.",
+        "analysis.help_sweep": "**Frage:** Wie ändert sich das Ergebnis, wenn ich einen Wert "
+        "gezielt verändere?\n\n"
+        "**Lesart:** Ein Planwert (Konstante, Verteilungsparameter oder Wahrscheinlichkeit) "
+        "läuft über k Werte; je Wert ein Lauf mit demselben Seed. Die Kurve zeigt die gewählte "
+        "Kennzahl, die Balken ihre numerische Unsicherheit.\n\n"
+        "**Grenze:** Alle anderen Werte bleiben wie im Modell; der Sweep sagt nicht, welcher "
+        "Wert realistisch ist.",
+        "analysis.help_rho": "**Frage:** Welche Eingaben laufen mit dem Ergebnis gleich?\n\n"
+        "**Lesart:** ρ nach Spearman zwischen −1 und 1: nahe 1 heißt „hohe Eingabe, hohes "
+        "Ergebnis“, nahe 0 kein monotoner Zusammenhang. Berechnet aus einem Lauf, daher "
+        "schnell.\n\n"
+        "**Grenze:** Deskriptiv: keine Ursache und keine Wirkungsstärke; Eingaben mit kleiner "
+        "Streuung können trotz starker Wirkung ein kleines ρ haben.",
+        "analysis.help_risk": "**Frage:** Welche Ereignisse sind wahrscheinlich und "
+        "folgenreich?\n\n"
+        "**Lesart:** Waagerecht die Eintrittswahrscheinlichkeit, senkrecht, um wie viel das "
+        "Ergebnis im Mittel höher liegt, wenn das Ereignis eintritt – wie eine klassische "
+        "Risikomatrix, aber aus der Simulation. Die Balken zeigen die Unsicherheit.\n\n"
+        "**Grenze:** Die Differenz ist keine kausale Wirkung, wenn Ereignisse gemeinsame "
+        "Ursachen haben oder zusammenwirken.",
         "analysis.run": "Analysieren",
         "analysis.memory": "Dieser Lauf hält alle {nodes} Knoten im Speicher, etwa {mb} MB.",
         "analysis.stale": "Modell, Szenario oder Einstellungen haben sich geändert; bitte neu "
