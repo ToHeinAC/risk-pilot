@@ -49,6 +49,19 @@ _DE: dict[str, str] = {
     "stats.single_sample": "Nur eine Iteration: kein Standardfehler bestimmbar.",
     "stats.quantile_range": "Quantil {q} liegt nicht strikt zwischen 0 und 1.",
     "files.exists": "Ein Modell „{name}“ gibt es schon. Vorschlag: „{suggestion}“.",
+    "scenario.id_invalid": "Die Szenario-ID „{id}“ ist nicht zulässig: {reason}.",
+    "scenario.parent_unknown": "Das Eltern-Szenario „{parent}“ gibt es nicht.",
+    "scenario.parent_cycle": "Die Elternkette bildet einen Zyklus: {cycle}.",
+    "scenario.node_unknown": "{node} gibt es nicht (mehr). Override entfernen oder mit "
+    "„inactive: true“ als inaktiv markieren.",
+    "scenario.field_invalid": "{node}: Das Feld „{field}“ lässt sich in einem Szenario nicht "
+    "überschreiben.",
+    "scenario.type_change": "{node}: Der Knotentyp lässt sich in einem Szenario nicht ändern.",
+    "scenario.unsupported": "„{key}“ wird in Szenarien erst ab Meilenstein M5 unterstützt.",
+    "scenario.inactive": "{node}: Override ist inaktiv (Knoten gibt es nicht mehr) und wird nicht "
+    "angewandt.",
+    "scenario.same_value": "{node}: Override von „{field}“ hat denselben Wert wie das "
+    "Eltern-Szenario.",
     "files.changed": "Die Datei „{name}“ wurde seit dem Öffnen verändert. Bitte neu laden.",
 }
 
@@ -88,7 +101,8 @@ def render(item: Issue | Notice, lang: str = "de") -> str:
     """Return the message text for an issue or notice; unknown languages fall back to German."""
     catalog = CATALOG.get(lang, CATALOG["de"])
     template = catalog.get(item.code) or CATALOG["de"][item.code]
-    return template.format_map(_fields(item))
+    text = template.format_map(_fields(item))
+    return f"Szenario „{item.scenario}“: {text}" if item.scenario else text
 
 
 # Texts of the user interface (not issues): key -> template, rendered with ``t()``.
@@ -114,6 +128,18 @@ UI: dict[str, dict[str, str]] = {
         "result.se": "Standardfehler",
         "result.points": "{diff} Prozentpunkte",
         "result.points_unit": "Prozentpunkte",
+        "compare.p10": "P10 (10-%-Quantil)",
+        "compare.direction": "Im Modell ist „{b}“ in {lower} der Iterationen kleiner als „{a}“, "
+        "in {ties} gleich und in {higher} größer.",
+        "compare.same_bool": "Im Modell stimmen „{b}“ und „{a}“ in {ties} der Iterationen überein.",
+        "compare.ties_label": "Anteil B = A",
+        "compare.stale": "Das Modell hat sich seit dem letzten Vergleich geändert; bitte neu "
+        "vergleichen.",
+        "compare.d_table": "Kennzahlen der Differenz B − A je Iteration",
+        "compare.p90": "P90 (90-%-Quantil)",
+        "compare.points": "{diff} Prozentpunkte [{lo} … {hi}]",
+        "compare.better": "Im Modell ist „{b}“ in {p} der Iterationen besser als „{a}“ "
+        "({lo} … {hi} %), in {ties} gleich und in {worse} schlechter.",
         "result.relative": "Relative Genauigkeit (SE / |Mittelwert|)",
         "result.change_up": "{label} steigt um {amount} (von {before} auf {after}).",
         "result.change_down": "{label} sinkt um {amount} (von {before} auf {after}).",
@@ -204,6 +230,51 @@ UI: dict[str, dict[str, str]] = {
         "ui.exit_confirm": "Ja, beenden",
         "ui.exit_cancel": "Abbrechen",
         "ui.exit_done": "Die App wird beendet. Das Browserfenster kann geschlossen werden.",
+        "ui.page_szenarien": "Szenarien",
+        "ui.page_vergleich": "Vergleich",
+        "ui.scenario": "Szenario",
+        "scen.pick": "Szenario",
+        "scen.why": "**Begründung:** {why}",
+        "scen.overrides": "{n} Overrides",
+        "scen.detached": "losgelöst",
+        "scen.no_overrides": "Dieses Szenario überschreibt noch nichts.",
+        "scen.col_node": "Knoten",
+        "scen.col_field": "Feld",
+        "scen.col_parent": "Eltern",
+        "scen.col_value": "Szenario",
+        "scen.col_why": "Begründung",
+        "scen.col_status": "Status",
+        "scen.readonly": "Tutorial: Szenarien ansehen, simulieren und vergleichen; ändern erst in "
+        "einer Kopie.",
+        "scen.invalid_model": "Das Modell hat noch Probleme (Seite Modell); Szenarien lassen sich "
+        "erst danach bearbeiten.",
+        "scen.new": "Neues Unterszenario",
+        "scen.new_id": "ID (a bis z, 0 bis 9, _)",
+        "scen.new_name": "Name",
+        "scen.new_why": "Begründung",
+        "scen.new_parent": "Eltern-Szenario",
+        "scen.add": "Szenario anlegen",
+        "scen.override": "Wert überschreiben",
+        "scen.value_hint": "Neuer Wert (Zahl, Ausdruck oder YAML)",
+        "scen.value_missing": "Bitte einen Wert eintragen.",
+        "scen.set": "Override setzen",
+        "scen.remove_pick": "Override entfernen",
+        "scen.remove": "Entfernen",
+        "scen.duplicate": "Duplizieren",
+        "scen.detach": "Loslösen",
+        "scen.detach_question": "Loslösen friert das Szenario mit allen Werten ein; spätere "
+        "Änderungen am Eltern-Szenario wirken dann nicht mehr. Fortfahren?",
+        "scen.detach_confirm": "Ja, loslösen",
+        "scen.mark_inactive": "Overrides gelöschter Knoten inaktiv setzen",
+        "compare.ref": "Referenz A",
+        "compare.others": "Vergleichen mit (bis zu drei)",
+        "compare.run": "Vergleichen",
+        "compare.same_seed": "Alle Szenarien laufen mit demselben Seed: Unterschiede entstehen nur "
+        "durch die Overrides (gemeinsame Zufallszahlen).",
+        "compare.need_two": "Für einen Vergleich braucht das Modell mindestens ein Unterszenario.",
+        "compare.pair": "„{b}“ gegen „{a}“",
+        "compare.diff": "Differenz B − A [95-%-Intervall]",
+        "compare.d_caption": "Verteilung der Differenz B − A je Iteration",
         "lesson.choose": "Lektion",
         "lesson.model_yaml": "Mini-Modell (YAML)",
         "lesson.sources": "**Zum Weiterlesen:**",
@@ -237,6 +308,7 @@ UI: dict[str, dict[str, str]] = {
         "lesson.check_var": "Varianz analytisch {expected}, simuliert {observed} (±2 %)",
         "ui.model_blank": "Noch kein Modelltext. Ein Tutorial öffnen oder YAML eintragen.",
         "ui.status_valid": "Gültig – {nodes} Knoten, {outputs}",
+        "ui.status_scenarios": ", {n} Unterszenarien",
         "ui.outputs_one": "1 Ausgabe",
         "ui.outputs_many": "{n} Ausgaben",
         "ui.problems_one": "1 Problem",

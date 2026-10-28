@@ -9,6 +9,8 @@ from app.analysis.stats import summary_to_dict
 from app.errors import ModelError
 from app.messages import t
 from app.model.compile import compile_model
+from app.model.scenarios import effective_model
+from app.model.schema import BASIS
 from app.model.yaml_io import model_from_yaml
 from app.present.results import summaries_for
 from app.ui import state, views
@@ -16,7 +18,8 @@ from app.ui import state, views
 
 def _load(path_name: str) -> None:
     stored = runs.load_run(settings.runs_dir() / path_name)
-    compiled = compile_model(model_from_yaml(stored.model_text))
+    scenario_id = str(stored.meta.get("scenario_id", BASIS))
+    compiled = compile_model(effective_model(model_from_yaml(stored.model_text), scenario_id))
     result = runs.as_result(stored)
     summaries = summaries_for(compiled, result)
     fresh = {k: summary_to_dict(v) for k, v in summaries.items()}
@@ -34,6 +37,7 @@ def _load(path_name: str) -> None:
             original,
             0.0,
             notices,
+            scenario_id,
         )
     )
 

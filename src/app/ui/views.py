@@ -1,5 +1,6 @@
 """Streamlit building blocks shared by several pages."""
 
+import dataclasses
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -11,7 +12,10 @@ from app.adapters import files, process, settings
 from app.engine.simulate import simulate
 from app.errors import InputError, ModelError, SimulationError
 from app.messages import render, t
-from app.model.compile import CompiledModel, content_hash
+from app.model.compile import CompiledModel, content_hash, model_hash
+from app.model.scenarios import effective_model, tree
+from app.model.schema import BASIS, Model
+from app.model.yaml_io import model_from_yaml, model_to_yaml
 from app.present import figures
 from app.present.references import Curve, has_reference, tutorial_reference
 from app.present.results import summaries_for
@@ -23,6 +27,7 @@ from app.present.text import (
     target_sentence,
     validity_line,
 )
+from app.present.validation import CheckResult
 from app.ui import state
 
 
@@ -67,13 +72,27 @@ def template_and_hash(compiled: CompiledModel, text: str) -> tuple[str, str | No
     if not path.is_file():
         return template, None
     try:
-        return template, content_hash(files.load_model(path))
+        return template, content_hash(effective_model(files.load_model(path), BASIS))
     except ModelError:
         return template, None
 
 
+def _full_hash(text: str, compiled: CompiledModel) -> str:
+    """Hash of the whole model text (with scenarios); the effective model's if unparsable."""
+    try:
+        return model_hash(model_from_yaml(text))
+    except ModelError:
+        return compiled.model_hash
+
+
 def run_model(
-    compiled: CompiledModel, text: str, n: int, seed: int, scenario: str
+    compiled: CompiledModel,
+    text: str,
+    n: int,
+    seed: int,
+    scenario: str,
+    scenario_id: str = BASIS,
+    notices: list[str] | None = None,
 ) -> state.RunView | None:
     """Simulate (or reuse the cached run); errors are shown, never raised."""
     key = (compiled.model_hash, n, seed)
@@ -87,11 +106,53 @@ def run_model(
         st.error(render(exc.issue))
         return None
     seconds = time.perf_counter() - started
+    meta = {
+        **result.meta,
+        "model_hash": _full_hash(text, compiled),
+        "effective_hash": content_hash(compiled.model),
+    }
+    result = dataclasses.replace(result, meta=meta)
     template, original = template_and_hash(compiled, text)
     summaries = summaries_for(compiled, result)
-    run = state.RunView(text, compiled, result, summaries, scenario, template, original, seconds)
+    run = state.RunView(
+        text,
+        compiled,
+        result,
+        summaries,
+        scenario,
+        template,
+        original,
+        seconds,
+        list(notices or []),
+        scenario_id,
+    )
     state.cache()[key] = run
     return run
+
+
+def scenario_labels(checked: CheckResult) -> dict[str, str]:
+    """Scenario names indented by their depth in the tree (for select boxes)."""
+    if checked.model is None:
+        return {sid: name for sid, (name, _) in checked.scenarios.items()}
+    depth = dict(tree(checked.model))
+    return {
+        sid: "\u2003" * depth.get(sid, 0) + name for sid, (name, _) in checked.scenarios.items()
+    }
+
+
+def rewrite(model: Model) -> None:
+    """Write an edited model back into the open model's draft (keeps the template comment).
+
+    Call from widget callbacks only: they run before the editor widget exists in this run.
+    """
+    open_model = state.get_model()
+    assert open_model is not None
+    text = model_to_yaml(model)
+    template = files.template_of(open_model.draft)
+    if template:
+        text = f"# Kopie von {template}\n{text}"
+    open_model.draft = text
+    st.session_state[state.EDITOR] = text
 
 
 def copy_form(source: Path, key: str, default: str) -> None:

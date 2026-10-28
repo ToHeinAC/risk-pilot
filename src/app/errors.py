@@ -41,6 +41,15 @@ CODES: dict[str, tuple[str, ...]] = {
     "stats.single_sample": (),
     "stats.quantile_range": ("q",),
     "files.exists": ("name", "suggestion"),
+    "scenario.id_invalid": ("id", "reason"),
+    "scenario.parent_unknown": ("parent",),
+    "scenario.parent_cycle": ("cycle",),
+    "scenario.node_unknown": (),
+    "scenario.field_invalid": (),
+    "scenario.type_change": (),
+    "scenario.unsupported": ("key",),
+    "scenario.inactive": (),
+    "scenario.same_value": (),
     "files.changed": ("name",),
 }
 
@@ -55,6 +64,7 @@ class Issue:
     line: int | None = None
     params: Mapping[str, object] = dc_field(default_factory=dict[str, object])
     share: float | None = None
+    scenario: str | None = None
 
 
 @dataclass(frozen=True)
@@ -65,6 +75,7 @@ class Notice:
     node_id: str | None = None
     share: float | None = None
     params: Mapping[str, object] = dc_field(default_factory=dict[str, object])
+    scenario: str | None = None
 
 
 class RiskPilotError(Exception):

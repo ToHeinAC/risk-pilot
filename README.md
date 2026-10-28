@@ -33,6 +33,11 @@ sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the termin
   parallel AND/OR, k-out-of-n, event branch, threshold, conditional distribution, multiplicative
   chain, Jensen, common cause, capstone). Each has a prediction, a knob that reruns with the same
   seed and shows before/after, and an analytic check. Numbers are illustrative.
+- **Scenarios** (M3, [spec](docs/specs/m3-szenarien.md)): sub-scenarios store only their
+  overrides (with a reason) under `scenarios:` in the model YAML and inherit everything else, to
+  any depth. Pages "Szenarien" (tree, diff, create, override, duplicate, detach) and "Vergleich"
+  (same seed, paired differences B − A with intervals, P(B better than A)). T2 ships with
+  "B −3 Tage" and "mit Nacharbeit".
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.
 - Data location: `RISK_PILOT_DATA_DIR` (default `data/`, gitignored).
 

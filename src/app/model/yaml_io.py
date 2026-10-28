@@ -6,7 +6,7 @@ import yaml
 from pydantic import ValidationError
 
 from app.errors import Issue, ModelError
-from app.model.schema import Model, id_problem
+from app.model.schema import BASIS, Model, id_problem
 
 _PYDANTIC_DE = {
     "missing": "Angabe fehlt",
@@ -78,8 +78,22 @@ def _issue_from_pydantic(error: Any) -> Issue:
     )
 
 
+def issues_from_validation(exc: ValidationError) -> list[Issue]:
+    """Pydantic errors as German model.schema issues."""
+    return [_issue_from_pydantic(e) for e in exc.errors()]
+
+
 def _id_issues(model: Model) -> list[Issue]:
     issues: list[Issue] = []
+    for scenario_id in model.scenarios:
+        reason = (
+            "der Name ist für das Hauptszenario reserviert"
+            if scenario_id == BASIS
+            else id_problem(scenario_id)
+        )
+        if reason:
+            params = {"id": scenario_id, "reason": reason}
+            issues.append(Issue("scenario.id_invalid", scenario=scenario_id, params=params))
     for value, node_id in [(model.model, None), *((k, k) for k in model.nodes)]:
         reason = id_problem(value)
         if reason:

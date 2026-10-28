@@ -9,7 +9,8 @@ from typing import cast
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from app.adapters import files, settings
+from app.adapters import files, runs, settings
+from app.model.compile import model_hash
 
 ROOT = Path(__file__).resolve().parent.parent
 MAIN = str(ROOT / "src" / "app" / "ui" / "main.py")
@@ -348,3 +349,168 @@ def test_editor_draft_survives_page_change() -> None:
     go(at, "modell")
     assert at.text_area(key="editor").value == draft
     assert "Ungespeicherte Änderungen" in texts(at)
+
+
+# --- M3: scenarios and comparison -------------------------------------------------------
+
+
+def test_t2_scenario_tree_and_diff_read_only() -> None:
+    at = go(open_model(start(), "t2_terminplan"), "szenarien")
+    page = texts(at)
+    assert "B −3 Tage" in page
+    assert "mit Nacharbeit" in page
+    at.selectbox(key="scenario_pick").set_value("b_schneller").run()
+    table = next(str(m.value) for m in at.markdown if "| b | mean" in str(m.value))
+    assert "| 15 | 12 |" in table
+    assert not has_button(at, "scenario_add")
+
+
+def test_simulate_sub_scenario_shows_it_in_validity_line() -> None:
+    at = open_model(start(), "t2_terminplan")
+    go(at, "simulation")
+    at.selectbox(key="sim_scenario").set_value("b_schneller").run()
+    at.number_input(key="sim_n").set_value(5_000).run()
+    at.button(key="sim_run").click().run()
+    page = texts(go(at, "ergebnisse"))
+    assert "Szenario B −3 Tage" in page
+    assert "DKW-Schranke" not in page  # analytic overlay only in the main scenario
+    at.button(key="save_run").click().run()
+    meta = runs.load_run(runs.list_runs(settings.runs_dir())[0]).meta
+    assert (meta["scenario_id"], meta["scenario_name"]) == ("b_schneller", "B −3 Tage")
+    assert "effective_hash" in meta
+
+
+def test_compare_page_t2() -> None:
+    at = go(open_model(start(), "t2_terminplan"), "vergleich")
+    at.selectbox(key="compare_ref").set_value("basis").run()
+    at.multiselect(key="compare_others").set_value(["b_schneller", "nacharbeit"]).run()
+    at.number_input(key="compare_n").set_value(10_000).run()
+    at.button(key="compare_run").click().run()
+    assert not at.exception
+    page = texts(at)
+    assert "besser als „Hauptszenario“" in page
+    assert "in 0 % schlechter" in page  # B −3 Tage is never worse (AK 6)
+    assert any("| Mittelwert" in str(m.value) for m in at.markdown)
+
+
+def test_edit_scenarios_in_own_copy() -> None:
+    at = start()
+    at.text_input(key="copy_id_t2_terminplan").input("plan").run()
+    at.button(key="copy_t2_terminplan").click().run()
+    at = go(open_model(start(), "plan"), "szenarien")
+    at.text_input(key="scenario_new_id").input("teuer").run()
+    at.text_input(key="scenario_new_name").input("Teurer Plan").run()
+    at.text_input(key="scenario_new_why").input("Test").run()
+    at.button(key="scenario_add").click().run()
+    assert not at.exception
+    at.selectbox(key="scenario_pick").set_value("teuer").run()
+    at.selectbox(key="override_node").set_value("c").run()
+    at.text_input(key="override_field").input("mean").run()
+    at.text_input(key="override_value").input("30").run()
+    at.text_input(key="override_why").input("Angebot").run()
+    at.button(key="override_set").click().run()
+    assert not at.exception
+    table = next(str(m.value) for m in at.markdown if "| c | mean" in str(m.value))
+    assert "| 24 | 30 | Angebot | geändert |" in table
+    at.button(key="scenario_duplicate").click().run()
+    at.button(key="scenario_detach").click().run()
+    at.button(key="scenario_detach_confirm").click().run()
+    assert not at.exception
+    go(at, "modell")
+    text = str(at.text_area(key="editor").value)
+    assert "teuer:" in text
+    assert "detached_from: basis" in text
+    assert text.startswith("# Kopie von t2_terminplan")
+
+
+def test_deleted_node_overrides_can_be_marked_inactive() -> None:
+    at = own_model(
+        "schema_version: 1\nmodel: eigen\nnodes:\n  a: {type: constant, value: 1}\n"
+        "  y: {type: output, expr: '1'}\n"
+        "scenarios:\n  s: {name: S, why: W, overrides: {a: {value: 2}}}\n"
+    )
+    at.text_area(key="editor").input(
+        "schema_version: 1\nmodel: eigen\nnodes:\n  y: {type: output, expr: '1'}\n"
+        "scenarios:\n  s: {name: S, why: W, overrides: {a: {value: 2}}}\n"
+    ).run()
+    assert "inaktiv markieren" in texts(at)
+    at.button(key="mark_inactive").click().run()
+    assert not at.exception
+    page = texts(at)
+    assert "Gültig" in page
+    assert "wird nicht angewandt" in page
+
+
+NO_TARGET = (
+    "schema_version: 1\nmodel: eigen\nnodes:\n"
+    "  a: {type: uncertain, dist: normal, mean: 0, sd: 1}\n  k: {type: constant, value: 1}\n"
+    "  y: {type: output, expr: a * k}\n"
+    "scenarios:\n  s: {name: Doppelt, why: W, overrides: {k: {value: 2}}}\n"
+)
+
+
+def test_compare_without_direction_shows_shares_and_d_statistics() -> None:
+    at = go(own_model(NO_TARGET), "vergleich")
+    at.multiselect(key="compare_others").set_value(["s"]).run()
+    at.button(key="compare_run").click().run()
+    page = texts(at)
+    assert "kleiner als „Hauptszenario“" in page
+    assert any("| Anteil B = A" in str(m.value) for m in at.markdown)
+
+
+def test_stale_comparison_hidden_after_model_change() -> None:
+    at = go(own_model(NO_TARGET), "vergleich")
+    at.multiselect(key="compare_others").set_value(["s"]).run()
+    at.button(key="compare_run").click().run()
+    go(at, "modell")
+    at.text_area(key="editor").input(NO_TARGET.replace("value: 2", "value: 3")).run()
+    page = texts(go(at, "vergleich"))
+    assert "kleiner als" not in page
+
+
+def test_reloaded_run_keeps_scenario_and_full_model_hash() -> None:
+    at = open_model(start(), "t2_terminplan")
+    go(at, "simulation")
+    at.selectbox(key="sim_scenario").set_value("b_schneller").run()
+    at.number_input(key="sim_n").set_value(2_000).run()
+    at.button(key="sim_run").click().run()
+    go(at, "ergebnisse")
+    at.button(key="save_run").click().run()
+    meta = runs.load_run(runs.list_runs(settings.runs_dir())[0]).meta
+    full = model_hash(files.load_model(T2))
+    assert meta["model_hash"] == full
+    assert meta["effective_hash"] != full
+    go(at, "laeufe")
+    at.button(key="load_run_0").click().run()
+    assert "Szenario B −3 Tage" in texts(at)
+    run = at.session_state["run"]
+    assert run.scenario_id == "b_schneller"
+
+
+def test_scenario_hints_reach_results_page() -> None:
+    at = own_model(NO_TARGET.replace("value: 2", "value: 1"))
+    go(at, "simulation")
+    at.selectbox(key="sim_scenario").set_value("s").run()
+    at.button(key="sim_run").click().run()
+    assert "denselben Wert" in texts(go(at, "ergebnisse"))
+
+
+def test_scenario_form_refuses_invalid_edit() -> None:
+    at = go(own_model(NO_TARGET), "szenarien")
+    at.selectbox(key="scenario_pick").set_value("s").run()
+    at.selectbox(key="override_node").set_value("k").run()
+    at.text_input(key="override_field").input("mean").run()
+    at.text_input(key="override_value").input("3").run()
+    at.button(key="override_set").click().run()
+    assert not at.exception
+    page = texts(at)
+    assert "nicht überschreiben" in page
+    assert "Doppelt" in page  # page still usable, model unchanged
+
+
+def test_simulation_scenario_list_is_indented() -> None:
+    at = open_model(start(), "t2_terminplan")
+    go(at, "simulation")
+    options = list(at.selectbox(key="sim_scenario").options)
+    assert options[0] == "Hauptszenario"
+    assert options[1].startswith("\u2003")  # indented one level

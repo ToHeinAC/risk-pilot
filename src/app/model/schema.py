@@ -2,7 +2,7 @@
 
 import keyword
 import re
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -135,6 +135,7 @@ class OutputNode(_NodeBase):
     type: Literal["output"]
     expr: str
     target: Target | None = None
+    better: Literal["lower", "higher"] | None = None  # comparison direction without a target
 
 
 Node = Annotated[
@@ -159,6 +160,21 @@ class Settings(_Strict):
         return value
 
 
+BASIS = "basis"  # ID of the main scenario: the model's own nodes
+
+
+class Scenario(_Strict):
+    """A sub-scenario: overrides on top of its parent, or (detached) a full set of nodes."""
+
+    name: str
+    why: str = Field(min_length=1)
+    parent: str = BASIS
+    overrides: dict[str, dict[str, Any]] = {}
+    nodes: dict[str, Node] | None = None
+    detached_from: str | None = None
+    correlations: dict[str, Any] | None = None  # reserved for M5
+
+
 class Model(_Strict):
     schema_version: int
     model: str
@@ -166,3 +182,4 @@ class Model(_Strict):
     description: str | None = None
     settings: Settings = Settings()
     nodes: dict[str, Node] = {}
+    scenarios: dict[str, Scenario] = {}

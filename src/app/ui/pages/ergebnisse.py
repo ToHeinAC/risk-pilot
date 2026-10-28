@@ -5,6 +5,7 @@ import streamlit as st
 from app.adapters import runs, settings
 from app.analysis.stats import summary_to_dict
 from app.messages import t
+from app.model.compile import content_hash
 from app.present.text import number
 from app.ui import state, views
 
@@ -23,7 +24,12 @@ def body() -> None:
         st.warning(t("ui.run_large", mb=number(size / 1024 / 1024)))
     if st.button(t("ui.save_run"), key="save_run"):
         summaries = {k: summary_to_dict(v) for k, v in run.summaries.items()}
-        extra = {"scenario": run.scenario}
+        extra = {
+            "scenario": run.scenario,
+            "scenario_id": run.scenario_id,
+            "scenario_name": run.scenario,
+            "effective_hash": content_hash(run.compiled.model),
+        }
         path = runs.save_run(
             settings.runs_dir(),
             run.result.meta,

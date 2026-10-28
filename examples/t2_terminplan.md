@@ -10,3 +10,8 @@ Iterationen der entscheidende.
 
 **Weiter:** Mit einem Ereignis „Nacharbeit an B“ gibt es keine geschlossene Lösung mehr – ab dann
 hilft nur die Simulation (Lektion A5 im Lernpfad).
+
+**Szenarien:** „B −3 Tage“ verkürzt Vorgang B im Mittel auf 12 Tage. Mit demselben Seed endet das
+Projekt in keiner Iteration später, in vielen aber gar nicht früher – dort entscheidet Pfad 2.
+„mit Nacharbeit“ setzt die Wahrscheinlichkeit der Nacharbeit an B auf 20 % (+5 Tage). Die Seite
+Vergleich zeigt beides gegen das Hauptszenario.

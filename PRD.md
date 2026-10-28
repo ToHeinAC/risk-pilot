@@ -145,7 +145,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M1.
 
 ### M3 — Szenarien und Vergleich
-- **Status:** planned
+- **Status:** in progress
 - **Deliverable:** Haupt- und Unterszenarien mit Overrides und Vererbung, Szenariobaum,
   Duplizieren, Loslösen, Diff-Ansicht, Vergleichsseite.
   Pflichtenheft: [docs/specs/m3-szenarien.md](docs/specs/m3-szenarien.md).

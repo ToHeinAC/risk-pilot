@@ -14,8 +14,10 @@ navigation = st.navigation(
         st.Page("pages/start.py", title=t("ui.page_start"), default=True),
         st.Page("pages/lernpfad.py", title=t("ui.page_lernpfad")),
         st.Page("pages/modell.py", title=t("ui.page_modell")),
+        st.Page("pages/szenarien.py", title=t("ui.page_szenarien")),
         st.Page("pages/simulation.py", title=t("ui.page_simulation")),
         st.Page("pages/ergebnisse.py", title=t("ui.page_ergebnisse")),
+        st.Page("pages/vergleich.py", title=t("ui.page_vergleich")),
         st.Page("pages/laeufe.py", title=t("ui.page_laeufe")),
     ]
 )

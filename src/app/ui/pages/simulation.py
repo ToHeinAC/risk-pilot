@@ -15,10 +15,21 @@ def body() -> None:
         st.info(t("ui.no_model"))
         return
     st.title(t("ui.page_simulation"))
-    compiled = check_text(model.text).compiled
-    if compiled is None:
+    checked = check_text(model.text)
+    if checked.compiled is None:
         st.error(t("ui.sim_blocked"))
         return
+    scenarios = checked.scenarios
+    labels = views.scenario_labels(checked)
+    scenario_id = str(
+        st.selectbox(
+            t("ui.scenario"),
+            list(scenarios),
+            format_func=lambda s: labels[s],
+            key="sim_scenario",
+        )
+    )
+    name, compiled = scenarios[scenario_id]
     defaults = compiled.model.settings
     n = st.number_input(
         t("ui.n"), min_value=1, max_value=N_MAX, value=defaults.n, step=1000, key="sim_n"
@@ -26,7 +37,8 @@ def body() -> None:
     seed = st.number_input(t("ui.seed"), min_value=0, value=defaults.seed, step=1, key="sim_seed")
     if st.button(t("ui.simulate"), key="sim_run", type="primary"):
         with st.spinner(t("ui.running")):
-            run = views.run_model(compiled, model.text, int(n), int(seed), t("ui.main_scenario"))
+            hints = checked.scenario_notices.get(scenario_id, [])
+            run = views.run_model(compiled, model.text, int(n), int(seed), name, scenario_id, hints)
         if run is not None:
             state.set_run(run)
             st.success(t("ui.sim_done", n=integer(int(n)), seconds=decimal(run.seconds, 2)))

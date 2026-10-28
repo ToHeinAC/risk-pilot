@@ -7,6 +7,8 @@ import streamlit as st
 from app.adapters import files, settings
 from app.errors import InputError
 from app.messages import render, t
+from app.model.scenarios import mark_unknown_inactive
+from app.model.yaml_io import model_from_yaml
 from app.present.validation import CheckResult, check_text
 from app.ui import state, views
 
@@ -34,6 +36,12 @@ def _show_check(result: CheckResult) -> None:
             for r in result.node_table
         ]
         st.markdown(views.table(headers, rows))
+
+
+def _mark_inactive() -> None:
+    model = state.get_model()
+    assert model is not None
+    views.rewrite(mark_unknown_inactive(model_from_yaml(model.draft)))
 
 
 def _save(model: state.OpenModel, path: Path, result: CheckResult, force: bool) -> None:
@@ -80,6 +88,10 @@ def body() -> None:
     )
     result = check_text(model.text)
     _show_check(result)
+    for notice in result.notices:
+        st.info(notice)
+    if result.unknown_nodes and not model.readonly:
+        st.button(t("scen.mark_inactive"), key="mark_inactive", on_click=_mark_inactive)
     if model.dirty:
         st.warning(t("ui.unsaved"))
     if not model.readonly:

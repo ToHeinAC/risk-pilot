@@ -142,6 +142,10 @@ def detach(model: Model, scenario_id: str) -> Model
 ## 5. Simulation und Ergebnisse
 
 - Simulationsseite: Auswahl des Szenarios (Baum als eingerückte Liste), dann N und Seed wie in M2.
+- Hinweise des Szenarios (`scenario.same_value`, `scenario.inactive`) erscheinen auch auf der
+  Ergebnisseite.
+- Formulare der Szenarioseite schreiben nur, wenn das Ergebnis ein gültiges Modell ist; sonst
+  erklären sie das Problem und lassen den Text unverändert.
 - `RunView.scenario` trägt ID und Namen; die Geltungszeile nennt das Szenario.
 - Läufe speichern `scenario_id` und `scenario_name` in `meta.json`; Modell-Hash ist der des
   ganzen Modelltexts, zusätzlich `effective_hash` (Inhalts-Hash des effektiven Modells).
@@ -199,8 +203,8 @@ Zwei Szenarien A (Referenz) und B, gleiche N und gleicher Seed; je Ausgabe die S
 
 `examples/t2_terminplan.yaml` erhält:
 
-- Knoten `nacharbeit: {type: event, p: 0}` und `ende: max(pfad1 + where(nacharbeit, 5, 0), c)`
-  im Hauptszenario (analytisch unverändert, weil p = 0).
+- Knoten `nacharbeit: {type: event, p: 0}` und `pfad1: a + b + where(nacharbeit, 5, 0)` im
+  Hauptszenario (analytisch unverändert, weil p = 0; die Nacharbeit wirkt auf B wie in M4 AK 6).
 - Szenario `b_schneller` („B −3 Tage“): `b.mean = 12`.
 - Szenario `nacharbeit` („mit Nacharbeit“): `nacharbeit.p = 0.2` (für M4 AK 6).
 - Erklärtext `t2_terminplan.md` um einen Abschnitt „Szenarien“ ergänzt.

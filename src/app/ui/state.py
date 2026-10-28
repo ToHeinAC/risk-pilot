@@ -45,6 +45,7 @@ class RunView:
     original_hash: str | None
     seconds: float = 0.0
     notices: list[str] = field(default_factory=list[str])
+    scenario_id: str = "basis"
 
 
 def _get(key: str) -> Any:

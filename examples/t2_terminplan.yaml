@@ -8,5 +8,18 @@ nodes:
   a: {type: uncertain, dist: normal, mean: 10, sd: 2, unit: d, name: "Vorgang A"}
   b: {type: uncertain, dist: normal, mean: 15, sd: 3, unit: d, name: "Vorgang B"}
   c: {type: uncertain, dist: normal, mean: 24, sd: 4, unit: d, name: "Vorgang C"}
-  pfad1: {type: derived, expr: "a + b", unit: d, track: true, name: "Pfad 1"}
+  # Im Hauptszenario tritt die Nacharbeit nie ein (p = 0): die analytischen Werte bleiben gültig.
+  nacharbeit: {type: event, p: 0, name: "Nacharbeit an B"}
+  pfad1: {type: derived, expr: "a + b + where(nacharbeit, 5, 0)", unit: d, track: true, name: "Pfad 1"}
   ende: {type: output, expr: "max(pfad1, c)", unit: d, target: {le: 30}, name: "Projektende"}
+scenarios:
+  b_schneller:
+    name: "B −3 Tage"
+    why: "Ein zweites Team verkürzt Vorgang B im Mittel um drei Tage."
+    overrides:
+      b: {mean: 12, why: "Planwert mit zweitem Team (illustrativ)"}
+  nacharbeit:
+    name: "mit Nacharbeit"
+    why: "Mit 20 % Wahrscheinlichkeit muss B nachgearbeitet werden (+5 Tage)."
+    overrides:
+      nacharbeit: {p: 0.2, why: "Erfahrungswert (illustrativ)"}
