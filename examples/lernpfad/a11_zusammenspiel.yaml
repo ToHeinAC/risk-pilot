@@ -1,0 +1,18 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a11_zusammenspiel
+title: "Zusammenspiel: Mini-Fusionskraftwerk"
+description: "Magnete, Plasma und Materialien greifen ineinander; Förderung beschleunigt den Bau."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  magnete: {type: uncertain, dist: pert, low: 2030, mode: 2035, high: 2045, unit: Jahr, name: "Magnete reif"}
+  durchbruch: {type: event, p: 0.3, name: "Durchbruch bei Magneten"}
+  plasma: {type: uncertain, dist: normal, mean: "2040 - 4 * durchbruch", sd: 3, unit: Jahr, name: "Plasma reif"}
+  m1: {type: event, p: 0.5, name: "Material 1 bewährt sich"}
+  m2: {type: event, p: 0.5, name: "Material 2 bewährt sich"}
+  m3: {type: event, p: 0.5, name: "Material 3 bewährt sich"}
+  material_ok: {type: derived, expr: "(m1 + m2 + m3) >= 2", name: "Zwei von drei Materialien"}
+  foerderung: {type: constant, value: 1, name: "Förderung (relativ)"}
+  bauzeit: {type: derived, expr: "interp(foerderung, [0.5, 1, 1.5], [12, 8, 6])", unit: Jahre}
+  demo: {type: derived, expr: "max(magnete, plasma) + 5", unit: Jahr, name: "Demonstrationsanlage"}
+  kommerziell: {type: output, expr: "where(material_ok, demo + bauzeit, 2100)", unit: Jahr, target: {le: 2060}, name: "Erste kommerzielle Anlage"}

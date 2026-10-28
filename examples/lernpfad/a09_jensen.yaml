@@ -1,0 +1,10 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a09_jensen
+title: "Nichtlineare Wirkung: Der Mittelwert lügt"
+description: "Die Kosten wachsen exponentiell mit dem Verzug; der Verzug ist unsicher."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  verzug: {type: uncertain, dist: normal, mean: 1, sd: 0.5, unit: Monate, name: "Verzug"}
+  plan: {type: output, expr: "exp(1)", name: "Kostenfaktor beim mittleren Verzug"}
+  kostenfaktor: {type: output, expr: "exp(verzug)", name: "Kostenfaktor"}

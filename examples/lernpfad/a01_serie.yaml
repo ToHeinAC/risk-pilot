@@ -1,0 +1,12 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a01_serie
+title: "Serie: Abschnitte addieren sich"
+description: "Drei Fahrtabschnitte hintereinander; die Gesamtfahrzeit ist ihre Summe."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  abschnitte: {type: constant, value: 2, name: "Anzahl Abschnitte"}
+  a: {type: uncertain, dist: normal, mean: 20, sd: 3, unit: min, name: "Abschnitt 1"}
+  b: {type: uncertain, dist: normal, mean: 35, sd: 4, unit: min, name: "Abschnitt 2"}
+  c: {type: uncertain, dist: normal, mean: 15, sd: 2, unit: min, name: "Abschnitt 3"}
+  gesamt: {type: output, expr: "a + where(abschnitte >= 2, b, 0) + where(abschnitte >= 3, c, 0)", unit: min, name: "Gesamtfahrzeit"}

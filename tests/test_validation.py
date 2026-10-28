@@ -4,7 +4,7 @@ import pytest
 from test_dists import INVALID
 
 from app.errors import Issue, ModelError
-from app.model.compile import CompiledModel, compile_model
+from app.model.compile import CompiledModel, compile_model, content_hash
 from app.model.yaml_io import model_from_yaml
 
 
@@ -199,3 +199,16 @@ def test_list_items_must_be_numbers(values: str) -> None:
         "  y: {type: output, expr: '1'}\n"
     )
     assert [(i.code, i.node_id, i.field) for i in found] == [("param.invalid", "a", "values")]
+
+
+def test_content_hash_ignores_ids_and_labels() -> None:
+    base = (
+        "schema_version: 1\nmodel: {mid}\ntitle: {title}\nnodes:\n"
+        "  a: {{type: constant, value: {v}, name: {name}}}\n  y: {{type: output, expr: a}}\n"
+    )
+
+    def h(mid: str = "m", title: str = "T", v: int = 1, name: str = "A") -> str:
+        return content_hash(model_from_yaml(base.format(mid=mid, title=title, v=v, name=name)))
+
+    assert h() == h(mid="kopie", title="Anders", name="Anderer Name")
+    assert h() != h(v=2)

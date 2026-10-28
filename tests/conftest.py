@@ -12,3 +12,9 @@ def _block_network(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(socket.socket, "connect", refuse)
     monkeypatch.setattr(socket.socket, "connect_ex", refuse)
+
+
+@pytest.fixture(autouse=True)
+def _data_dir(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> None:
+    """No test writes to the real data/ directory."""
+    monkeypatch.setenv("RISK_PILOT_DATA_DIR", str(tmp_path_factory.mktemp("data")))

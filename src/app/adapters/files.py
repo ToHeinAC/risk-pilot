@@ -1,11 +1,86 @@
-"""File adapter: the only place in M1 that reads from disk."""
+"""File adapter for model files: read, list, copy as template, save atomically."""
 
+import hashlib
+import os
+import re
 from pathlib import Path
 
-from app.model.schema import Model
+from app.errors import InputError, Issue
+from app.model.schema import Model, id_problem
 from app.model.yaml_io import model_from_yaml
+
+_MODEL_LINE = re.compile(r"^model:\s*(\S+).*$", re.MULTILINE)
+_TEMPLATE = re.compile(r"^# Kopie von ([a-z][a-z0-9_]*)\s*$", re.MULTILINE)
+
+
+def template_of(text: str) -> str | None:
+    """The tutorial a model was copied from (recorded as a comment by ``copy_model``)."""
+    found = _TEMPLATE.search(text)
+    return found.group(1) if found else None
+
+
+def read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
 
 
 def load_model(path: Path) -> Model:
     """Read a UTF-8 YAML model file and validate it."""
-    return model_from_yaml(path.read_text(encoding="utf-8"))
+    return model_from_yaml(read_text(path))
+
+
+def text_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def list_models(directory: Path) -> list[Path]:
+    return sorted(directory.glob("*.yaml")) if directory.is_dir() else []
+
+
+def suggest_id(base: str, existing: set[str]) -> str:
+    """``base`` if free, else the first free ``base_2``, ``base_3``, …"""
+    if base not in existing:
+        return base
+    number = 2
+    while f"{base}_{number}" in existing:
+        number += 1
+    return f"{base}_{number}"
+
+
+def create_model_text(directory: Path, new_id: str, text: str) -> Path:
+    """Write ``text`` as a new model ``new_id``; never overwrites an existing model."""
+    reason = id_problem(new_id)
+    if reason:
+        raise InputError(Issue("node.id_invalid", params={"id": new_id, "reason": reason}))
+    directory.mkdir(parents=True, exist_ok=True)
+    target = directory / f"{new_id}.yaml"
+    try:
+        with target.open("x", encoding="utf-8") as handle:
+            handle.write(_MODEL_LINE.sub(f"model: {new_id}", text, count=1))
+    except FileExistsError as exc:
+        existing = {p.stem for p in list_models(directory)}
+        params = {"name": new_id, "suggestion": suggest_id(new_id, existing)}
+        raise InputError(Issue("files.exists", params=params)) from exc
+    return target
+
+
+def copy_model(source: Path, directory: Path, new_id: str) -> Path:
+    """Copy the model text with a new ID; never overwrites, the source stays byte-identical.
+
+    The copy records its original tutorial in a comment, so the app can tell an unchanged copy
+    (analytic overlay applies) from a changed one (notice instead).
+    """
+    text = read_text(source)
+    if template_of(text) is None:
+        found = _MODEL_LINE.search(text)
+        if found:
+            text = f"# Kopie von {found.group(1)}\n{text}"
+    return create_model_text(directory, new_id, text)
+
+
+def save_model_text(path: Path, text: str, expected_hash: str | None) -> None:
+    """Write atomically; refuse if the file changed since it was opened (``expected_hash``)."""
+    if expected_hash is not None and path.exists() and text_hash(read_text(path)) != expected_hash:
+        raise InputError(Issue("files.changed", params={"name": path.name}))
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    os.replace(temporary, path)

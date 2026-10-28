@@ -1,0 +1,13 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a02_parallel_und
+title: "Parallel-UND: Wenn alles fertig sein muss"
+description: "Mehrere gleich lange Pfade laufen parallel; das Ergebnis wartet auf den spätesten."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  pfade: {type: constant, value: 2, name: "Anzahl paralleler Pfade"}
+  p1: {type: uncertain, dist: normal, mean: 10, sd: 2, unit: Jahre, name: "Pfad 1"}
+  p2: {type: uncertain, dist: normal, mean: 10, sd: 2, unit: Jahre, name: "Pfad 2"}
+  p3: {type: uncertain, dist: normal, mean: 10, sd: 2, unit: Jahre, name: "Pfad 3"}
+  p4: {type: uncertain, dist: normal, mean: 10, sd: 2, unit: Jahre, name: "Pfad 4"}
+  ende: {type: output, expr: "max(p1, where(pfade >= 2, p2, -1e9), where(pfade >= 3, p3, -1e9), where(pfade >= 4, p4, -1e9))", unit: Jahre, name: "Alles fertig"}

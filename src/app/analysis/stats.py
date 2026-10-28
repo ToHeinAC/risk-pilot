@@ -4,7 +4,7 @@
 # pyright: reportUnknownMemberType=false
 import math
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Literal
 
 import numpy as np
@@ -131,3 +131,8 @@ def summarize(
         target=proportion(_hits(x, target), conf) if target is not None else None,
         notices=notices,
     )
+
+
+def summary_to_dict(summary: Summary) -> dict[str, Any]:
+    """Plain JSON-compatible form, for stored runs."""
+    return asdict(summary)

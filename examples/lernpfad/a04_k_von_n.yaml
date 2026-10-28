@@ -1,0 +1,12 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a04_k_von_n
+title: "k-von-n: Genug muss klappen"
+description: "Drei Materialkandidaten werden geprüft; die Anlage braucht eine Mindestzahl bewährter Materialien."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  benoetigt: {type: constant, value: 2, name: "Benötigte Materialien"}
+  m1: {type: event, p: 0.6, name: "Material 1 bewährt sich"}
+  m2: {type: event, p: 0.6, name: "Material 2 bewährt sich"}
+  m3: {type: event, p: 0.6, name: "Material 3 bewährt sich"}
+  erfolg: {type: output, expr: "(m1 + m2 + m3) >= benoetigt", name: "Genug Materialien"}

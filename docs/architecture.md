@@ -4,9 +4,9 @@
 
 | Layer | Where | Rule |
 |---|---|---|
-| Core logic | `src/app/` except `adapters/` | Pure functions, fully typed, no I/O. Unit-tested directly. |
-| Adapters | `src/app/adapters/` | The only place for network, file, or database I/O (M1: `files.load_model`). |
-| Entry points | Streamlit app (M2) | Wire adapters to core logic; keep them thin. |
+| Core logic | `src/app/` except `adapters/` and `ui/` | Pure functions, fully typed, no I/O. Unit-tested directly. |
+| Adapters | `src/app/adapters/` | The only place for file and process I/O: model files, runs, settings, shutdown. |
+| Entry point | `src/app/ui/` (Streamlit) | Thin: read widgets, call core and adapters, render. Tested with AppTest. |
 
 Core packages (M1, [spec](specs/m1-rechenkern.md)):
 
@@ -18,8 +18,15 @@ Core packages (M1, [spec](specs/m1-rechenkern.md)):
 | `dists/` | Distribution families (inversion sampling), registry |
 | `engine/` | One random stream per node, `simulate` |
 | `analysis/` | Summary statistics with intervals, analytic references for T1/T2 |
+| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation, before/after rows; no Streamlit import |
+| `lessons/` (M2) | Learning path: manifest schema, knob (`with_value`), analytic checks per lesson, reading list |
 
-Dependency direction: `analysis`, `engine` -> `model` -> `expr`, `dists` -> `errors`. Numeric
+Dependency direction: `ui` -> `present`, `lessons`, `adapters` -> `analysis`, `engine` -> `model`
+-> `expr`, `dists` -> `errors`.
+
+UI notes: every page calls `views.sidebar_exit()` itself, because AppTest re-renders only the page
+after a widget interaction under `st.navigation`. All visible texts come from `messages.UI` via
+`t()`; `tests/test_messages_ui.py` checks that every key used in the code exists. Numeric
 modules switch off pyright's `reportUnknownMemberType` per file, because the NumPy stubs mark
 `ArrayLike` as partially unknown under `pythonVersion = 3.11`.
 

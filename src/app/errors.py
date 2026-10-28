@@ -40,6 +40,8 @@ CODES: dict[str, tuple[str, ...]] = {
     "uniform.degenerate": ("value",),
     "stats.single_sample": (),
     "stats.quantile_range": ("q",),
+    "files.exists": ("name", "suggestion"),
+    "files.changed": ("name",),
 }
 
 

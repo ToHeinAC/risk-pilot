@@ -107,7 +107,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** keine.
 
 ### M2 — Erste App
-- **Status:** planned
+- **Status:** in progress
 - **Deliverable:** Streamlit-App mit den Seiten Tutorials, Modell (YAML-Editor mit
   Live-Validierung), Simulation (N, Seed), Ergebnisse; analytische Überlagerung für T1/T2;
   Ergebnisablage in `data/runs/`; Kopierfunktion für Vorlagen; Lernpfad „Abhängigkeitsmuster“

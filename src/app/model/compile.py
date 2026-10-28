@@ -89,6 +89,19 @@ def model_hash(model: Model) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+_LABELS = ("name", "description", "why", "tags")
+
+
+def content_hash(model: Model) -> str:
+    """SHA-256 over what determines the numbers: without model ID, title and display labels."""
+    data = model.model_dump(mode="json", exclude={"model", "title", "description"})
+    for node in data["nodes"].values():
+        for key in _LABELS:
+            node.pop(key, None)
+    text = json.dumps(data, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 class _Fail(Exception):
     """Collected issues of one node; compilation of that node stops."""
 

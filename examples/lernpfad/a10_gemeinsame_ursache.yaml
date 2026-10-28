@@ -1,0 +1,14 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a10_gemeinsame_ursache
+title: "Gemeinsame Ursache: Gleichlauf ohne Absprache"
+description: "Das Wetter verspätet zwei Züge zugleich; jeder Zug hat zusätzlich eigene Störungen."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  anteil: {type: constant, value: 1, name: "Einfluss des Wetters (0 bis 1)"}
+  wetter: {type: uncertain, dist: normal, mean: 0, sd: 4, unit: min, name: "Wettereinfluss"}
+  ea: {type: uncertain, dist: normal, mean: 0, sd: 3, unit: min, name: "Eigene Störung Zug A"}
+  eb: {type: uncertain, dist: normal, mean: 0, sd: 3, unit: min, name: "Eigene Störung Zug B"}
+  a: {type: derived, expr: "30 + anteil * wetter + ea", unit: min, name: "Fahrzeit Zug A"}
+  b: {type: derived, expr: "25 + anteil * wetter + eb", unit: min, name: "Fahrzeit Zug B"}
+  summe: {type: output, expr: "a + b", unit: min, name: "Fahrzeit beider Züge"}

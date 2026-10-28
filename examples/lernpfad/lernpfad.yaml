@@ -1,0 +1,302 @@
+# Lernpfad „Abhängigkeitsmuster“ (M2), Pflichtenheft docs/specs/m2-erste-app.md, Abschnitt 6.
+schema: 1
+lessons:
+- id: a01_serie
+  title: 'Serie: Abschnitte addieren sich'
+  model: a01_serie.yaml
+  text: a01_serie.md
+  output: gesamt
+  rule: Mittelwerte und Varianzen addieren sich; die Streuung wächst langsamer als die Summe, die relative
+    Streuung sinkt mit jedem Abschnitt.
+  question:
+    text: Was passiert mit der Streuung der Gesamtfahrzeit, wenn ein weiterer Abschnitt hinzukommt?
+    options:
+    - Sie steigt
+    - Sie bleibt gleich
+    - Sie sinkt
+    answer: 0
+    metric: sd
+  knob:
+    node: abschnitte
+    field: value
+    label: Anzahl Abschnitte
+    values:
+    - 1
+    - 2
+    - 3
+  reference: sum_normal
+  sources:
+  - malcolm1959
+- id: a02_parallel_und
+  title: 'Parallel-UND: Wenn alles fertig sein muss'
+  model: a02_parallel_und.yaml
+  text: a02_parallel_und.md
+  output: ende
+  rule: Das Maximum liegt im Mittel später als jeder Einzelpfad; jeder weitere Pfad verschiebt es weiter.
+  question:
+    text: Was passiert mit dem mittleren Ende, wenn ein dritter gleich langer Pfad hinzukommt?
+    options:
+    - Es wird später
+    - Es bleibt gleich
+    - Es wird früher
+    answer: 0
+    metric: mean
+  knob:
+    node: pfade
+    field: value
+    label: Anzahl paralleler Pfade
+    values:
+    - 1
+    - 2
+    - 3
+    - 4
+  reference: max_iid_normal
+  sources:
+  - clark1961
+  - maccrimmon1964
+- id: a03_parallel_oder
+  title: 'Parallel-ODER: Der Erste gewinnt'
+  model: a03_parallel_oder.yaml
+  text: a03_parallel_oder.md
+  output: wartezeit
+  rule: Jede Alternative verkürzt die Wartezeit, der Gewinn wird mit jeder weiteren kleiner.
+  question:
+    text: Was passiert mit der mittleren Wartezeit, wenn der Bus als zweite Möglichkeit hinzukommt?
+    options:
+    - Sie steigt
+    - Sie bleibt gleich
+    - Sie sinkt
+    answer: 2
+    metric: mean
+  knob:
+    node: alternativen
+    field: value
+    label: Anzahl Alternativen
+    values:
+    - 1
+    - 2
+    - 3
+  reference: min_exponential
+  sources:
+  - rausand2004
+- id: a04_k_von_n
+  title: 'k-von-n: Genug muss klappen'
+  model: a04_k_von_n.yaml
+  text: a04_k_von_n.md
+  output: erfolg
+  rule: 'Zwischen ODER (k = 1) und UND (k = n): Jede zusätzlich geforderte Komponente senkt die Erfolgschance
+    deutlich.'
+  question:
+    text: Was passiert mit der Erfolgswahrscheinlichkeit, wenn alle drei statt zwei Materialien nötig
+      sind?
+    options:
+    - Sie steigt
+    - Sie bleibt ungefähr gleich
+    - Sie sinkt deutlich
+    answer: 2
+    metric: share
+  knob:
+    node: benoetigt
+    field: value
+    label: Benötigte Materialien (k)
+    values:
+    - 1
+    - 2
+    - 3
+  reference: k_of_n_binomial
+  sources:
+  - barlow1965
+  - rausand2004
+- id: a05_verzweigung
+  title: 'Ereignis-Verzweigung: Zwei Welten in einer Verteilung'
+  model: a05_verzweigung.yaml
+  text: a05_verzweigung.md
+  output: ende
+  rule: Der Mittelwert steigt um p·d, die Verteilung bekommt einen zweiten Gipfel; der Mittelwert ist
+    dann kein typischer Wert.
+  question:
+    text: Was passiert mit dem Mittelwert der Dauer, wenn die Nacharbeit wahrscheinlicher wird?
+    options:
+    - Er steigt
+    - Er bleibt gleich
+    - Er sinkt
+    answer: 0
+    metric: mean
+  knob:
+    node: nacharbeit
+    field: p
+    label: Wahrscheinlichkeit der Nacharbeit
+    values:
+    - 0
+    - 0.1
+    - 0.2
+    - 0.5
+  reference: mixture_shift
+  sources:
+  - mclachlan2000
+- id: a06_schwelle
+  title: 'Schwelle: Kleine Ursache, großer Sprung'
+  model: a06_schwelle.yaml
+  text: a06_schwelle.md
+  output: anschluss
+  rule: An einer Schwelle springt das Ergebnis; jede zusätzliche Pufferminute bringt weniger als die vorige.
+  question:
+    text: Bringt jede zusätzliche Minute Umstiegspuffer gleich viel?
+    options:
+    - Ja, jede Minute gleich viel
+    - Nein, die ersten Minuten bringen am meisten
+    - Nein, die letzten Minuten bringen am meisten
+    answer: 1
+    metric: share
+  knob:
+    node: puffer
+    field: value
+    label: Umstiegspuffer (min)
+    values:
+    - 1
+    - 3
+    - 5
+    - 7
+    - 10
+  reference: threshold_exp
+  sources:
+  - savage2009
+- id: a07_bedingt
+  title: 'Bedingte Verteilung: Eine Ursache verschiebt die Unsicherheit'
+  model: a07_bedingt.yaml
+  text: a07_bedingt.md
+  output: dauer
+  rule: 'Die Streuung wächst um die Unsicherheit der Ursache: Var = E[Var] + Var[E].'
+  question:
+    text: Ist die Streuung der Entwicklungszeit größer, gleich oder kleiner als die 3 Jahre innerhalb
+      jedes Zweigs?
+    options:
+    - Größer
+    - Gleich
+    - Kleiner
+    answer: 0
+    metric: sd
+  knob:
+    node: durchbruch
+    field: p
+    label: Wahrscheinlichkeit des Durchbruchs
+    values:
+    - 0
+    - 0.2
+    - 0.4
+    - 0.5
+    - 0.8
+  reference: total_expectation
+  sources:
+  - mclachlan2000
+- id: a08_kette
+  title: 'Multiplikative Kette: Das schwächste Glied reicht nicht'
+  model: a08_kette.yaml
+  text: a08_kette.md
+  output: erfolg
+  rule: Erfolgswahrscheinlichkeiten multiplizieren sich und liegen unter der des schwächsten Glieds.
+  question:
+    text: Liegt die Erfolgswahrscheinlichkeit der Kette über oder unter der des schwächsten Glieds (60
+      %)?
+    options:
+    - Darüber
+    - Genau bei 60 %
+    - Darunter
+    answer: 2
+    metric: share
+  knob:
+    node: material
+    field: p
+    label: Wahrscheinlichkeit „Material hält“
+    values:
+    - 0.4
+    - 0.6
+    - 0.8
+    - 0.95
+  reference: product_prob
+  sources:
+  - kremer1993
+  - rausand2004
+- id: a09_jensen
+  title: 'Nichtlineare Wirkung: Der Mittelwert lügt'
+  model: a09_jensen.yaml
+  text: a09_jensen.md
+  output: kostenfaktor
+  rule: Bei konvexer Wirkung unterschätzt der Planwert f(Mittelwert) den mittleren Effekt – umso mehr,
+    je größer die Streuung.
+  question:
+    text: Ist der mittlere Kostenfaktor größer, gleich oder kleiner als der Kostenfaktor beim mittleren
+      Verzug (2,72)?
+    options:
+    - Größer
+    - Gleich
+    - Kleiner
+    answer: 0
+    metric: mean
+  knob:
+    node: verzug
+    field: sd
+    label: Streuung des Verzugs (Monate)
+    values:
+    - 0.2
+    - 0.5
+    - 0.8
+    - 1.0
+  reference: lognormal_mean
+  sources:
+  - jensen1906
+  - savage2009
+- id: a10_gemeinsame_ursache
+  title: 'Gemeinsame Ursache: Gleichlauf ohne Absprache'
+  model: a10_gemeinsame_ursache.yaml
+  text: a10_gemeinsame_ursache.md
+  output: summe
+  rule: 'Eine gemeinsame Ursache erzeugt Gleichlauf: Summen streuen stärker, Redundanz wirkt schwächer.'
+  question:
+    text: Was passiert mit der Streuung der Summe, wenn das Wetter beide Züge trifft statt keinen?
+    options:
+    - Sie steigt
+    - Sie bleibt gleich
+    - Sie sinkt
+    answer: 0
+    metric: sd
+  knob:
+    node: anteil
+    field: value
+    label: Einfluss des Wetters
+    values:
+    - 0
+    - 0.5
+    - 1
+  reference: common_cause_var
+  sources:
+  - fleming1974
+  - mosleh1998
+- id: a11_zusammenspiel
+  title: 'Zusammenspiel: Mini-Fusionskraftwerk'
+  model: a11_zusammenspiel.yaml
+  text: a11_zusammenspiel.md
+  output: kommerziell
+  rule: 'Das Ergebnis wird vom engsten Muster bestimmt: hier vom späteren Reifejahr und der Materialfrage,
+    nicht von der Förderung.'
+  question:
+    text: Was passiert mit P(Anlage bis 2060), wenn die Förderung von 1 auf 1,5 steigt?
+    options:
+    - Sie steigt deutlich
+    - Sie steigt nur wenig
+    - Sie sinkt
+    answer: 1
+    metric: target
+  knob:
+    node: foerderung
+    field: value
+    label: Förderung (relativ)
+    values:
+    - 0.5
+    - 1
+    - 1.5
+  sources:
+  - clark1961
+  - barlow1965
+  - mclachlan2000
+  - jensen1906

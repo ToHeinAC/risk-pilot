@@ -1,0 +1,13 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a06_schwelle
+title: "Schwelle: Kleine Ursache, großer Sprung"
+description: "Der Anschluss wird erreicht, wenn die Verspätung den Umstiegspuffer nicht überschreitet."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  puenktlich: {type: event, p: 0.6, name: "Zug 1 pünktlich"}
+  verspaetung_bei_ausfall: {type: uncertain, dist: exponential, input: mean, mean: 6, unit: min, name: "Verspätung, falls unpünktlich"}
+  puffer: {type: constant, value: 5, unit: min, name: "Umstiegspuffer"}
+  verspaetung: {type: derived, expr: "where(puenktlich, 0, verspaetung_bei_ausfall)", unit: min}
+  anschluss: {type: output, expr: "verspaetung <= puffer", name: "Anschluss erreicht"}
+  verspaetung_ziel: {type: output, expr: "where(verspaetung <= puffer, 0, 60)", unit: min, name: "Verspätung am Ziel"}

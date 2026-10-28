@@ -107,7 +107,10 @@ mit dem Modelltext. Er leistet:
   Warnung; Simulieren bleibt dann gesperrt), „Verwerfen“ (Text aus der Datei neu laden),
   „Als Vorlage kopieren“. Tutorials und Lektionen sind schreibgeschützt (Feld deaktiviert).
 - **Speichern sicher:** atomar (temporäre Datei, dann `rename`); hat sich die Datei seit dem
-  Öffnen geändert (SHA-256), fragt die App vor dem Überschreiben.
+  Öffnen geändert (SHA-256), meldet die App das und bietet „Trotzdem überschreiben“ an.
+- **Entwurf bleibt erhalten:** Der Editortext liegt zusätzlich außerhalb des Widgets im
+  Sitzungszustand, weil Streamlit den Zustand eines Widgets löscht, sobald eine Seite ohne dieses
+  Widget angezeigt wird.
 - **Nicht enthalten:** Syntaxfärbung, Autovervollständigung, Einrücken per Tab, Rückgängig über
   die Browser-Funktion hinaus. Komfortabler wird die Bearbeitung mit dem Formular in M6.
 
@@ -145,8 +148,11 @@ Je `output`-Knoten:
 
 - **KS-Block:** „Größter Abstand der CDFs: 0,0021 – zulässig bei N = 100 000: 0,0062
   (DKW-Schranke, α = 0,001).“ Ampel grün/rot.
-- Die Referenz gilt nur, wenn der Modell-Hash dem Tutorial-Original entspricht. Bei einer
-  geänderten Kopie: „Die analytische Lösung gilt für das unveränderte Tutorial.“
+- Die Referenz gilt nur, wenn der **Inhalts-Hash** (`content_hash`: ohne Modell-ID, Titel und
+  Anzeigenamen) dem Tutorial-Original entspricht. „Als Vorlage kopieren“ schreibt die Herkunft als
+  Kommentar `# Kopie von <tutorial>` in die Kopie; eine unveränderte Kopie behält so die
+  Überlagerung, eine geänderte zeigt: „Die analytische Lösung gilt für das unveränderte Tutorial.“
+  (Festlegung nach Review, 28.10.2026.)
 
 ***
 
@@ -217,6 +223,7 @@ lessons:
       text: "Was passiert mit dem mittleren Ende, wenn ein dritter gleich langer Pfad hinzukommt?"
       options: ["steigt", "bleibt gleich", "sinkt"]
       answer: 0
+      metric: mean                     # mean | sd | share | target: Kennzahl der Auflösung
     knob:                              # genau eine Stellschraube
       node: anzahl_pfade
       field: value
@@ -255,8 +262,9 @@ nach dem Drehen gilt. Toleranzen aus PRD Abschnitt 3.
 
 1. **Erklären:** Erklärtext (Markdown), Ausdruck des Musters hervorgehoben, Mini-Modell als
    YAML (schreibgeschützt), Leseliste.
-2. **Vorhersagen:** Frage mit Antwortoptionen; Auflösung erst nach der Simulation. Keine
-   Bewertung, nur „Deine Vorhersage: steigt – Ergebnis: steigt um 0,85 d“.
+2. **Vorhersagen:** Frage mit Antwortoptionen; Auflösung erst nach dem Drehen, aus den beiden
+   Läufen berechnet (`question.metric`), nicht aus dem Manifest. Keine Bewertung, nur „Deine
+   Vorhersage: steigt – Ergebnis: Mittelwert steigt um 0,85 d (von … auf …)“.
 3. **Simulieren:** Ausgangswert der Stellschraube, N = 20 000 (Lernpfad-Standard, E6), fester
    Seed des Modells. Ergebnisansicht wie Abschnitt 4, plus Referenz.
 4. **Drehen:** Stellschraube ändern → zweiter Lauf mit **demselben Seed** (gemeinsame
@@ -267,7 +275,10 @@ nach dem Drehen gilt. Toleranzen aus PRD Abschnitt 3.
 
 - `lessons/knob.py::with_value` gibt ein **neues** `Model` zurück (Pydantic `model_copy` mit
   Validierung); die Lektionsdatei wird nie geschrieben. Das ist bewusst kein Szenario (M3).
-- Fortschritt (gesehene Lektionen, Vorhersagen) lebt nur in `st.session_state`.
+- Fortschritt (angesehen, durchgearbeitet) lebt nur in `st.session_state` und steht als Liste in
+  der Seitenleiste.
+- Beim Öffnen einer Lektion prüft die Seite Dateien und Manifest (`lesson_problems`) zur Laufzeit
+  und zeigt Abweichungen statt abzustürzen.
 
 ***
 
@@ -314,7 +325,10 @@ nach dem Drehen gilt. Toleranzen aus PRD Abschnitt 3.
   `ui.*`, `result.*`, `lesson.*`; `render()` wie in M1. Englisch bleibt vorbereitet.
 - Test: Jeder in `ui/` verwendete Code hat eine `de`-Vorlage (Suche nach `t("…")`-Aufrufen).
 - Validierungsfehler aus M1 erscheinen unverändert über `render(issue)`; Ausnahmen in der UI
-  werden abgefangen und als `ui.unexpected` mit Kurzbeschreibung gezeigt, die App läuft weiter.
+  werden abgefangen und als `ui.unexpected` mit Kurzbeschreibung gezeigt, die App läuft weiter
+  (`views.run_page`; Streamlits Steuer-Ausnahmen erben von `BaseException` und passieren).
+- Jede Seite ruft `views.sidebar_exit()` selbst auf: AppTest baut unter `st.navigation` nach einer
+  Widget-Interaktion nur die Seite neu auf; Elemente des Hauptskripts fehlen dann.
 
 ***
 

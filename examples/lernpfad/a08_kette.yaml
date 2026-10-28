@@ -1,0 +1,11 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a08_kette
+title: "Multiplikative Kette: Das schwächste Glied reicht nicht"
+description: "Ein Kraftwerk braucht Magnete, Plasma und Material – jedes muss funktionieren."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  magnete: {type: event, p: 0.8, name: "Magnete funktionieren"}
+  plasma: {type: event, p: 0.7, name: "Plasmaeinschluss funktioniert"}
+  material: {type: event, p: 0.6, name: "Material hält"}
+  erfolg: {type: output, expr: "magnete and plasma and material", name: "Alles funktioniert"}

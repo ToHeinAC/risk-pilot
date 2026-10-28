@@ -17,6 +17,27 @@ numerical uncertainty. Spec and milestones: [PRD.md](PRD.md); computation core (
 [docs/specs/m1-rechenkern.md](docs/specs/m1-rechenkern.md); first app (M2):
 [docs/specs/m2-erste-app.md](docs/specs/m2-erste-app.md).
 
+**Start the app** (German UI, port 8642 from `.streamlit/config.toml`):
+
+```
+uv run streamlit run src/app/ui/main.py
+```
+
+Open <http://localhost:8642>. **Stop it** with "App beenden" in the sidebar: it asks once, then
+sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the terminal works too.
+
+- **Tutorials** (`examples/`): T1 sum of two uniforms, T2 mini schedule, each with its analytic
+  solution shown next to the simulation. Read-only; "Als Vorlage kopieren" creates your own
+  model in `data/models/`.
+- **Lernpfad** (`examples/lernpfad/`): eleven short lessons on dependency patterns (series,
+  parallel AND/OR, k-out-of-n, event branch, threshold, conditional distribution, multiplicative
+  chain, Jensen, common cause, capstone). Each has a prediction, a knob that reruns with the same
+  seed and shows before/after, and an analytic check. Numbers are illustrative.
+- **Runs** are saved on request to `data/runs/` and reload with the same numbers.
+- Data location: `RISK_PILOT_DATA_DIR` (default `data/`, gitignored).
+
+Use the core without the app:
+
 ```python
 from pathlib import Path
 from app.adapters.files import load_model
@@ -49,7 +70,8 @@ docs/HOWTO.md        step-by-step workflow
 docs/architecture.md code layers, gate flow, harness design decisions
 docs/harness-review.md review state and decision log of /harness-review
 src/app/             code (computation core, see docs/specs/m1-rechenkern.md)
-examples/            tutorial models T1, T2 (YAML)
+examples/            tutorial models T1, T2 and the learning path (YAML + explanations)
+.streamlit/          app config (port 8642)
 scripts/             benchmark, not part of the test suite
 tests/               pytest suite (offline) and the docs checks
 .claude/settings.json            shared permissions and hooks

@@ -1,0 +1,12 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a07_bedingt
+title: "Bedingte Verteilung: Eine Ursache verschiebt die Unsicherheit"
+description: "Ein Durchbruch bei den Magneten verkürzt die erwartete Entwicklungszeit des Plasmaeinschlusses."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  durchbruch: {type: event, p: 0.4, name: "Durchbruch bei Magneten"}
+  basis: {type: constant, value: 15, unit: Jahre, name: "Entwicklungszeit ohne Durchbruch"}
+  effekt: {type: constant, value: 5, unit: Jahre, name: "Verkürzung durch Durchbruch"}
+  plasma: {type: uncertain, dist: normal, mean: "basis - effekt * durchbruch", sd: 3, unit: Jahre, name: "Entwicklungszeit Plasma (Verteilung)"}
+  dauer: {type: output, expr: plasma, unit: Jahre, name: "Entwicklungszeit Plasma"}

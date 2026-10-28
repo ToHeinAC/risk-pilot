@@ -1,0 +1,11 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a05_verzweigung
+title: "Ereignis-Verzweigung: Zwei Welten in einer Verteilung"
+description: "Mit einer gewissen Wahrscheinlichkeit ist Nacharbeit nötig und verlängert die Dauer."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  dauer: {type: uncertain, dist: normal, mean: 20, sd: 2, unit: d, name: "Dauer ohne Nacharbeit"}
+  nacharbeit: {type: event, p: 0.2, name: "Nacharbeit nötig"}
+  zusatz: {type: constant, value: 10, unit: d, name: "Zusatzdauer bei Nacharbeit"}
+  ende: {type: output, expr: "where(nacharbeit, dauer + zusatz, dauer)", unit: d, name: "Dauer"}

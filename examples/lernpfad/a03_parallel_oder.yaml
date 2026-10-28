@@ -1,0 +1,12 @@
+# Lernpfad, illustrative Zahlen: didaktisch gesetzt, keine Rechercheergebnisse.
+schema_version: 1
+model: a03_parallel_oder
+title: "Parallel-ODER: Der Erste gewinnt"
+description: "Mehrere Weiterfahrten stehen zur Wahl; es zählt die zuerst verfügbare."
+settings: {n: 20000, seed: 20261028}
+nodes:
+  alternativen: {type: constant, value: 1, name: "Anzahl Alternativen"}
+  zug: {type: uncertain, dist: exponential, input: mean, mean: 20, unit: min, name: "Wartezeit nächster Zug"}
+  bus: {type: uncertain, dist: exponential, input: mean, mean: 30, unit: min, name: "Wartezeit Bus"}
+  taxi: {type: uncertain, dist: exponential, input: mean, mean: 15, unit: min, name: "Wartezeit Taxi"}
+  wartezeit: {type: output, expr: "min(zug, where(alternativen >= 2, bus, 1e9), where(alternativen >= 3, taxi, 1e9))", unit: min, name: "Wartezeit bis zur Weiterfahrt"}
