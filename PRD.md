@@ -170,7 +170,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M2.
 
 ### M4 — Struktur-Auswertungen
-- **Status:** planned
+- **Status:** done (verified by: tests/test_criticality.py, test_tornado.py, test_sweep.py,
+  test_sensitivity.py, test_riskmatrix.py, test_graph.py, test_analysis_page.py, test_app.py;
+  manual click-through 28.10.2026; correlation edges of AK 1 follow with M5)
 - **Deliverable:** Abhängigkeitsgraph, Kritikalität und Pfadkonstellationen, Tornado, Sweep,
   Rangkorrelation, Risikomatrix.
   Pflichtenheft: [docs/specs/m4-struktur.md](docs/specs/m4-struktur.md).
