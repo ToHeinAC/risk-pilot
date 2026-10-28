@@ -1,6 +1,6 @@
 # Pflichtenheft M2 — Erste App mit Lernpfad „Abhängigkeitsmuster“
 
-**Stand:** 28. Oktober 2026, Entscheidungen E1–E8 eingearbeitet (Abschnitt 13) · **Bezug:**
+**Stand:** 28. Oktober 2026, Entscheidungen E1–E8 eingearbeitet, M2 abgeschlossen (Abschnitt 13) · **Bezug:**
 [PRD.md](../../PRD.md), Meilenstein M2 (AK 1–11, Edge cases) · **Voraussetzung:**
 [m1-rechenkern.md](m1-rechenkern.md) vollständig umgesetzt
 
@@ -202,8 +202,11 @@ Nicht-Ziel und werden in der Abschlusslektion als Grenze benannt.
 - Rausand, M.; Høyland, A. (2004): *System Reliability Theory.* 2. Aufl., Wiley.
 - Savage, S. L. (2009): *The Flaw of Averages.* Wiley.
 
-Die bibliografischen Angaben werden vor Abschluss von M2 einmal gegen die Verlage/DOIs geprüft
-(AP-L4); Zahlen in den Lektionen sind didaktisch gesetzt und als „illustrativ“ gekennzeichnet.
+Die bibliografischen Angaben wurden am 28.10.2026 online gegen Verlage, DOIs und
+Bibliothekskataloge geprüft (AP-L4); die geprüfte Fassung mit DOIs steht in
+`src/app/lessons/sources.py`. Einzige Unschärfe: Fleming GA-A13284 ist auf Dezember 1974 datiert
+und wird wegen des Vortrags 1975 teils als 1975 zitiert. Zahlen in den Lektionen sind didaktisch
+gesetzt und als „illustrativ“ gekennzeichnet.
 
 ### 6.2 Dateiformat
 
@@ -378,7 +381,8 @@ nach dem Drehen gilt. Toleranzen aus PRD Abschnitt 3.
 
 - [ ] PRD M2 AK 1–11 und Edge cases durch die Tests in Abschnitt 10 belegt.
 - [ ] `uv run pre-commit run --all-files` grün; neue Dateien vorher `git add`.
-- [ ] Manuell: App gestartet, Lernpfad A1–A11 durchgeklickt, Beenden beendet nur die App.
+- [x] Manuell: App gestartet, Lernpfad A1–A11 durchgeklickt (Nutzer, 28.10.2026); Beenden per
+      SIGTERM an die eigene PID geprüft.
 - [ ] README: Installation, Start (Port 8642), Beenden, Tutorials und Lernpfad.
 - [ ] `docs/architecture.md` um `present/`, `lessons/`, `ui/` ergänzt.
 - [ ] PRD M2 **Status:** `done (verified by: …)`.

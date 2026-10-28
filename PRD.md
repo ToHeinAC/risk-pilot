@@ -107,7 +107,8 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** keine.
 
 ### M2 — Erste App
-- **Status:** in progress
+- **Status:** done (verified by: tests/test_app.py, test_present_*.py, test_lessons_*.py,
+  test_adapters_*.py, test_messages_ui.py; manual click-through 28.10.2026)
 - **Deliverable:** Streamlit-App mit den Seiten Tutorials, Modell (YAML-Editor mit
   Live-Validierung), Simulation (N, Seed), Ergebnisse; analytische Überlagerung für T1/T2;
   Ergebnisablage in `data/runs/`; Kopierfunktion für Vorlagen; Lernpfad „Abhängigkeitsmuster“
