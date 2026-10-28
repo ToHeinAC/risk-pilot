@@ -108,7 +108,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Status:** planned
 - **Deliverable:** Streamlit-App mit den Seiten Tutorials, Modell (YAML-Editor mit
   Live-Validierung), Simulation (N, Seed), Ergebnisse; analytische Überlagerung für T1/T2;
-  Ergebnisablage in `data/runs/`; Kopierfunktion für Vorlagen.
+  Ergebnisablage in `data/runs/`; Kopierfunktion für Vorlagen; Lernpfad „Abhängigkeitsmuster“
+  (A1–A11) in `examples/lernpfad/`.
+  Pflichtenheft: [docs/specs/m2-erste-app.md](docs/specs/m2-erste-app.md).
 - **Acceptance criteria:**
   1. App startet auf dem konfigurierten Port; `streamlit.testing` (AppTest) lädt T1, simuliert und
      zeigt Kennzahlen ohne Ausnahme.
@@ -123,8 +125,20 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   6. Validierungsfehler erscheinen als deutscher Klartext an der Eingabe, die App stürzt nicht ab.
   7. Die Beenden-Schaltfläche sendet SIGTERM an die eigene PID (Test mit gemocktem `os.kill`).
   8. Alle sichtbaren Texte sind deutsch; Quantile sind in Modellsprache beschriftet.
+  9. Lernpfad mit mindestens zehn Abhängigkeitsmustern: Serie, Parallel-UND (`max`),
+     Parallel-ODER (`min`), k-von-n, Ereignis-Verzweigung, Schwelle, bedingte Verteilung,
+     multiplikative Kette, nichtlineare Transformation (Jensen), gemeinsame Ursache; dazu eine
+     Abschlusslektion, die mehrere Muster kombiniert. Jede Lektion hat Mini-Modell, Erklärtext,
+     Faustregel zur voraussichtlichen Auswirkung, Vorhersagefrage und Quellenangabe.
+  10. Jede Lektion mit analytischer Referenz erfüllt ihr Kriterium aus Abschnitt 3 im Ausgangswert
+      und in einem gedrehten Wert der Stellschraube.
+  11. Drehen der Stellschraube rechnet mit demselben Seed neu und zeigt Vorher/Nachher (CDFs,
+      Kennzahlen, Differenz); nicht betroffene Knoten haben bitgleiche Ziehungen; die
+      Lektionsdatei bleibt bytegleich.
 - **Edge cases:** leeres Modell (Hinweis statt Fehler); Modell ohne `output` (Validierungsfehler);
-  Kopie mit bereits vorhandenem Namen (Nachfrage oder neuer Name, kein Überschreiben).
+  Kopie mit bereits vorhandenem Namen (Nachfrage oder neuer Name, kein Überschreiben);
+  Stellschraubenwert verletzt Parameterbedingung (Manifest-Validierung weist ab); geändertes
+  Tutorial (keine analytische Überlagerung, Hinweis).
 - **Dependencies:** M1.
 
 ### M3 — Szenarien und Vergleich
