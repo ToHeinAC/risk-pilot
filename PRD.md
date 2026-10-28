@@ -173,6 +173,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Status:** planned
 - **Deliverable:** Abhängigkeitsgraph, Kritikalität und Pfadkonstellationen, Tornado, Sweep,
   Rangkorrelation, Risikomatrix.
+  Pflichtenheft: [docs/specs/m4-struktur.md](docs/specs/m4-struktur.md).
 - **Acceptance criteria:**
   1. Graph: Kanten aus Ausdrucks- und Parameterreferenzen sowie Korrelationsgruppen; Knotentyp und
      Kantenart unterscheidbar; Einfärbung nach Sensitivität, Kritikalität oder fehlender Begründung.
