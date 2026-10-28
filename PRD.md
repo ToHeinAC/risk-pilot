@@ -249,6 +249,27 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   Hinweis).
 - **Dependencies:** M5.
 
+### M7 — UX und Selbsterklärung
+- **Status:** planned
+- **Deliverable:** Eine App, die sich Fachleuten ohne Monte-Carlo-Vorwissen selbst erklärt:
+  geführter Einstieg, Hilfetexte je Seite und Auswertung, Begriffsglossar, Beispiele zur Lesart.
+  Anlass: Rückmeldung nach M4, die Seite „Analyse“ erschließt sich zunächst nicht (erste
+  Erklärtexte je Reiter seit M4).
+- **Acceptance criteria:**
+  1. Jede Seite beginnt mit einem kurzen Absatz, wofür sie da ist und was der nächste Schritt ist.
+  2. Jede Auswertung (Ergebnisse, Vergleich, alle Reiter der Analyse) erklärt Frage, Lesart und
+     Grenze und zeigt ein Lesebeispiel am geöffneten Modell.
+  3. Ein Glossar erklärt die Fachbegriffe der Oberfläche (u. a. Iteration, Seed, Quantil,
+     Intervall, Szenario, Override, kritischer Pfad, Tornado, Spearman-ρ) und ist von jeder Seite
+     erreichbar; jeder Begriff im Glossar ist durch einen Test gegen die UI-Texte abgedeckt.
+  4. Ein geführter Einstieg führt an T2 durch Öffnen, Simulieren, Szenario, Vergleich und
+     Analyse; per AppTest durchlaufbar.
+  5. Manueller Durchgang mit einer Fachperson ohne Vorkenntnisse; ihre Befunde sind behoben oder
+     als offene Punkte im PRD vermerkt.
+- **Edge cases:** Modelle ohne Ereignisse, ohne Unterszenarien oder ohne max/min (Hilfetexte
+  erklären, warum eine Auswertung leer bleibt).
+- **Dependencies:** M6.
+
 ## 5. Open risks & assumptions
 
 - **Inversionsmethode ist für manche Familien langsam** (SciPy-`ppf` bei beta, student_t, gamma).
@@ -267,7 +288,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 
 ## 6. Definition of done
 
-- [ ] M1–M6 stehen auf `done` mit Verweis auf die prüfenden Tests.
+- [ ] M1–M7 stehen auf `done` mit Verweis auf die prüfenden Tests.
 - [ ] `uv run pre-commit run --all-files` ist grün.
 - [ ] T1–T5 laufen in der App und als Regressionstests; T1–T4 bestehen ihre analytischen Abnahmen.
 - [ ] Ein eigenes Modell lässt sich aus einer kopierten Vorlage aufbauen, in mindestens zwei
