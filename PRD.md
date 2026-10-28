@@ -148,6 +148,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Status:** planned
 - **Deliverable:** Haupt- und Unterszenarien mit Overrides und Vererbung, Szenariobaum,
   Duplizieren, Loslösen, Diff-Ansicht, Vergleichsseite.
+  Pflichtenheft: [docs/specs/m3-szenarien.md](docs/specs/m3-szenarien.md).
 - **Acceptance criteria:**
   1. Ein Unterszenario speichert nur seine Overrides (Werte, Verteilungsfamilie/-parameter,
      Ereigniswahrscheinlichkeiten, Ausdrücke, Korrelationswerte) samt Begründung.
