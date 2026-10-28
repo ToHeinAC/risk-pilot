@@ -2,7 +2,9 @@
 
 import ast
 from collections.abc import Iterator, Mapping
+from dataclasses import dataclass
 from graphlib import CycleError, TopologicalSorter
+from typing import Literal
 
 from app.expr.parser import ExprIssue, parse_expression
 from app.model.schema import DerivedNode, EventNode, Model, Node, OutputNode, UncertainNode
@@ -37,6 +39,31 @@ def collect_refs(model: Model) -> dict[str, set[str]]:
         node_id: {name for _, text in expression_fields(node) for name in _names(text)} & ids
         for node_id, node in model.nodes.items()
     }
+
+
+EdgeKind = Literal["ausdruck", "parameter", "korrelation"]
+
+
+@dataclass(frozen=True, order=True)
+class Edge:
+    source: str
+    target: str
+    kind: EdgeKind
+
+
+def edges(model: Model) -> list[Edge]:
+    """Edges of the dependency graph, sorted.
+
+    ``ausdruck``: reference in ``expr``; ``parameter``: reference in a distribution parameter or
+    ``p``. ``korrelation`` (correlation groups) follows with M5, once the schema knows groups.
+    """
+    ids = set(model.nodes)
+    found: set[Edge] = set()
+    for node_id, node in model.nodes.items():
+        for field, text in expression_fields(node):
+            kind: EdgeKind = "ausdruck" if field == "expr" else "parameter"
+            found |= {Edge(ref, node_id, kind) for ref in _names(text) & ids}
+    return sorted(found)
 
 
 def topo_order(refs: Mapping[str, set[str]]) -> tuple[list[str], list[str] | None]:

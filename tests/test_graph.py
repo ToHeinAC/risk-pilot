@@ -6,7 +6,7 @@ import pytest
 
 from app.errors import ModelError
 from app.model.compile import compile_model
-from app.model.graph import collect_refs, topo_order
+from app.model.graph import Edge, collect_refs, edges, topo_order
 from app.model.schema import Model
 from app.model.yaml_io import model_from_yaml
 
@@ -77,3 +77,20 @@ def test_unconnected_nodes_allowed() -> None:
         "  y: {type: output, expr: a}\n"
     )
     assert set(compile_model(m).order) == {"a", "lonely", "y"}
+
+
+def test_edges_by_kind() -> None:
+    m = model(
+        "  a: {type: constant, value: 1}\n"
+        "  b: {type: uncertain, dist: normal, mean: 'a * 2', sd: 1}\n"
+        "  e: {type: event, p: 'min(a, 0.5)'}\n"
+        "  d: {type: derived, expr: 'b + 1'}\n"
+        "  y: {type: output, expr: 'max(d, 0) + where(e, 1, 0)'}\n"
+    )
+    assert edges(m) == [
+        Edge("a", "b", "parameter"),
+        Edge("a", "e", "parameter"),
+        Edge("b", "d", "ausdruck"),
+        Edge("d", "y", "ausdruck"),
+        Edge("e", "y", "ausdruck"),
+    ]

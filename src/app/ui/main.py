@@ -18,6 +18,7 @@ navigation = st.navigation(
         st.Page("pages/simulation.py", title=t("ui.page_simulation")),
         st.Page("pages/ergebnisse.py", title=t("ui.page_ergebnisse")),
         st.Page("pages/vergleich.py", title=t("ui.page_vergleich")),
+        st.Page("pages/analyse.py", title=t("ui.page_analyse")),
         st.Page("pages/laeufe.py", title=t("ui.page_laeufe")),
     ]
 )

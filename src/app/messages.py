@@ -313,6 +313,90 @@ UI: dict[str, dict[str, str]] = {
         "ui.outputs_many": "{n} Ausgaben",
         "ui.problems_one": "1 Problem",
         "ui.problems_many": "{n} Probleme",
+        "ui.page_analyse": "Analyse",
+        "analysis.intro": "Struktur-Auswertungen eines Szenarios: Graph und Rangkorrelation "
+        "rechnen aus einem Lauf, Tornado und Sweep starten eigene Läufe mit demselben Seed.",
+        "analysis.output": "Ausgabe",
+        "analysis.run": "Analysieren",
+        "analysis.memory": "Dieser Lauf hält alle {nodes} Knoten im Speicher, etwa {mb} MB.",
+        "analysis.stale": "Modell, Szenario oder Einstellungen haben sich geändert; bitte neu "
+        "analysieren.",
+        "analysis.tab_graph": "Graph",
+        "analysis.tab_crit": "Kritikalität",
+        "analysis.tab_tornado": "Tornado",
+        "analysis.tab_sweep": "Sweep",
+        "analysis.tab_rho": "Rangkorrelation",
+        "analysis.tab_risk": "Risikomatrix",
+        "analysis.color": "Einfärbung",
+        "analysis.color_sensitivity": "Sensitivität (|ρ| nach Spearman)",
+        "analysis.color_criticality": "Kritikalitätsindex",
+        "analysis.color_why": "Begründung fehlt",
+        "analysis.graph_caption": "Symbole: Kreis unsicher, Raute Ereignis, Quadrat Konstante, "
+        "Dreieck Auswahl, Punkt berechnet, Stern Ausgabe. Linien: durchgezogen Ausdruck, "
+        "gestrichelt Parameter, gepunktet Korrelation. Blass: kein Pfad zur Ausgabe.",
+        "analysis.edge_ausdruck": "Ausdruck",
+        "analysis.edge_parameter": "Parameter",
+        "analysis.edge_korrelation": "Korrelation",
+        "analysis.crit_sentence": "Im Modell liegt {name} in {p} der Iterationen auf dem "
+        "entscheidenden Pfad ({lo} … {hi} %).",
+        "analysis.crit_no_extremum": "Das Modell enthält kein max, min oder where. Dann liegt jede "
+        "Eingabe mit Pfad zur Ausgabe in jeder Iteration auf dem entscheidenden Pfad, und der "
+        "Kritikalitätsindex trägt keine Information.",
+        "analysis.crit_note": "Der Index zählt die Iterationen, in denen ein Knoten das Ergebnis "
+        "über max/min oder den gewählten where-Zweig mitbestimmt. Indizes summieren nicht zu "
+        "100 % (bei Gleichstand zählen alle Gewinner); die Pfadkonstellationen summieren zu 100 %.",
+        "analysis.crit_axis": "Anteil der Iterationen auf dem entscheidenden Pfad",
+        "analysis.constellations": "Pfadkonstellationen (kritische unsichere Eingaben und "
+        "Ereignisse je Iteration)",
+        "analysis.constellation_none": "keine unsichere Eingabe",
+        "analysis.constellation_rest": "übrige ({n} Konstellationen)",
+        "analysis.col_node": "Knoten",
+        "analysis.col_index": "Index [95-%-Intervall]",
+        "analysis.col_constellation": "Konstellation",
+        "analysis.col_share": "Anteil [95-%-Intervall]",
+        "analysis.metric": "Kennzahl",
+        "analysis.metric_mean": "Mittelwert der Ausgabe",
+        "analysis.metric_median": "Median der Ausgabe",
+        "analysis.metric_target": "P(Ziel erreicht)",
+        "analysis.metric_quantile": "Quantil der Ausgabe",
+        "analysis.metric_share": "Anteil „trifft zu“",
+        "analysis.tornado_n": "Iterationen je Lauf",
+        "analysis.tornado_run": "Tornado rechnen",
+        "analysis.tornado_runs": "Der Tornado braucht {runs} Läufe mit je N = {n}.",
+        "analysis.tornado_many": "Mehr als 50 Läufe: Die Rechnung kann länger dauern.",
+        "analysis.tornado_caption": "Je unsichere Eingabe zwei Läufe mit demselben Seed, die "
+        "Eingabe auf ihr P10 bzw. P90 fixiert; alle anderen Knoten ziehen dieselben "
+        "Zufallszahlen. Ausgangswert: {base}.",
+        "analysis.no_uncertain": "Das Modell hat keine unsicheren Eingaben.",
+        "analysis.col_p10": "P10",
+        "analysis.col_p90": "P90",
+        "analysis.at_p10": "Eingabe auf P10",
+        "analysis.at_p90": "Eingabe auf P90",
+        "analysis.col_swing": "Ausschlag",
+        "analysis.sweep_param": "Parameter",
+        "analysis.sweep_from": "von",
+        "analysis.sweep_to": "bis",
+        "analysis.sweep_k": "Anzahl Werte (k)",
+        "analysis.sweep_q": "Quantil (0 bis 1)",
+        "analysis.sweep_run": "Sweep rechnen",
+        "analysis.sweep_invalid": "Diese Werte sind im Modell nicht zulässig; der Sweep läuft "
+        "erst mit einem gültigen Bereich:",
+        "analysis.sweep_none": "Das Modell hat keine literalen Zahlen, die sich verändern lassen.",
+        "analysis.col_value": "Wert",
+        "analysis.col_estimate": "Schätzung",
+        "analysis.col_interval": "95-%-Intervall",
+        "analysis.rho_caption": "Deskriptiv: zeigt Gleichlauf im Modell, keine Ursache und keine "
+        "Wirkungsstärke.",
+        "analysis.col_rho": "ρ (Spearman)",
+        "analysis.undefined": "nicht bestimmbar",
+        "analysis.risk_caption": "Die Differenz ist keine kausale Wirkung, wenn Ereignisse "
+        "gemeinsame Ursachen haben oder zusammenwirken.",
+        "analysis.no_events": "Das Modell hat keine Ereignisse.",
+        "analysis.col_p": "p̂ [95-%-Intervall, Wilson]",
+        "analysis.col_diff": "E[Y | Ereignis] − E[Y | kein Ereignis] [95 %, Welch]",
+        "analysis.risk_undefined": "y nicht bestimmbar",
+        "analysis.risk_x": "Eintrittswahrscheinlichkeit p̂",
+        "analysis.risk_y": "E[Y | Ereignis] − E[Y | kein Ereignis]",
     }
 }
 

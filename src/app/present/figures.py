@@ -28,7 +28,7 @@ def _bins(x: NDArray[np.float64]) -> int:
     return int(min(MAX_BINS, max(1, np.ceil(span / width))))
 
 
-def _layout(fig: go.Figure, x_title: str, y_title: str) -> go.Figure:
+def layout(fig: go.Figure, x_title: str, y_title: str) -> go.Figure:
     fig.update_layout(
         xaxis_title=x_title,
         yaxis_title=y_title,
@@ -50,7 +50,7 @@ def histogram(x: NDArray[Any], unit: str | None, overlays: list[Curve]) -> go.Fi
     fig.update_layout(bargap=0)
     for curve in overlays:
         fig.add_trace(go.Scatter(x=curve.x, y=curve.y, mode="lines", name=curve.label))
-    return _layout(fig, _axis(unit), t("fig.density"))
+    return layout(fig, _axis(unit), t("fig.density"))
 
 
 def _ecdf(x: NDArray[Any]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
@@ -69,7 +69,7 @@ def cdf(x: NDArray[Any], unit: str | None, overlays: list[Curve]) -> go.Figure:
         fig.add_trace(
             go.Scatter(x=curve.x, y=curve.y, mode="lines", name=curve.label, line_dash="dash")
         )
-    return _layout(fig, _axis(unit), t("fig.cdf"))
+    return layout(fig, _axis(unit), t("fig.cdf"))
 
 
 def compare_cdfs(
@@ -83,10 +83,10 @@ def compare_cdfs(
         fig.add_trace(
             go.Scatter(x=curve.x, y=curve.y, mode="lines", name=curve.label, line_dash="dash")
         )
-    return _layout(fig, _axis(unit), t("fig.cdf"))
+    return layout(fig, _axis(unit), t("fig.cdf"))
 
 
 def share_bar(x: NDArray[np.bool_]) -> go.Figure:
     share = float(np.mean(x))
     fig = go.Figure(go.Bar(x=[t("fig.true"), t("fig.false")], y=[share, 1 - share]))
-    return _layout(fig, "", t("fig.share"))
+    return layout(fig, "", t("fig.share"))

@@ -38,6 +38,13 @@ sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the termin
   any depth. Pages "Szenarien" (tree, diff, create, override, duplicate, detach) and "Vergleich"
   (same seed, paired differences B − A with intervals, P(B better than A)). T2 ships with
   "B −3 Tage" and "mit Nacharbeit".
+- **Analysis** (M4, [spec](docs/specs/m4-struktur.md)): page "Analyse" per scenario and output.
+  Dependency graph (node type as symbol, edge kind as line style, coloured by |Spearman ρ|,
+  criticality or missing reason), criticality index and path constellations (decisive path
+  through `max`/`min` winners and the chosen `where` branch), tornado (each uncertain input fixed
+  at its P10 and P90, same seed), sweep of one literal parameter over k values, Spearman rank
+  correlation (descriptive) and a risk matrix per event (p̂ with Wilson, conditional difference
+  with Welch interval).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.
 - Data location: `RISK_PILOT_DATA_DIR` (default `data/`, gitignored).
 

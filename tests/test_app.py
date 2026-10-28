@@ -522,3 +522,53 @@ def test_simulation_scenario_list_is_indented() -> None:
     options = list(at.selectbox(key="sim_scenario").options)
     assert options[0] == "Hauptszenario"
     assert options[1].startswith("\u2003")  # indented one level
+
+
+def analyse(stem: str, scenario: str = "basis", n: int = 5_000) -> AppTest:
+    at = go(open_model(start(), stem), "analyse")
+    at.selectbox(key="ana_scenario").set_value(scenario).run()
+    at.number_input(key="ana_n").set_value(n).run()
+    at.button(key="ana_run").click().run()
+    assert not at.exception
+    return at
+
+
+def test_analysis_page_t2_all_tabs() -> None:
+    at = analyse("t2_terminplan", "nacharbeit")
+    page = texts(at)
+    assert "Im Modell liegt Vorgang B in " in page
+    assert "Deskriptiv: zeigt Gleichlauf im Modell" in page
+    assert "keine kausale Wirkung" in page
+    assert any("| Nacharbeit an B |" in str(m.value) for m in at.markdown)
+    at.selectbox(key="graph_color").set_value("why").run()
+    at.number_input(key="tornado_n").set_value(2_000).run()
+    at.button(key="tornado_run").click().run()
+    assert not at.exception
+    assert "Der Tornado braucht 6 Läufe" in texts(at)
+    assert any("| Vorgang C |" in str(m.value) and "Ausschlag" in str(m.value) for m in at.markdown)
+    at.button(key="sweep_run").click().run()
+    assert not at.exception
+    assert any("95-%-Intervall" in str(m.value) for m in at.markdown)
+
+
+def test_analysis_sweep_reports_invalid_values() -> None:
+    at = analyse("t2_terminplan")
+    at.selectbox(key="sweep_param").set_value("b.sd").run()
+    at.number_input(key="sweep_from_b.sd").set_value(-1.0).run()
+    at.button(key="sweep_run").click().run()
+    assert not at.exception
+    assert "nicht zulässig" in texts(at)
+
+
+def test_analysis_colourings_and_undefined_risk_marked() -> None:
+    at = analyse("t2_terminplan")  # main scenario: the rework never occurs
+    assert any("y nicht bestimmbar" in str(m.value) for m in at.markdown)
+    for mode in ("sensitivity", "criticality", "why"):
+        at.selectbox(key="graph_color").set_value(mode).run()
+        assert not at.exception
+
+
+def test_analysis_without_extremum_explains_empty_criticality() -> None:
+    page = texts(analyse("t1_faltung"))
+    assert "kein max, min oder where" in page
+    assert "Das Modell hat keine Ereignisse." in page

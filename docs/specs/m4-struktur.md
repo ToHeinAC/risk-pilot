@@ -89,7 +89,7 @@ Ergebnis eines Ausdrucks mitbestimmt.
   Anteile aller Konstellationen summieren zu 100 % (Tabelle, häufigste zuerst, Rest gesammelt
   ab Rang 10).
 - **T2:** Index von A und B = P(Pfad 1 > C) ≈ 0.5737 (Anteils-Kriterium), C ≈ 0.4263.
-- **Ohne `max`/`min`** (Edge case): Die Seite erklärt, dass dann jede Eingabe mit Pfad zur
+- **Ohne `max`/`min`** (Edge case; ebenso ohne `where`, das den Pfad je Iteration teilt): Die Seite erklärt, dass dann jede Eingabe mit Pfad zur
   Ausgabe in jeder Iteration kritisch ist und der Index keine Information trägt.
 
 ***
@@ -114,7 +114,8 @@ Ergebnis eines Ausdrucks mitbestimmt.
 ## 6. Sweep (AK 4)
 
 - Parameter wie die Stellschraube im Lernpfad (E7): literale Zahl eines Knotens
-  (`value`, Verteilungsparameter, `p`); Bereich von–bis, k Werte (Standard 9), gleicher Seed.
+  (`value`, Verteilungsparameter, `p`); Bereich von–bis, k Werte (Standard 9), gleicher Seed,
+  N und Seed der Seite.
 - Kennzahlen: Mittelwert, Median, wählbares Quantil, P(Ziel) – je mit Unsicherheit (SE,
   Quantil-KI bzw. Wilson aus M1).
 - Ungültige Werte im Bereich (z. B. sd ≤ 0) werden vor dem Lauf gemeldet, nicht übersprungen.
@@ -137,8 +138,9 @@ Ergebnis eines Ausdrucks mitbestimmt.
 - Je `event`: x = p̂ mit Wilson-Intervall; y = E[Y | Ereignis] − E[Y | kein Ereignis] mit
   95-%-Intervall nach Welch (E8); Darstellung als Streudiagramm mit Fehlerbalken, Beschriftung
   mit Ereignisnamen.
-- Tritt ein Ereignis nie oder immer ein, ist y nicht definiert: Punkt am Rand, markiert
-  „y nicht bestimmbar“ (Edge case).
+- Tritt ein Ereignis nie oder immer ein (oder hat eine Gruppe weniger als zwei Iterationen), ist
+  y nicht definiert: Punkt auf der Nulllinie, eigenes Symbol, markiert „y nicht bestimmbar“
+  (Edge case).
 - **T2, Szenario „mit Nacharbeit“:** y ∈ (0, 5]; im Hauptszenario tritt das Ereignis nie ein.
 - Sichtbarer Hinweis: „Die Differenz ist keine kausale Wirkung, wenn Ereignisse gemeinsame
   Ursachen haben oder zusammenwirken.“
@@ -185,9 +187,9 @@ Ergebnis eines Ausdrucks mitbestimmt.
 
 **Reihenfolge:** AP1 → (AP2 ∥ AP3) → AP4 → AP5 → AP6.
 
-- [ ] PRD M4 AK 1–6 und Edge cases durch Tests belegt; Gate grün.
-- [ ] Manuell: T2 und Lektion A11 auf der Seite Analyse durchgesehen.
-- [ ] README, `docs/architecture.md`; PRD M4 **Status** `done (verified by: …)`; Review.
+- [x] PRD M4 AK 1–6 und Edge cases durch Tests belegt; Gate grün.
+- [x] Manuell: T2 und Lektion A11 auf der Seite Analyse durchgesehen.
+- [x] README, `docs/architecture.md`; PRD M4 **Status** `done (verified by: …)`; Review.
 
 ***
 

@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib.metadata import version
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import scipy
@@ -125,9 +125,16 @@ def _meta(compiled: CompiledModel, n: int, seed: int) -> dict[str, object]:
 
 
 def simulate(
-    compiled: CompiledModel, n: int | None = None, seed: int | None = None
+    compiled: CompiledModel,
+    n: int | None = None,
+    seed: int | None = None,
+    keep: Literal["outputs", "all"] = "outputs",
 ) -> SimulationResult:
-    """Evaluate every node once per iteration, in dependency order."""
+    """Evaluate every node once per iteration, in dependency order.
+
+    ``keep="all"`` returns every node's array (for the structure analyses), not only the
+    tracked ones; memory grows with N times the number of nodes.
+    """
     n = compiled.model.settings.n if n is None else n
     seed = compiled.model.settings.seed if seed is None else seed
     if not _is_int(n) or not 1 <= n <= N_MAX:
@@ -149,7 +156,7 @@ def simulate(
         if notice is not None:
             notices.append(notice)
         run.values[node_id] = x
-        if node.tracked:
+        if node.tracked or keep == "all":
             samples[node_id] = x
         _release(run.values, compiled.refs[node_id], pending, samples)
     return SimulationResult(samples, _meta(compiled, n, seed), compiled.canonical, tuple(notices))

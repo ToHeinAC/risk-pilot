@@ -84,7 +84,7 @@ def quantile_ci(sorted_x: NDArray[np.float64], q: float, conf: float) -> tuple[f
     return float(sorted_x[lower - 1]), float(sorted_x[upper - 1])
 
 
-def _hits(x: NDArray[np.float64], target: Target) -> NDArray[np.bool_]:
+def hits(x: NDArray[np.float64], target: Target) -> NDArray[np.bool_]:
     compare = {"le": np.less_equal, "lt": np.less, "ge": np.greater_equal, "gt": np.greater}
     return compare[target.op](x, target.value)
 
@@ -128,7 +128,7 @@ def summarize(
         min=float(sorted_x[0]),
         max=float(sorted_x[-1]),
         quantiles=estimates,
-        target=proportion(_hits(x, target), conf) if target is not None else None,
+        target=proportion(hits(x, target), conf) if target is not None else None,
         notices=notices,
     )
 

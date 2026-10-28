@@ -38,9 +38,13 @@ def chart(figure: object, key: str, target: DeltaGenerator | None = None) -> Non
 
 
 def table(headers: list[str], rows: list[tuple[str, ...]]) -> str:
-    """A Markdown table (text the tests and screen readers can read)."""
-    lines = ["| " + " | ".join(headers) + " |", "|" + "---|" * len(headers)]
-    lines += ["| " + " | ".join(row) + " |" for row in rows]
+    """A Markdown table (text the tests and screen readers can read); ``|`` in cells is escaped."""
+
+    def line(cells: tuple[str, ...] | list[str]) -> str:
+        return "| " + " | ".join(c.replace("|", "\\|") for c in cells) + " |"
+
+    lines = [line(headers), "|" + "---|" * len(headers)]
+    lines += [line(row) for row in rows]
     return "\n".join(lines)
 
 

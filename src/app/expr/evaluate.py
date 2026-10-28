@@ -135,8 +135,17 @@ class Extremum:
     args: tuple[Expr, ...]
 
     def evaluate(self, values: Values) -> Array:
+        return self._reduce([as_num(a.evaluate(values)) for a in self.args])
+
+    def winners(self, values: Values) -> list[NDArray[np.bool_]]:
+        """Per argument: the iterations where it equals the result (ties: every winner)."""
+        evaluated = [as_num(a.evaluate(values)) for a in self.args]
+        result = self._reduce(evaluated)
+        return [np.asarray(x == result) for x in evaluated]
+
+    def _reduce(self, evaluated: list[Array]) -> Array:
         fn = np.minimum if self.kind == "min" else np.maximum
-        return reduce(fn, (as_num(a.evaluate(values)) for a in self.args))
+        return reduce(fn, evaluated)
 
 
 @dataclass(frozen=True)

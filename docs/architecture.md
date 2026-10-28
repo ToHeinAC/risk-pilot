@@ -13,12 +13,12 @@ Core packages (M1, [spec](specs/m1-rechenkern.md)):
 | Package | Role |
 |---|---|
 | `errors.py`, `messages.py` | Issue/Notice with stable codes and parameters; German message catalogue, `render()` |
-| `model/` | Pydantic schema, YAML text <-> model, reference graph, `compile_model`; `scenarios.py` (M3): chain, effective model, validation, diff, editing |
-| `expr/` | Expression language: AST whitelist, static types, vectorised evaluation, function registry |
+| `model/` | Pydantic schema, YAML text <-> model, reference graph and typed edges (`graph.edges`, M4), `compile_model`; `scenarios.py` (M3): chain, effective model, validation, diff, editing |
+| `expr/` | Expression language: AST whitelist, static types, vectorised evaluation, function registry; `activity.py` (M4): which references decide a result per iteration |
 | `dists/` | Distribution families (inversion sampling), registry |
-| `engine/` | One random stream per node, `simulate` |
-| `analysis/` | Summary statistics with intervals, analytic references for T1/T2; `compare.py` (M3): paired differences, batch means, P(B better) |
-| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts; no Streamlit import |
+| `engine/` | One random stream per node, `simulate` (`keep="all"` holds every node's array for the M4 analyses) |
+| `analysis/` | Summary statistics with intervals, analytic references for T1/T2; `compare.py` (M3): paired differences, batch means, P(B better); M4 ([spec](specs/m4-struktur.md)): `criticality.py` (decisive path, index, constellations), `tornado.py`, `sweep.py`, `sensitivity.py` (Spearman), `riskmatrix.py` (Wilson, Welch) |
+| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); no Streamlit import |
 | `lessons/` (M2) | Learning path: manifest schema, knob (`with_value`), analytic checks per lesson, reading list |
 
 Dependency direction: `ui` -> `present`, `lessons`, `adapters` -> `analysis`, `engine` -> `model`
