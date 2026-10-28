@@ -1,1 +1,1 @@
-"""Application package. Replace the example modules with your own."""
+"""Risk Pilot: world-model builder with a Monte Carlo core."""

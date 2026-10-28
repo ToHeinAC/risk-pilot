@@ -205,6 +205,9 @@ Notation: kanonische Parameter fett; SciPy-Abbildung für `ppf` und Referenztest
 - `uniform` mit low = high → wird als **Konstante** ausgewertet, Hinweis `uniform.degenerate`
   (PRD, Edge case). Der Zufallsstrom wird trotzdem verbraucht (Abschnitt 6), damit sich nichts
   verschiebt.
+- Der Hinweis `uniform.degenerate` gilt nur für **literale** Grenzen. Sind low und high Ausdrücke
+  und fallen in einzelnen Iterationen zusammen, ist der Wert dort ebenfalls konstant; ein Hinweis
+  je Iteration wäre Rauschen und entfällt (Festlegung nach Review, 28.10.2026).
 - `pert` und `triangular` mit mode = low oder mode = high sind zulässig (Randmodus).
 - `pert`: λ = 4 ist **Produktkonvention**, nicht naturgegeben; der Standard wird in der
   Ergebnis-Metadatenliste der kanonischen Parameter sichtbar gespeichert.
@@ -333,6 +336,9 @@ Statische Typprüfung beim Kompilieren mit drei Typen: `num`, `bool`, `choice(<k
 | `canonical` | dict ID → kanonische Parameter literaler Verteilungen (AK 2: Modus **und** kanonische Werte) |
 | `warnings` | Liste von `Notice` (Abschnitt 9) |
 
+- Die Paketversion in `meta` liest `importlib.metadata` aus den installierten Paketmetadaten. Das
+  ist kein Modell-, Nutzer- oder Netzwerkzugriff und gilt nicht als I/O im Sinne der
+  Kernregel (Festlegung nach Review, 28.10.2026).
 - **Reproduzierbarkeit (AK 8):** gleiches Modell, `n`, `seed` und gleiche Paketversionen →
   `samples` bitgleich. Bitgleichheit wird nur innerhalb einer festen Umgebung zugesagt.
 
@@ -493,6 +499,8 @@ def register_function(fn: ExprFunction) -> None: ...
 - Größere Stichproben (N = 10⁶) nur in einem Benchmarkskript `scripts/bench_m1.py` außerhalb der
   Suite. Ziel aus dem PRD (30 Knoten × 100 000 Iterationen < 5 s) wird damit gemessen und im
   Abschlussbericht von M1 berichtet.
+  **Gemessen 28.10.2026:** 0,51 s (bestes von drei Läufen, Entwicklungsrechner, 32 Kerne);
+  Gesamtsuite 425 Tests in 1,7 s.
 - Alle Zufallstests mit festem Seed; Toleranzen aus PRD Abschnitt 3 (α = 0.001).
 
 ***

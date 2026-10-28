@@ -8,6 +8,28 @@ Code's defaults.
 
 **How to use it, step by step: [docs/HOWTO.md](docs/HOWTO.md).**
 
+## Risk Pilot
+
+The project built on this template: a local world-model builder with a Monte Carlo core. Models
+are YAML files made of six node types (constant, uncertain, event, choice, derived, output);
+the engine simulates them with one random stream per node and reports statistics with their
+numerical uncertainty. Spec and milestones: [PRD.md](PRD.md); computation core (M1):
+[docs/specs/m1-rechenkern.md](docs/specs/m1-rechenkern.md); first app (M2):
+[docs/specs/m2-erste-app.md](docs/specs/m2-erste-app.md).
+
+```python
+from pathlib import Path
+from app.adapters.files import load_model
+from app.analysis.stats import summarize
+from app.engine.simulate import simulate
+from app.model.compile import compile_model
+
+result = simulate(compile_model(load_model(Path("examples/t2_terminplan.yaml"))))
+print(summarize(result.samples["ende"]).mean)  # about 26.69 days (Clark: 26.685)
+```
+
+Benchmark (30 nodes x 100 000 iterations, target < 5 s): `uv run python scripts/bench_m1.py`.
+
 ## Quickstart
 
 1. On GitHub, click **Use this template**, then clone your new repository.
@@ -26,7 +48,9 @@ PRD.md               spec template: goals, non-goals, milestones with status and
 docs/HOWTO.md        step-by-step workflow
 docs/architecture.md code layers, gate flow, harness design decisions
 docs/harness-review.md review state and decision log of /harness-review
-src/app/             code (the slugify example is a placeholder)
+src/app/             code (computation core, see docs/specs/m1-rechenkern.md)
+examples/            tutorial models T1, T2 (YAML)
+scripts/             benchmark, not part of the test suite
 tests/               pytest suite (offline) and the docs checks
 .claude/settings.json            shared permissions and hooks
 .claude/hooks/                   format-on-edit, Stop-gate and review-reminder scripts (tested)

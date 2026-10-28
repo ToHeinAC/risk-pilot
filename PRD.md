@@ -61,7 +61,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 ## 4. Milestones
 
 ### M1 — Rechenkern
-- **Status:** planned <!-- planned | in progress | done (verified by: <tests>) -->
+- **Status:** done (verified by: tests/test_dists.py, test_expr.py, test_graph.py,
+  test_validation.py, test_engine.py, test_stats.py, test_examples.py, test_yaml_io.py,
+  test_messages.py) <!-- planned | in progress | done (verified by: <tests>) -->
 - **Deliverable:** Modellschema (Knotentypen `constant`, `uncertain`, `event`, `choice`, `derived`,
   `output`), YAML-Lader (Adapter), Ausdruckssprache, Verteilungsregister, vektorisierte Engine,
   Grundstatistik; `examples/t1_faltung.yaml` und `examples/t2_terminplan.yaml`.

@@ -4,9 +4,24 @@
 
 | Layer | Where | Rule |
 |---|---|---|
-| Core logic | `src/app/*.py` | Pure functions, fully typed, no I/O. Unit-tested directly. |
-| Adapters | `src/app/<adapter>.py` (add when needed) | The only place for network, file, or database I/O. |
-| Entry points | CLI / app module (add when needed) | Wire adapters to core logic; keep them thin. |
+| Core logic | `src/app/` except `adapters/` | Pure functions, fully typed, no I/O. Unit-tested directly. |
+| Adapters | `src/app/adapters/` | The only place for network, file, or database I/O (M1: `files.load_model`). |
+| Entry points | Streamlit app (M2) | Wire adapters to core logic; keep them thin. |
+
+Core packages (M1, [spec](specs/m1-rechenkern.md)):
+
+| Package | Role |
+|---|---|
+| `errors.py`, `messages.py` | Issue/Notice with stable codes and parameters; German message catalogue, `render()` |
+| `model/` | Pydantic schema, YAML text <-> model, reference graph, `compile_model` |
+| `expr/` | Expression language: AST whitelist, static types, vectorised evaluation, function registry |
+| `dists/` | Distribution families (inversion sampling), registry |
+| `engine/` | One random stream per node, `simulate` |
+| `analysis/` | Summary statistics with intervals, analytic references for T1/T2 |
+
+Dependency direction: `analysis`, `engine` -> `model` -> `expr`, `dists` -> `errors`. Numeric
+modules switch off pyright's `reportUnknownMemberType` per file, because the NumPy stubs mark
+`ArrayLike` as partially unknown under `pythonVersion = 3.11`.
 
 ## Quality gate flow
 

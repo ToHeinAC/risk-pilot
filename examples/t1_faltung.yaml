@@ -1,0 +1,10 @@
+# Tutorial T1: didactic values, not research results.
+schema_version: 1
+model: t1_faltung
+title: "Faltung: Summe zweier Unsicherheiten"
+description: "Zwei unabhängige Gleichverteilungen; die Summe ist dreieckverteilt."
+settings: {n: 100000, seed: 20261027}
+nodes:
+  x1: {type: uncertain, dist: uniform, low: 0, high: 1, name: "Unsicherheit 1"}
+  x2: {type: uncertain, dist: uniform, low: 0, high: 1, name: "Unsicherheit 2"}
+  s:  {type: output, expr: "x1 + x2", name: "Summe"}

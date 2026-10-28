@@ -1,0 +1,93 @@
+"""Error and notice types. Objects carry stable codes and parameters, never text."""
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+from dataclasses import field as dc_field
+
+# Code -> names of the parameters its message template uses.
+CODES: dict[str, tuple[str, ...]] = {
+    "yaml.syntax": ("problem",),
+    "yaml.duplicate_key": ("key",),
+    "model.schema": ("loc", "msg"),
+    "model.schema_version": ("version",),
+    "model.no_output": (),
+    "model.empty": (),
+    "node.id_invalid": ("id", "reason"),
+    "dist.unknown": ("dist", "known"),
+    "dist.mode_unknown": ("dist", "mode", "modes"),
+    "param.missing": ("dist", "mode"),
+    "param.unknown": ("dist", "mode", "allowed"),
+    "param.invalid": ("value", "rule"),
+    "expr.syntax": ("expr", "problem"),
+    "expr.forbidden": ("construct", "hint"),
+    "expr.unknown_name": ("name", "suggestion"),
+    "expr.unknown_function": ("name",),
+    "expr.arity": ("name", "expected", "got"),
+    "expr.type": ("expected", "got", "context"),
+    "expr.too_long": ("length", "limit"),
+    "expr.too_deep": ("depth", "limit"),
+    "expr.too_large": ("size", "limit"),
+    "expr.unknown_label": ("label", "choice", "labels"),
+    "expr.choice_usage": ("choice",),
+    "expr.interp_table": ("reason",),
+    "graph.cycle": ("cycle",),
+    "sim.n_range": ("n",),
+    "sim.seed_range": ("seed",),
+    "runtime.param_invalid": ("rule",),
+    "runtime.non_finite": (),
+    "runtime.clip_bounds": (),
+    "range.violation": ("below", "above"),
+    "uniform.degenerate": ("value",),
+    "stats.single_sample": (),
+    "stats.quantile_range": ("q",),
+}
+
+
+@dataclass(frozen=True)
+class Issue:
+    """A problem that stops validation or simulation."""
+
+    code: str
+    node_id: str | None = None
+    field: str | None = None
+    line: int | None = None
+    params: Mapping[str, object] = dc_field(default_factory=dict[str, object])
+    share: float | None = None
+
+
+@dataclass(frozen=True)
+class Notice:
+    """A hint that does not stop anything."""
+
+    code: str
+    node_id: str | None = None
+    share: float | None = None
+    params: Mapping[str, object] = dc_field(default_factory=dict[str, object])
+
+
+class RiskPilotError(Exception):
+    """Base class of all Risk Pilot errors."""
+
+
+class ModelError(RiskPilotError):
+    """All problems found in a model at once."""
+
+    def __init__(self, issues: list[Issue]) -> None:
+        super().__init__(", ".join(i.code for i in issues))
+        self.issues = issues
+
+
+class SimulationError(RiskPilotError):
+    """A problem that aborts a running simulation."""
+
+    def __init__(self, issue: Issue) -> None:
+        super().__init__(issue.code)
+        self.issue = issue
+
+
+class InputError(RiskPilotError):
+    """An invalid argument from the caller, e.g. a quantile outside (0, 1)."""
+
+    def __init__(self, issue: Issue) -> None:
+        super().__init__(issue.code)
+        self.issue = issue

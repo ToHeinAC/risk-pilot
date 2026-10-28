@@ -1,0 +1,12 @@
+# Tutorial T2: didactic values, not research results.
+schema_version: 1
+model: t2_terminplan
+title: "Mini-Terminplan: Serie und Parallelität"
+description: "Pfad 1 (A, dann B) läuft parallel zu Pfad 2 (C); das Projekt endet mit dem späteren Pfad."
+settings: {n: 100000, seed: 20261027}
+nodes:
+  a: {type: uncertain, dist: normal, mean: 10, sd: 2, unit: d, name: "Vorgang A"}
+  b: {type: uncertain, dist: normal, mean: 15, sd: 3, unit: d, name: "Vorgang B"}
+  c: {type: uncertain, dist: normal, mean: 24, sd: 4, unit: d, name: "Vorgang C"}
+  pfad1: {type: derived, expr: "a + b", unit: d, track: true, name: "Pfad 1"}
+  ende: {type: output, expr: "max(pfad1, c)", unit: d, target: {le: 30}, name: "Projektende"}
