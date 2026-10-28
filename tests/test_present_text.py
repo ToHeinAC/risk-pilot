@@ -18,7 +18,9 @@ from app.present import text
         (-2.5, "-2,5"),
         (0.0, "0"),
         (float("nan"), "–"),
-        (2026.4, "2 026"),
+        (2026.4, "2026"),  # four digits without separator (DIN 5008), e.g. years
+        (-2026.0, "-2026"),
+        (12345.0, "12 345"),
     ],
 )
 def test_number_format(value: float, expected: str) -> None:
@@ -27,6 +29,7 @@ def test_number_format(value: float, expected: str) -> None:
 
 def test_integer_format() -> None:
     assert text.integer(100000) == "100 000"
+    assert text.integer(5000) == "5000"
 
 
 def test_percent() -> None:
@@ -99,8 +102,8 @@ def test_horizon_rows_hide_mean_and_mark_quantiles() -> None:
     s = summarize(x, horizon=2100)
     rows = dict(text.metric_rows(s, "Jahr"))
     assert rows["Mittelwert"].startswith("nicht bestimmbar: 20 % jenseits des Horizonts")
-    assert rows["P95 (95-%-Quantil)"] == "> Horizont 2 100"
-    assert rows["P10 (10-%-Quantil)"].startswith("2 04")
+    assert rows["P95 (95-%-Quantil)"] == "> Horizont 2100"
+    assert rows["P10 (10-%-Quantil)"].startswith("204")
     assert rows["Anteil nicht im Horizont"].startswith("20 % [")
     q95 = next(q for q in s.quantiles if q.q == 0.95)
     assert "Horizont" in text.quantile_sentence(q95, "Jahr", 0.95, horizon=2100)

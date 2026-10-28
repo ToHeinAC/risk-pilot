@@ -14,6 +14,7 @@ from app.model.schema import Target
 
 _OPS = {"le": "≤", "lt": "<", "ge": "≥", "gt": ">"}
 _THIN = " "
+GROUP_FROM = 10_000  # four-digit numbers stay unseparated
 
 
 def number(x: float, digits: int = 3) -> str:
@@ -23,10 +24,15 @@ def number(x: float, digits: int = 3) -> str:
     if x == 0:
         return "0"
     decimals = max(0, digits - 1 - math.floor(math.log10(abs(x))))
-    formatted = f"{x:,.{decimals}f}"
+    formatted = f"{x:{_group(x)}.{decimals}f}"
     if decimals:
         formatted = formatted.rstrip("0").rstrip(".")
     return formatted.replace(",", _THIN).replace(".", ",")
+
+
+def _group(x: float) -> str:
+    """Thousands separator only from five digits on (DIN 5008), so years read 2040, not 2 040."""
+    return "," if abs(x) >= GROUP_FROM else ""
 
 
 def decimal(x: float, places: int) -> str:
@@ -35,7 +41,7 @@ def decimal(x: float, places: int) -> str:
 
 
 def integer(n: int) -> str:
-    return f"{n:,}".replace(",", _THIN)
+    return f"{n:{_group(n)}}".replace(",", _THIN)
 
 
 def percent(p: float) -> str:
