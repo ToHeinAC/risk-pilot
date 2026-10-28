@@ -185,13 +185,21 @@ def test_lesson_turn_knob_shows_before_after() -> None:
 def test_lesson_copy_as_template() -> None:
     at = go(start(), "lernpfad")
     at.selectbox(key="lesson").set_value("a05_verzweigung").run()
-    at.text_input(key="lesson_copy_id").input("meine_nacharbeit").run()
+    at.text_input(key="lesson_copy_id_a05_verzweigung").input("meine_nacharbeit").run()
     at.button(key="lesson_copy").click().run()
     assert not at.exception
     assert (
         files.load_model(settings.models_dir() / "meine_nacharbeit.yaml").model
         == "meine_nacharbeit"
     )
+
+
+def test_lesson_copy_name_follows_selected_lesson() -> None:
+    at = go(start(), "lernpfad")
+    at.selectbox(key="lesson").set_value("a01_serie").run()
+    at.selectbox(key="lesson").set_value("a11_zusammenspiel").run()
+    names = [str(w.value) for w in at.text_input if str(w.key).startswith("lesson_copy_id")]
+    assert names == ["a11_zusammenspiel_eigen"]
 
 
 LESSON_IDS = [

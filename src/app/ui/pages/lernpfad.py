@@ -108,7 +108,9 @@ def _compare(lesson: Lesson, before: state.RunView, after: state.RunView) -> Non
 
 
 def _copy(lesson: Lesson, model: Model) -> None:
-    new_id = st.text_input(t("ui.copy_name"), value=f"{lesson.id}_eigen", key="lesson_copy_id")
+    new_id = st.text_input(
+        t("ui.copy_name"), value=f"{lesson.id}_eigen", key=f"lesson_copy_id_{lesson.id}"
+    )
     if st.button(t("ui.copy"), key="lesson_copy"):
         try:
             target = files.create_model_text(
