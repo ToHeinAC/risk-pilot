@@ -1,6 +1,6 @@
 # Pflichtenheft M3 — Szenarien und Vergleich
 
-**Stand:** 28. Oktober 2026, Entscheidungen E1–E10 bestätigt (Abschnitt 12) · **Bezug:**
+**Stand:** 28. Oktober 2026, Entscheidungen E1–E10 bestätigt (Abschnitt 12), M3 abgeschlossen · **Bezug:**
 [PRD.md](../../PRD.md), Meilenstein M3 (AK 1–8, Edge cases) · **Voraussetzung:** M1, M2
 
 Dieses Pflichtenheft legt fest, **wie** M3 umgesetzt wird. Das PRD bleibt der Vertrag für das
@@ -249,11 +249,12 @@ Weil sich der Inhalts-Hash von T2 ändert, gelten bestehende Kopien von T2 danac
 
 ## 11. Abschluss von M3
 
-- [ ] PRD M3 AK 1–8 und Edge cases durch die Tests in Abschnitt 9 belegt.
-- [ ] `uv run pre-commit run --all-files` grün.
-- [ ] Manuell: T2-Kopie mit zwei Unterszenarien angelegt, verglichen, losgelöst.
-- [ ] README und `docs/architecture.md` aktualisiert; PRD M3 **Status** `done (verified by: …)`.
-- [ ] Review durch den `reviewer`-Agenten.
+- [x] PRD M3 AK 1–8 und Edge cases durch die Tests in Abschnitt 9 belegt.
+- [x] `uv run pre-commit run --all-files` grün.
+- [x] Manuell: T2-Kopie mit zwei Unterszenarien angelegt, verglichen, losgelöst (Nutzer,
+      28.10.2026).
+- [x] README und `docs/architecture.md` aktualisiert; PRD M3 **Status** `done (verified by: …)`.
+- [x] Review durch den `reviewer`-Agenten; alle Befunde behoben.
 
 ***
 

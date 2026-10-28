@@ -145,7 +145,8 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M1.
 
 ### M3 — Szenarien und Vergleich
-- **Status:** in progress
+- **Status:** done (verified by: tests/test_scenarios.py, test_scenario_runs.py, test_compare.py,
+  test_app.py; manual click-through 28.10.2026)
 - **Deliverable:** Haupt- und Unterszenarien mit Overrides und Vererbung, Szenariobaum,
   Duplizieren, Loslösen, Diff-Ansicht, Vergleichsseite.
   Pflichtenheft: [docs/specs/m3-szenarien.md](docs/specs/m3-szenarien.md).
