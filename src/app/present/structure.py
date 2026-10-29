@@ -4,6 +4,7 @@
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
 # pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 import math
+import textwrap
 from collections.abc import Mapping, Sequence
 
 import networkx as nx
@@ -35,6 +36,9 @@ DASHES = {"ausdruck": "solid", "parameter": "dash", "korrelation": "dot"}
 SCALE = "YlOrRd"
 NO_VALUE = "#c8c8c8"
 FADED = 0.25
+LABEL_WIDTH = 18  # characters per label line; longer names wrap
+X_PAD = 0.6  # layers of room left and right so outer labels are not clipped
+ROW_HEIGHT = 60  # pixels per node in the fullest layer
 
 
 def type_label(node_type: str) -> str:
@@ -64,6 +68,23 @@ def positions(model: Model, edges: Sequence[Edge]) -> dict[str, tuple[float, flo
         for i, node in enumerate(sorted(layer)):
             pos[node] = (float(x), (len(layer) - 1) / 2 - i)
     return pos
+
+
+def _label(name: str) -> str:
+    return "<br>".join(textwrap.wrap(name, LABEL_WIDTH, break_long_words=True)) or name
+
+
+def _frame(fig: go.Figure, pos: Mapping[str, tuple[float, float]]) -> None:
+    """Room for the outer labels and enough height for the fullest layer."""
+    xs = [x for x, _ in pos.values()] or [0.0]
+    ys = [y for _, y in pos.values()] or [0.0]
+    rows = max(ys) - min(ys) + 1
+    fig.update_xaxes(visible=False, range=[min(xs) - X_PAD, max(xs) + X_PAD])
+    fig.update_yaxes(visible=False, range=[min(ys) - 0.5, max(ys) + 0.7])
+    fig.update_layout(
+        height=max(450, int(ROW_HEIGHT * rows) + 150),
+        legend={"orientation": "h", "y": -0.02, "yanchor": "top"},
+    )
 
 
 def _edge_traces(edges: Sequence[Edge], pos: Mapping[str, tuple[float, float]]) -> list[go.Scatter]:
@@ -122,7 +143,7 @@ def graph_figure(
                 y=[pos[i][1] for i in ids],
                 mode="markers+text",
                 name=type_label(node_type),
-                text=[rows[i].name for i in ids],
+                text=[_label(rows[i].name) for i in ids],
                 textposition="top center",
                 customdata=ids,
                 hovertext=hover,
@@ -137,9 +158,7 @@ def graph_figure(
             )
         )
     fig.add_trace(_colorbar(color_title))
-    fig.update_xaxes(visible=False)
-    fig.update_yaxes(visible=False)
-    fig.update_layout(legend={"orientation": "h", "y": -0.05, "yanchor": "top"})
+    _frame(fig, pos)
     return layout(fig, "", "")
 
 

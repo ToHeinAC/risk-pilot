@@ -50,6 +50,23 @@ def test_missing_why_colouring_and_faded_nodes() -> None:
     assert opacity["lonely"] < opacity["k"]
 
 
+T5 = T2.with_name("t5_fusion.yaml")
+
+
+def test_graph_labels_fit_inside_the_plot() -> None:
+    m = model_from_yaml(T5.read_text("utf-8"))
+    fig = structure.graph_figure(m, edges(m), {}, "Sensitivität", "kommerziell")
+    nodes = [tr for tr in data(fig) if tr.mode == "markers+text"]
+    xs = [x for tr in nodes for x in tr.x]
+    frame: Any = getattr(fig, "layout")  # noqa: B009 - untyped plotly
+    lo, hi = frame.xaxis.range
+    assert lo <= min(xs) - 0.5
+    assert hi >= max(xs) + 0.5
+    labels = [label for tr in nodes for label in tr.text]
+    assert all(len(line) <= structure.LABEL_WIDTH for s in labels for line in s.split("<br>"))
+    assert frame.height >= 9 * 60  # nine nodes in the first layer
+
+
 def test_criticality_sentence_and_risk_figure() -> None:
     model = model_from_yaml(T2.read_text("utf-8"))
     c = compile_model(effective_model(model, "nacharbeit"))
