@@ -95,7 +95,8 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 - Doku: README (Start, Port, Beenden), `docs/architecture.md`, PRD-Constraints (Streamlit →
   NiceGUI), `.streamlit/` entfernt.
 - Gestaltung: ein kleines Designsystem (Farben, Abstände, Schrift, Kennzahlkarte,
-  Auswertungsblock) als Tokens an einer Stelle; hell und dunkel.
+  Auswertungsblock) als Tokens an einer Stelle; Ausgang ist die Optik des Spikes (hell). Ein
+  dunkler Modus kommt später; die Tokens bleiben dafür an einer Stelle.
 
 ## 5. Entscheidungen
 
@@ -103,8 +104,8 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 |---|---|---|---|
 | E1 | Framework | NiceGUI, Entscheid nach Spike | entschieden: NiceGUI (29.10.2026) |
 | E2 | Spike-Ort | Worktree, Branch `spike/nicegui`, kein Merge | umgesetzt |
-| E3 | Migration | in einem Zug, Seite für Seite, Streamlit bis zum Ende lauffähig | offen |
-| E4 | Optik | eigenes kleines Designsystem, hell/dunkel, Ausgang: Tokens aus `web/theme.py` im Spike; Vorgaben des Nutzers fehlen noch | offen |
+| E3 | Migration | in einem Zug, Seite für Seite, Streamlit bis zum Ende lauffähig | entschieden (29.10.2026) |
+| E4 | Optik | Optik des Spikes (Tokens aus `web/theme.py`), zunächst nur hell; dunkler Modus später | entschieden (29.10.2026) |
 
 ## 6. Testzuordnung AppTest → User
 
