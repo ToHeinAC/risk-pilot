@@ -595,10 +595,28 @@ def test_tutorials_t3_to_t5_listed_copyable_and_marked_illustrative() -> None:
     at = start()
     for stem in ("t3_bahn", "t4_portfolio", "t5_fusion"):
         assert has_button(at, f"open_{stem}")
-    at.text_input(key="copy_id_t3_bahn").input("meine_bahn").run()
-    at.button(key="copy_t3_bahn").click().run()
-    assert files.load_model(settings.models_dir() / "meine_bahn.yaml").illustrative
+    for stem in ("t3_bahn", "t4_portfolio", "t5_fusion"):
+        at.text_input(key=f"copy_id_{stem}").input(f"meine_{stem}").run()
+        at.button(key=f"copy_{stem}").click().run()
+        assert not at.exception
+        assert files.load_model(settings.models_dir() / f"meine_{stem}.yaml").illustrative
     assert "Illustrative Zahlen" in texts(open_model(start(), "t4_portfolio"))
+
+
+def test_csv_column_becomes_empirical_distribution() -> None:
+    at = own_model(
+        "schema_version: 1\nmodel: eigen\nnodes:\n"
+        "  x: {type: uncertain, dist: normal, mean: 0, sd: 1}\n"
+        "  y: {type: output, expr: x}\n"
+    )
+    at.file_uploader(key="csv_file").upload("d.csv", b"tag;dauer\n1;3,5\n2;\n3;4\n").run()
+    at.selectbox(key="csv_column").set_value("dauer").run()
+    at.button(key="csv_import").click().run()
+    assert not at.exception
+    assert "2 Werte in „x“ übernommen (1 leere Zellen übersprungen)" in texts(at)
+    draft = str(at.text_area(key="editor").value)
+    assert "dist: empirical" in draft
+    assert "3.5" in draft
 
 
 def test_results_show_correlations_losses_horizon_and_peaks() -> None:
