@@ -277,7 +277,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M6.
 
 ### M8 — UX und Selbsterklärung
-- **Status:** planned
+- **Status:** in progress (spec carried over to NiceGUI, E12–E14 approved 2026-10-29)
 - **Deliverable:** Eine App, die sich Fachleuten ohne Monte-Carlo-Vorwissen selbst erklärt:
   geführter Einstieg, Hilfetexte je Seite und Auswertung, Begriffsglossar, Beispiele zur Lesart.
   Anlass: Rückmeldung nach M4, die Seite „Analyse“ erschließt sich zunächst nicht (erste
@@ -293,6 +293,8 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
      Analyse; per Oberflächentest ohne Browser durchlaufbar.
   5. Manueller Durchgang mit einer Fachperson ohne Vorkenntnisse; ihre Befunde sind behoben oder
      als offene Punkte im PRD vermerkt.
+  6. Ein neuer unsicherer Knoten startet im Formular mit der Eingabe als Spanne (P10/P50/P90);
+     die übrigen Eingabearten bleiben wählbar (Pflichtenheft E14, freigegeben 29.10.2026).
 - **Edge cases:** Modelle ohne Ereignisse, ohne Unterszenarien oder ohne max/min (Hilfetexte
   erklären, warum eine Auswertung leer bleibt).
 - **Dependencies:** M7. Pflichtenheft (Entwurf):
