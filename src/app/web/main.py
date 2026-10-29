@@ -15,8 +15,10 @@ from app.messages import t
 from app.web import (
     analysis_page,
     compare_page,
+    lesson_page,
     model_page,
     results_page,
+    runs_page,
     scenario_page,
     simulation_page,
     start,
@@ -40,22 +42,17 @@ PAGES = (
 Builder = Callable[[Session], None]
 
 
-def _follows(_session: Session) -> None:
-    ui.label(t("web.page_follows")).classes("rp-muted")
-
-
-BUILDERS: dict[str, Builder] = {path: _follows for path, _key, _icon in PAGES}
-BUILDERS.update(
-    {
-        "/": start.page,
-        "/modell": model_page.page,
-        "/szenarien": scenario_page.page,
-        "/simulation": simulation_page.page,
-        "/ergebnisse": results_page.page,
-        "/vergleich": compare_page.page,
-        "/analyse": analysis_page.page,
-    }
-)
+BUILDERS: dict[str, Builder] = {
+    "/": start.page,
+    "/lernpfad": lesson_page.page,
+    "/modell": model_page.page,
+    "/szenarien": scenario_page.page,
+    "/simulation": simulation_page.page,
+    "/ergebnisse": results_page.page,
+    "/vergleich": compare_page.page,
+    "/analyse": analysis_page.page,
+    "/laeufe": runs_page.page,
+}
 
 
 def new_session() -> Session:

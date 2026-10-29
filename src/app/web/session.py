@@ -63,12 +63,24 @@ class CompareView:
 
 
 @dataclass
+class LessonState:
+    """Learning path of a tab; progress is not stored on disk (M4 E8)."""
+
+    selected: str | None = None
+    progress: dict[str, set[str]] = field(default_factory=dict[str, set[str]])  # seen, turned
+    runs: dict[str, RunView] = field(default_factory=dict[str, RunView])  # id, "id:turned"
+    predictions: dict[str, str] = field(default_factory=dict[str, str])
+    knobs: dict[str, float] = field(default_factory=dict[str, float])
+
+
+@dataclass
 class Session:
     model: OpenModel | None = None
     run: RunView | None = None
     runs: dict[RunKey, RunView] = field(default_factory=dict[RunKey, RunView])
     compare: CompareView | None = None
     analysis: AnalysisState = field(default_factory=AnalysisState)
+    lessons: LessonState = field(default_factory=LessonState)
 
 
 def is_example(path: Path) -> bool:

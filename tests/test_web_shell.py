@@ -28,8 +28,10 @@ def test_navigation_lists_every_page_and_opens_it() -> None:
         await user.open("/")
         for _path, key, _icon in main.PAGES:
             await user.should_see(t(key))
-        user.find(marker="nav/laeufe").click()
-        await user.should_see(t("web.page_follows"))
+        for path, key, _icon in main.PAGES:
+            user.find(marker=f"nav{path}").click()
+            await user.should_see(t(key))
+        assert set(main.BUILDERS) == {path for path, _key, _icon in main.PAGES}
 
     drive(steps)
 

@@ -116,7 +116,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | 3 | Simulation (Lauf im Hintergrund-Thread, Seite bleibt bedienbar) und Ergebnisse (Antwort zuerst als Kennzahlkarten, „So liest man das“ neben allen Kennzahlen, Grafiken, Speichern, drei Downloads); Lauflogik ohne UI in `web/running.py`, von beiden Oberflächen genutzt | erledigt |
 | 4 | Szenarien (Baum, Unterschiedstabelle, Anlegen, Override setzen und entfernen, Duplizieren, Loslösen; ungültige Änderungen werden erklärt und nicht übernommen, `web/scenario_edit.py` ohne UI) und Vergleich (Läufe im Hintergrund-Thread, Paartabellen, Differenzstatistik, Verteilungskurven, veralteter Vergleich wird ausgeblendet) | erledigt |
 | 5 | Analyse (Einstellungen, Lauf im Hintergrund-Thread, sechs Reiter mit Erklärung; Tornado und Sweep als eigene Läufe; Ergebnis und Einstellungen bleiben beim Seitenwechsel erhalten; Rechenlogik ohne UI in `web/analysing.py`, von beiden Oberflächen genutzt). Nebenbei: Diagramme zeigen ihre Legende wieder | erledigt |
-| 6 | Lernpfad, Läufe | offen |
+| 6 | Lernpfad (Lektionsliste mit Fortschritt, Erklärung, Vorhersage, Simulieren, Stellschraube als Umschalter, Vorher/Nachher mit Referenzprüfung, Kopie als Vorlage) und Läufe (Liste, Laden mit Kennzahlabgleich; ein defekter Lauf wird Meldung, die Seite bleibt bedienbar). Laden ohne UI in `web/running.py`, von beiden Oberflächen genutzt. Damit sind alle Seiten umgestellt | erledigt |
 | 7 | Umschalten: Port 8642, Streamlit und AppTest entfernen, Doku, PRD-Constraints | offen |
 
 ## 6. Testzuordnung AppTest → User
@@ -176,5 +176,15 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | — (neu) geänderte Einstellungen markieren die Analyse als veraltet | `test_web_analysis.py::test_changed_settings_mark_the_analysis_stale` |
 | — (neu) ungültiges Modell sperrt die Analyse | `test_web_analysis.py::test_invalid_model_blocks_analysis` |
 | — (neu) Analyse, Tornado und Sweep überstehen einen Seitenwechsel | `test_web_analysis.py::test_analysis_survives_a_page_change`, `…::test_tornado_and_sweep_results_survive_a_page_change` |
+| `test_app.py::test_saved_run_reloads_with_same_numbers` | `test_web_lessons.py::test_saved_run_reloads_with_same_numbers` |
+| `test_app.py::test_reloaded_run_keeps_scenario_and_full_model_hash` | `test_web_lessons.py::test_reloaded_run_keeps_scenario_and_full_model_hash` |
+| `test_app.py::test_tampered_run_summary_is_reported` | `test_web_lessons.py::test_tampered_run_summary_is_reported` |
+| `test_app.py::test_corrupt_run_folder_shows_message_not_crash` | `test_web_lessons.py::test_corrupt_run_folder_shows_message_not_crash` |
+| — (neu) noch keine Läufe | `test_web_lessons.py::test_no_runs_yet` |
+| `test_app.py::test_lesson_turn_knob_shows_before_after`, `…::test_lesson_reference_curve_in_comparison` | `test_web_lessons.py::test_lesson_turn_knob_shows_before_after` |
+| `test_app.py::test_prediction_resolved_from_simulation_not_manifest` | `test_web_lessons.py::test_prediction_resolved_from_simulation_not_manifest` |
+| `test_app.py::test_lesson_shows_validity_lines_and_progress`, `…::test_lesson_file_stays_byte_identical` | `test_web_lessons.py::test_lesson_shows_validity_lines_and_progress` |
+| `test_app.py::test_lesson_copy_as_template`, `…::test_lesson_copy_name_follows_selected_lesson` | `test_web_lessons.py::test_lesson_copy_as_template_and_name_follows_lesson` |
+| `test_app.py::test_every_lesson_runs_and_turns_without_error` | `test_web_lessons.py::test_every_lesson_runs_and_turns_without_error` |
 
 Weitere Zeilen kommen mit jedem Schritt dazu.

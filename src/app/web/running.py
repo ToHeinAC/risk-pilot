@@ -1,6 +1,7 @@
 """Simulate, cache and save runs; no UI import (shared by both UIs until M7 ends)."""
 
 import dataclasses
+import json
 import time
 from pathlib import Path
 
@@ -8,7 +9,8 @@ from app.adapters import files, runs, settings
 from app.analysis.stats import summary_to_dict
 from app.engine.simulate import simulate
 from app.errors import ModelError
-from app.model.compile import CompiledModel, content_hash, model_hash
+from app.messages import t
+from app.model.compile import CompiledModel, compile_model, content_hash, model_hash
 from app.model.scenarios import effective_model
 from app.model.schema import BASIS
 from app.model.yaml_io import model_from_yaml
@@ -76,6 +78,31 @@ def compute_run(
     )
     cache[key] = run
     return run
+
+
+def load(path: Path) -> RunView:
+    """A stored run, recomputed summaries included; a mismatch with the stored ones is noted."""
+    stored = runs.load_run(path)
+    scenario_id = str(stored.meta.get("scenario_id", BASIS))
+    compiled = compile_model(effective_model(model_from_yaml(stored.model_text), scenario_id))
+    result = runs.as_result(stored)
+    summaries = summaries_for(compiled, result)
+    fresh = {k: summary_to_dict(v) for k, v in summaries.items()}
+    notices = [] if json.dumps(fresh) == json.dumps(stored.summary) else [t("ui.run_mismatch")]
+    scenario = str(stored.meta.get("scenario", t("ui.main_scenario")))
+    template, original = template_and_hash(compiled, stored.model_text)
+    return RunView(
+        stored.model_text,
+        compiled,
+        result,
+        summaries,
+        scenario,
+        template,
+        original,
+        0.0,
+        notices,
+        scenario_id,
+    )
 
 
 def save(run: RunView) -> Path:

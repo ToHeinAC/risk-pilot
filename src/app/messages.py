@@ -291,8 +291,6 @@ UI: dict[str, dict[str, str]] = {
         "ui.page_simulation": "Simulation",
         "ui.page_ergebnisse": "Ergebnisse",
         "ui.page_laeufe": "Läufe",
-        "web.page_follows": "Diese Seite wird gerade umgestellt. Bis dahin steht sie in der "
-        "bisherigen App auf Port 8642 bereit.",
         "web.no_model": "Kein Modell geöffnet",
         "web.col_node": "Knoten",
         "web.col_brief": "Eingabe",
