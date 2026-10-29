@@ -16,7 +16,8 @@ Widerspruch wird hier korrigiert.
 
 - Modellschema mit sechs Knotentypen, YAML-Lesen (Text → Modell) und Datei-Adapter.
 - Validierung und Kompilierung: Namensauflösung, Graph, Zyklen, Parameterprüfung, Ausdrücke.
-- 14 Verteilungsfamilien mit Eingabemodi, kanonischen Parametern und Inversionsmethode.
+- 14 Verteilungsfamilien mit Eingabemodi, kanonischen Parametern und Inversionsmethode
+  (Stand 29.10.2026: 16, M5 brachte `piecewise` und `empirical`).
 - Vektorisierte Engine mit einem Zufallsstrom je Knoten.
 - Grundstatistik je Ausgabe.
 - Analytische Referenzen für T1 und T2, Gitterfaltung.
@@ -111,7 +112,7 @@ nodes:
 | `unit` | str | nein | Freitext in M1 (keine Einheitenprüfung); wird unverändert gespeichert und durchgereicht |
 | `description` | str | nein | Beschreibung |
 | `why` | str oder `{text, links[], date}` | nein | Begründung, Recherchenotiz |
-| `tags` | list[str] | nein | Gruppierung (ab M4 genutzt) |
+| `tags` | list[str] | nein | Gruppierung; gespeichert und im Formular bearbeitbar, zählt nicht zum Inhalts-Hash, von keiner Auswertung genutzt (Stand 29.10.2026) |
 | `bounds` | `{min?, max?}` | nein | Zulässiger Wertebereich; Verletzung → Hinweis mit Anteil, **keine Kappung** |
 | `track` | bool | nein | Stichproben im Ergebnis behalten (Standard: nur bei `output`) |
 
@@ -168,7 +169,7 @@ Jede Familie implementiert das Protokoll `Family` (`dists/base.py`):
 | `kind` | `continuous` oder `discrete` |
 | `modes` | Eingabemodus → Liste der Parameterfelder (Pflicht/optional mit Standard) |
 | `to_canonical(mode, params)` | Eingabeparameter → kanonische Parameter; arbeitet elementweise auf Arrays |
-| `check(canonical)` | Liefert je Bedingung eine boolesche Maske „verletzt“ plus Fehlercode |
+| `check(mode, params)` | Prüft die **Eingabe**parameter; liefert je Bedingung `Violation(field, rule, mask)`: Feld, Regeltext (kein Code), boolesche Maske „verletzt“ (Stand 29.10.2026) |
 | `ppf(u, canonical)` | Inversionsmethode, vektorisiert über u und Parameterarrays |
 | `reference(canonical)` | Eingefrorene SciPy-Verteilung für Tests (nur skalare Parameter) |
 
@@ -197,7 +198,7 @@ Notation: kanonische Parameter fett; SciPy-Abbildung für `ppf` und Referenztest
 | `gamma` | `params`: shape, scale; `mean_sd`: mean, sd | **shape, scale** mit shape = mean²/sd², scale = sd²/mean | shape, scale > 0; mean, sd > 0 | `gamma(shape, scale=scale)` |
 | `weibull` | `params`: shape, scale, loc (0) | **shape, scale, loc** | shape, scale > 0 | `weibull_min(shape, loc, scale)` |
 | `bernoulli` | `params`: p | **p** | 0 ≤ p ≤ 1 | `bernoulli(p)`; Wert 1.0/0.0 |
-| `discrete` | `params`: values (Liste), weights (Liste, relativ) | **values, cumulative probabilities** | ≥ 1 Wert, gleiche Länge, Gewichte ≥ 0, Summe > 0, Werte eindeutig | eigene Inversion; Referenz `rv_discrete` |
+| `discrete` | `params`: values (Liste), weights (Liste, relativ) | **values, cumulative probabilities** | ≥ 1 Wert, gleiche Länge, Gewichte ≥ 0, Summe > 0, Werte eindeutig | eigene Inversion; keine SciPy-Referenz (`reference()` wirft `NotImplementedError`, wie bei `piecewise` und `empirical`; Stand 29.10.2026) |
 | `poisson` | `params`: rate | **rate** | rate ≥ 0 | `poisson(rate)`; Wert als float |
 
 **Festlegungen und Grenzfälle:**
@@ -266,8 +267,9 @@ Comprehensions, `a if c else b` (Hinweis: „`where(c, a, b)` verwenden“), Sch
 | `where(c, a, b)` | 3 | `np.where(c, a, b)`; c muss bool sein |
 | `interp(x, xs, ys)` | 3 | `np.interp`; xs, ys Literallisten gleicher Länge ≥ 2, xs streng steigend; außerhalb konstant fortgesetzt |
 
-- Das Funktionsregister enthält je Funktion Arität, Argumenttypen und Implementierung; neue
-  Funktionen kommen per `register_function()` hinzu.
+- Das Funktionsregister enthält je Funktion Name, minimale und maximale Argumentzahl und
+  Implementierung (`ExprFunction`; keine Argumenttypen, Stand 29.10.2026); neue Funktionen
+  kommen per `register_function()` hinzu.
 - **Vorbereitung M4:** `min`/`max` werden als eigene Klassen implementiert, damit später die
   Gewinnerindizes ohne Umbau erfasst werden können. In M1 keine Erfassung.
 

@@ -132,10 +132,12 @@ scenarios:
   normal: lineare Regression auf z = Φ⁻¹(p); lognormal: dasselbe auf log q; gamma, weibull:
   `scipy.optimize.least_squares` mit festem Startwert (deterministisch).
 - **Abweichung (E6):** max |q_fit − q_gegeben| / (P90 − P10). Immer ausgewiesen (Notice
-  `fit.deviation` mit Wert und den drei Quantilen gegen Fit); über 2 % als Warnung mit Erklärung
+  `fit.deviation` mit Wert und den drei Quantilen gegen Fit); über 2 % stattdessen als eigene
+  Notice `fit.conflict` (Warnung) mit Erklärung
   („Die drei Werte passen nicht zu einer {Familie}-Verteilung …“) und Knopf „Als
   Stützstellen-Verteilung übernehmen“ (E7): Die Felder P0 und P100 starten leer, der Knopf wird
-  erst aktiv, wenn beide eingetragen sind.
+  erst aktiv, wenn beide eingetragen sind. Liegt P0 nicht unter P10 oder P100 nicht über P90,
+  meldet `fit.bounds` den Fehler.
 - Kanonische Parameter erscheinen wie bisher in `canonical` (Lauf-Metadaten).
 
 ***
@@ -163,8 +165,9 @@ scenarios:
 
 ## 8. Mehrgipfligkeit (AK 6)
 
-- Generischer Hinweis auf der Ergebnisseite (E10), wenn die Dichte (Histogramm nach M2,
-  geglättet über drei Klassen) mindestens zwei Gipfel hat, deren Höhe je ≥ 10 % des höchsten
+- Generischer Hinweis auf der Ergebnisseite (E10), wenn die Dichte (Histogramm mit 60 gleich
+  breiten Klassen, geglättet über drei Klassen; Stand 29.10.2026, `analysis/stats.py`)
+  mindestens zwei Gipfel hat, deren Höhe je ≥ 10 % des höchsten
   beträgt und zwischen denen die Dichte unter die Hälfte des kleineren Gipfels fällt:
   „Die Verteilung hat mehrere Gipfel: Median ({median}) und häufigster Bereich ({mode}) fallen
   auseinander; der Mittelwert beschreibt hier keinen typischen Fall.“ Bei einer Ausgabe mit

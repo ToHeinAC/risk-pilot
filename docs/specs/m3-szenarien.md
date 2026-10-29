@@ -72,8 +72,12 @@ scenarios:
 ### 3.1 Overrides (AK 1, 2)
 
 - **Feldweise** (E2): Ein Override nennt einen Knoten und eines oder mehrere seiner Felder;
-  nicht genannte Felder kommen vom Eltern. Erlaubt sind die Werte-Felder der Knotentypen:
-  `value`, Verteilungsparameter, `p`, `expr`, `options`, `target`, `bounds`.
+  nicht genannte Felder kommen vom Eltern. Erlaubt sind die Werte-Felder der Knotentypen
+  (Stand 29.10.2026, `model/scenarios.py`): `constant` `value`, `bounds`; `uncertain` `dist`,
+  `input`, Verteilungsparameter, `bounds`; `event` `p`, `bounds`; `choice` `options` (ohne
+  `bounds`); `derived` `expr`, `bounds`; `output` `expr`, `target`, `better`, `bounds`,
+  `horizon`, `loss_reference`. Beschriftungen (`name`, `unit`, `description`, `tags`, `track`)
+  werden mit `scenario.field_invalid` abgewiesen.
 - **Familienwechsel:** Nennt ein Override `dist` oder `input`, ersetzt es den ganzen
   Parametersatz der Verteilung (die Felder des Overrides sind dann vollständig anzugeben); sonst
   würden alte Parameter in die neue Familie fallen.
@@ -81,8 +85,9 @@ scenarios:
 - **Typwechsel** (`type` im Override) → abgewiesen, `scenario.type_change` (Edge case).
 - **Gleicher Wert wie beim Eltern** → zulässig, Hinweis `scenario.same_value`, in der
   Diff-Ansicht markiert (Edge case).
-- **Korrelationswerte** (AK 1): Schlüssel `correlations:` im Szenario ist reserviert und wird ab
-  M5 ausgewertet; bis dahin `scenario.unsupported`.
+- **Korrelationswerte** (AK 1): Schlüssel `correlations:` im Szenario ersetzt seit M5 die Matrix
+  einer Gruppe (`spearman`, `why`); geprüft mit `scenario.corr_unknown` und
+  `scenario.corr_field` (Stand 29.10.2026; `scenario.unsupported` gibt es nicht mehr).
 
 ### 3.2 Was Szenarien nicht dürfen
 
@@ -162,7 +167,7 @@ Zwei Szenarien A (Referenz) und B, gleiche N und gleicher Seed; je Ausgabe die S
 | Größe | Verfahren |
 |---|---|
 | Kennzahlen A, B | `summarize` aus M1 |
-| Differenz der Mittelwerte | `mean(d)`, Standardfehler `sd(d)/√N` (gepaart, deshalb klein) |
+| Differenz der Mittelwerte | `mean(d)`, Standardfehler `sd(d)/√N` (gepaart, deshalb klein); 95-%-Intervall mit der Normalverteilung, mean(d) ± z·sd(d)/√N |
 | Differenz von Median, P10, P90, P(Ziel) | Punktwert aus A und B; Unsicherheit per **Batch-Means** (E6): 20 Blöcke gleicher Größe, Differenz je Block, Standardfehler = sd/√20, 95-%-Intervall mit t(19) |
 | Verteilung von `d` | Histogramm und Kennzahlen von `d`; Anteil `d = 0` (unbeeinflusste Iterationen) |
 | P(B besser als A) | Anteil der Iterationen mit `d < 0` bzw. `d > 0` je nach Zielrichtung, Wilson-Intervall; Gleichstände separat ausgewiesen |
