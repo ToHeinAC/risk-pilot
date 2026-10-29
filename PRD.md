@@ -34,7 +34,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 ## 3. Constraints
 
 - Python ≥ 3.11, Abhängigkeiten nur über uv, Lizenzen Apache-2.0-kompatibel
-  (NumPy, SciPy, Pydantic, PyYAML, Streamlit, Plotly, NetworkX, PyArrow).
+  (NumPy, SciPy, Pydantic, PyYAML, Streamlit, Plotly, NetworkX, PyArrow; ab M7 NiceGUI statt
+  Streamlit). Freigegebene Ausnahmen (29.10.2026): `bidict` (MPL-2.0) und `docutils` (Public
+  Domain/BSD, einzelne Teile GPL) als transitive Abhängigkeiten von NiceGUI, unverändert genutzt.
 - Repository-Gate bleibt verbindlich: Testsuite offline und ≤ 60 s, Branch-Coverage ≥ 85 %,
   pyright strict in `src/`. Langlaufende Statistiktests nur mit eigener Markierung außerhalb des
   Gates und nach Freigabe.
@@ -255,7 +257,26 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   Änderung gewinnt mit Hinweis).
 - **Dependencies:** M5.
 
-### M7 — UX und Selbsterklärung
+### M7 — Neue Oberfläche
+- **Status:** in progress (AK 1 met: spike decided for NiceGUI on 2026-10-29, see spec §3.1)
+- **Deliverable:** Die Oberfläche löst Streamlit ab, damit eine durchgestaltete Bedienung möglich
+  wird, die Streamlits Seiten-Neulauf und Einheitsoptik nicht zulassen. Gewählt: NiceGUI
+  (MIT, reines Python, ereignisgesteuert), entschieden nach einem Spike mit drei Ansichten nach
+  den Leitbildern Hex (Ergebnisse), GoRules (Modell-Arbeitsfläche mit Probelauf) und
+  Guesstimate (Unsicherheit als Spanne, Mini-Verteilung je Knoten). Pflichtenheft:
+  [docs/specs/m7-neue-oberflaeche.md](docs/specs/m7-neue-oberflaeche.md).
+- **Acceptance criteria:**
+  1. Spike entschieden: Framework gewählt oder Abbruch mit Begründung (dann bleibt Streamlit).
+  2. Alle Seiten aus M2–M6 laufen in der neuen Oberfläche mit gleichem Funktionsumfang; die
+     AppTest-Tests sind durch gleichwertige Tests ohne Browser ersetzt, offline im Gate.
+  3. Kern, `present/` und `adapters/` bleiben ohne UI-Import; die Oberfläche bleibt dünn.
+  4. Eigener Port (8642), Beenden-Schaltfläche beendet nur den eigenen Prozess.
+  5. Streamlit ist aus Code, Abhängigkeiten und Doku entfernt.
+- **Edge cases:** Formular-Entwurf und YAML-Entwurf bleiben synchron ohne Neulauf-Tricks;
+  lange Läufe blockieren die Oberfläche nicht.
+- **Dependencies:** M6.
+
+### M8 — UX und Selbsterklärung
 - **Status:** planned
 - **Deliverable:** Eine App, die sich Fachleuten ohne Monte-Carlo-Vorwissen selbst erklärt:
   geführter Einstieg, Hilfetexte je Seite und Auswertung, Begriffsglossar, Beispiele zur Lesart.
@@ -269,12 +290,13 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
      Intervall, Szenario, Override, kritischer Pfad, Tornado, Spearman-ρ) und ist von jeder Seite
      erreichbar; jeder Begriff im Glossar ist durch einen Test gegen die UI-Texte abgedeckt.
   4. Ein geführter Einstieg führt an T2 durch Öffnen, Simulieren, Szenario, Vergleich und
-     Analyse; per AppTest durchlaufbar.
+     Analyse; per Oberflächentest ohne Browser durchlaufbar.
   5. Manueller Durchgang mit einer Fachperson ohne Vorkenntnisse; ihre Befunde sind behoben oder
      als offene Punkte im PRD vermerkt.
 - **Edge cases:** Modelle ohne Ereignisse, ohne Unterszenarien oder ohne max/min (Hilfetexte
   erklären, warum eine Auswertung leer bleibt).
-- **Dependencies:** M6.
+- **Dependencies:** M7. Pflichtenheft (Entwurf):
+  [docs/specs/m8-ux-selbsterklaerung.md](docs/specs/m8-ux-selbsterklaerung.md).
 
 ## 5. Open risks & assumptions
 
@@ -283,8 +305,10 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   Trigger: Ziel verfehlt → schnellere Inversion je Familie, ohne die Kopplungseigenschaft aufzugeben.
 - **60-s-Gate gegen statistische Tests:** Referenztests nutzen N ≤ 100 000 und feste Seeds. Trigger:
   Suite > 45 s → langsame Tests markieren und außerhalb des Gates fahren (nach Freigabe).
-- **Streamlit für komplexe Bearbeitung:** Trigger: M6-Formular nicht flüssig bedienbar →
-  Neubewertung (NiceGUI) vor weiteren UI-Meilensteinen.
+- **Ablösung von Streamlit (M7):** Der Spike hat die bessere Bedienung bestätigt (NiceGUI,
+  ≈ 25–55 ms je Änderung, Tests ohne Browser offline). Restrisiko: Migrationsaufwand und
+  Testumstellung über alle Seiten; Trigger: eine Seite lässt sich nicht gleichwertig testen →
+  vor dem Weiterbauen mit dem Nutzer klären.
 - **Illustrative Zahlen werden als Fakten gelesen:** Hinweis im UI und in den YAML-Dateien.
 - **Spearman → latent ist nur für die Gaussian Copula exakt;** die erreichte Korrelation wird
   deshalb immer ausgewiesen.
@@ -294,7 +318,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 
 ## 6. Definition of done
 
-- [ ] M1–M7 stehen auf `done` mit Verweis auf die prüfenden Tests.
+- [ ] M1–M8 stehen auf `done` mit Verweis auf die prüfenden Tests.
 - [ ] `uv run pre-commit run --all-files` ist grün.
 - [ ] T1–T5 laufen in der App und als Regressionstests; T1–T4 bestehen ihre analytischen Abnahmen.
 - [ ] Ein eigenes Modell lässt sich aus einer kopierten Vorlage aufbauen, in mindestens zwei

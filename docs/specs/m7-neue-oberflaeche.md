@@ -1,0 +1,111 @@
+# Pflichtenheft M7 — Neue Oberfläche
+
+**Stand:** 29. Oktober 2026; Phase 1 (Spike) abgeschlossen, NiceGUI gewählt; Phase 2 als Nächstes ·
+**Bezug:** [PRD.md](../../PRD.md), Meilenstein M7 (AK 1–5, Edge cases) · **Voraussetzung:** M1–M6 ·
+**Folgt:** [M8 UX und Selbsterklärung](m8-ux-selbsterklaerung.md)
+
+Dieses Pflichtenheft legt fest, **wie** M7 umgesetzt wird. Das PRD bleibt der Vertrag für das
+**Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
+
+***
+
+## 1. Warum
+
+Streamlit führt bei jeder Eingabe das ganze Seitenskript neu aus. Daraus folgen die
+Hilfskonstrukte im Formular (Widget-Zustand nach Text-Hash zurücksetzen, Entwurf über
+`session_state` spiegeln) und die festgelegte Optik: Spalten, Reiter, Expander, kein freies
+Layout, keine Klick-Ereignisse auf Grafiken ohne Neulauf. Die Leitbilder aus M8 (Hex, GoRules,
+Guesstimate) brauchen eine Arbeitsfläche mit nebeneinanderliegenden Bereichen, Auswahl per Klick
+und Werten, die sich an Ort und Stelle aktualisieren.
+
+## 2. Kandidat und Alternativen (E1)
+
+| Option | Bewertung |
+|---|---|
+| **NiceGUI** (MIT) | reines Python, ereignisgesteuert, Quasar/Vue-Bausteine mit Tailwind-Klassen, Plotly mit Klick-Ereignissen, eigene Vue-Komponenten möglich; Tests ohne Browser über die `User`-Fixture (in-process). **Gewählt** (Abschnitt 3.1). |
+| FastAPI + eigenes Frontend | größte Gestaltungsfreiheit, aber zweite Sprache, Node-Toolchain, API-Schicht, Browser-Tests; für ein lokales Ein-Personen-Werkzeug zu teuer |
+| Reflex, Dash | Reflex braucht Node/Next.js-Build und ändert seine API häufig; Dash' Callback-Modell macht den Formular-Editor umständlich |
+
+## 3. Phase 1 — Spike (AK 1)
+
+Eigener Branch `spike/nicegui` in einem Worktree; wird **nicht** gemergt. Drei Ansichten,
+gebaut nur aus vorhandenem `present/`, `model/`, `engine/`:
+
+1. **Ergebnisse (Hex):** Antwortsatz zuerst als Kennzahlkarte, Text direkt an der Grafik,
+   Kennzahlen kompakt, Ausgaben als Reiter.
+2. **Modell-Arbeitsfläche (GoRules):** Graph links, Knotenkarte rechts; Klick auf einen Knoten
+   wählt die Karte; „Probelauf“ füllt die Knotentabelle mit P10/P50/P90 je Knoten.
+3. **Unsicherheit (Guesstimate):** Knotentabelle mit Kurzangabe und Mini-Verteilung je Zeile;
+   Karte eines unsicheren Knotens mit Eingabe als Spanne (low/mode/high), Vorschau aktualisiert
+   sich beim Tippen.
+
+**Prüfpunkte, die der Spike beantwortet:**
+
+| Nr. | Frage | Maß |
+|---|---|---|
+| S1 | Wirkt die Bedienung deutlich besser als heute? | Urteil des Nutzers am laufenden Spike |
+| S2 | Tempo | Reaktion auf Eingabe/Klick ohne spürbare Verzögerung (T5: < 0,2 s Server-Zeit) |
+| S3 | Tests offline | `User`-Fixture läuft unter der Socket-Sperre aus `tests/conftest.py` |
+| S4 | Typen | pyright strict ohne Datei-Pragmas über das heutige Maß hinaus |
+| S5 | Betrieb | Port 8642 konfigurierbar, Beenden beendet nur den eigenen Prozess |
+| S6 | Lizenzen | NiceGUI und transitive Abhängigkeiten Apache-2.0-kompatibel |
+
+**Abbruch:** S1 nein oder S3 nicht lösbar → Streamlit bleibt, M8 baut auf Streamlit.
+
+### 3.1 Ergebnis des Spikes (29.10.2026)
+
+Branch `spike/nicegui`, Worktree `../risk-pilot-spike`, NiceGUI 3.18.0; Start
+`uv run python -m app.web.main`, Port 8643. Code: `src/app/web/` (≈ 550 Zeilen),
+`src/app/present/brief.py` (Kurzangabe, Mini-Verteilung, Werte je Knoten), Tests
+`tests/test_web_spike.py`.
+
+| Nr. | Ergebnis |
+|---|---|
+| S1 | erfüllt: Urteil des Nutzers am laufenden Spike (29.10.2026): „Die Bedienung wirkt deutlich besser.“ |
+| S2 | erfüllt: gemessen 51 ms (T2) und 112 ms (T5) für je zwei Änderungen samt YAML-Patch, Prüfung, Probelauf 5 000, Tabelle und Graph, also ≈ 25 bzw. 55 ms je Änderung; der Probelauf selbst 1–2 ms |
+| S3 | erfüllt: `user_simulation` läuft in-process (httpx ASGI) unter der Socket-Sperre; 4 Tests in ≈ 2 s; ohne pytest-asyncio (`asyncio.run`) |
+| S4 | erfüllt: pyright strict grün; NiceGUI bringt `py.typed`, eine Unterdrückung an `ui.run`; Plotly-Pragmas wie bisher |
+| S5 | erfüllt: Port im Code (8643 im Spike, 8642 nach dem Wechsel); Beenden über `app.shutdown()` beendet nur den eigenen Server, mit Rückfrage |
+| S6 | erfüllt nach Freigabe: alles MIT/BSD/Apache bis auf `bidict` (MPL-2.0, über python-socketio) und `docutils` (Public Domain/BSD, einzelne Teile GPL); MPL-2.0 ist bereits über `certifi` im Projekt. Beide werden unverändert als Bibliothek genutzt; der Nutzer hat beide am 29.10.2026 zugelassen (PRD §3) |
+
+**Entscheid:** NiceGUI. Alle Prüfpunkte erfüllt, Abbruchbedingung nicht eingetreten; Phase 2
+beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
+
+**Befunde aus dem Spike:**
+
+- Umstellen eines Knotens auf „Spanne“ (P10/P50/P90) macht Szenario-Overrides des alten
+  Modus ungültig (T2: `b_schneller` setzt `mean`). Die Karte zeigt den Grund; M8 muss die
+  Umstellung die Overrides mitnehmen lassen oder sie mit Hinweis sperren.
+- Eine Normalverteilung kann eine schiefe Spanne nur angenähert treffen (Quantil-Fit); die
+  Vorschau macht das sofort sichtbar. M8: bei schiefer Spanne Lognormal vorschlagen.
+- Inhalte in Tabellen-Slots sieht `User.should_see` nicht; Tests prüfen dort die Zeilendaten.
+- Firefox headless (`--screenshot`) reicht für Sichtprüfungen im Entwicklungsablauf.
+
+## 4. Phase 2 — Migration (AK 2–5)
+
+- Neues Paket `src/app/web/` (Seiten, Bausteine, Zustand je Browser-Tab); `src/app/ui/`
+  (Streamlit) wird am Ende gelöscht.
+- Seiten wie heute: Start, Lernpfad, Modell (Formular | YAML), Szenarien, Simulation,
+  Ergebnisse, Vergleich, Analyse, Läufe. Navigation als feste Seitenleiste.
+- Zustand: ein `Session`-Objekt je Tab (offenes Modell, Entwurf, Läufe); Formular und YAML
+  schreiben in denselben Entwurf, ohne Hash-Trick (Edge case).
+- Lange Läufe in `run.io_bound`/Thread, Fortschrittsanzeige, Oberfläche bleibt bedienbar.
+- Tests: jede heutige AppTest-Prüfung bekommt ein Gegenstück mit `User`; Liste der Zuordnung in
+  Abschnitt 6 (beim Umsetzen gefüllt).
+- Doku: README (Start, Port, Beenden), `docs/architecture.md`, PRD-Constraints (Streamlit →
+  NiceGUI), `.streamlit/` entfernt.
+- Gestaltung: ein kleines Designsystem (Farben, Abstände, Schrift, Kennzahlkarte,
+  Auswertungsblock) als Tokens an einer Stelle; hell und dunkel.
+
+## 5. Entscheidungen
+
+| Nr. | Frage | Vorschlag | Stand |
+|---|---|---|---|
+| E1 | Framework | NiceGUI, Entscheid nach Spike | entschieden: NiceGUI (29.10.2026) |
+| E2 | Spike-Ort | Worktree, Branch `spike/nicegui`, kein Merge | umgesetzt |
+| E3 | Migration | in einem Zug, Seite für Seite, Streamlit bis zum Ende lauffähig | offen |
+| E4 | Optik | eigenes kleines Designsystem, hell/dunkel, Ausgang: Tokens aus `web/theme.py` im Spike; Vorgaben des Nutzers fehlen noch | offen |
+
+## 6. Testzuordnung AppTest → User
+
+(wird in Phase 2 gefüllt)

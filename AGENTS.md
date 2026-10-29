@@ -23,6 +23,7 @@ Step-by-step usage of this template: [docs/HOWTO.md](docs/HOWTO.md).
   values in `.env.example`. Runtime data goes in `data/`. Both are gitignored.
 - Dependencies and copied code need a license compatible with Apache-2.0 (MIT, BSD, ISC, PSF,
   Apache-2.0). Record copied code in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+  Approved exceptions (PRD §3): `bidict` (MPL-2.0) and `docutils` via NiceGUI, used unmodified.
 
 ## Definition of done
 
