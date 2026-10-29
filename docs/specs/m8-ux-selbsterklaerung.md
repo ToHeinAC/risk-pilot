@@ -1,7 +1,7 @@
 # Pflichtenheft M8 — UX und Selbsterklärung
 
-**Stand:** 29. Oktober 2026, Entwurf; E2–E11 bestätigt, E1 geändert: die Optik wird neu
-gestaltet, Streamlit wird in M7 abgelöst ([m7-neue-oberflaeche.md](m7-neue-oberflaeche.md)) ·
+**Stand:** 29. Oktober 2026, Entwurf, auf NiceGUI überführt (M7 abgeschlossen,
+[m7-neue-oberflaeche.md](m7-neue-oberflaeche.md)); E2–E11 bestätigt, E12–E14 zur Freigabe ·
 **Bezug:** [PRD.md](../../PRD.md), Meilenstein M8 (AK 1–5, Edge cases) · **Voraussetzung:** M1–M7
 
 Dieses Pflichtenheft legt fest, **wie** M8 umgesetzt wird. Das PRD bleibt der Vertrag für das
@@ -18,7 +18,8 @@ Beobachtungsbogen für den Durchgang mit einer Fachperson (AK 5).
 
 **Bestätigt, über das bisherige PRD hinaus (E7, E8):** Modellseite als Arbeitsfläche mit Graph,
 Karte und Probelauf; Knotentabelle mit Kurzangabe und Mini-Verteilung; Spanne als erste
-Eingabeart.
+Eingabeart. Mit M7 bereits geliefert: Graph-Klick wählt Karte, Probelauf mit P10/P50/P90 je
+Knoten, Kurzangabe und Mini-Verteilung (Abschnitt 8). In M8 offen: Spanne als erste Eingabeart.
 
 **Nicht in M8:** What-if-Regler auf der Ergebnisseite (E9), neue Auswertungen, neue
 Verteilungsfamilien, Mehrsprachigkeit.
@@ -42,18 +43,23 @@ Tabellenraster und freie Zellplatzierung (das Modell bleibt YAML mit Formular).
 
 ***
 
-## 3. Seitenkopf (AK 1, E2)
+## 3. Seitenkopf (AK 1, E2, E12)
 
 - Jede Seite beginnt mit Titel, **einem** Absatz „Wofür ist diese Seite da?“ und einer Zeile
   „Nächster Schritt“ mit Link zur Folgeseite.
-- Zentral über ein Verzeichnis `PAGES` in `present/guide.py` (rein: Seiten-ID → Text-Schlüssel,
-  Folgeseite); die Oberfläche rendert den Kopf. Der nächste Schritt hängt vom
-  Zustand ab (kein Modell offen → Start; Modell ohne Lauf → Simulation; Lauf vorhanden →
-  Ergebnisse).
+- Zentral über ein Verzeichnis in `present/guide.py` (rein: Seitenpfad → Text-Schlüssel,
+  Folgeseite); der nächste Schritt hängt vom Zustand ab (kein Modell offen → Start; Modell ohne
+  Lauf → Simulation; Lauf vorhanden → Ergebnisse).
+- **NiceGUI (E12):** Die Hülle in `web/main.py` rendert den Kopf **einmal** vor jeder Seite
+  (dort, wo heute die Fehlergrenze je Seite sitzt); die Seiten-Builder setzen keinen eigenen
+  Titel mehr. Das Navigationsverzeichnis `main.PAGES` und das Verzeichnis in `present/guide.py`
+  werden per Test abgeglichen. Der Link ist ein `ui.link` auf den Seitenpfad
+  (`ui.sub_pages`), damit der Zustand der Sitzung erhalten bleibt.
 - Bestehende Einleitungen (`ui.start_intro`, `ui.lernpfad_intro`, `analysis.intro`) gehen in
   dieses Verzeichnis über.
-- Test: jede Seite der Navigation hat einen Eintrag; ein Oberflächentest prüft auf jeder Seite Absatz und
-  Link.
+- Test (`tests/test_web_guide.py`): jede Seite der Navigation hat einen Eintrag; ein
+  Oberflächentest öffnet jede Seite und prüft Absatz und Link; der nächste Schritt wechselt mit
+  dem Zustand (ohne Modell, mit Modell, mit Lauf).
 
 ***
 
@@ -72,8 +78,13 @@ dieselbe Reihenfolge, nach dem Hex-Prinzip „Antwort zuerst“:
 
 - Lesebeispiele sind reine Funktionen in `present/reading.py`, eine je Auswertung:
   `(Lauf/Auswertungsergebnis) → Sentence | Empty`. `Empty` trägt den Grund (Abschnitt 7).
-- Ein Baustein `evaluation_block(key, reading, draw)` der Oberfläche rendert die vier Teile
-  einheitlich.
+- Ein Baustein `evaluation_block(key, reading, draw)` in `web/explain.py` rendert die vier Teile
+  einheitlich: Frage als Zwischenüberschrift, Lesebeispiel in der Antwort-Schrift
+  (`rp-answer`), Grafik bzw. Tabelle über `draw()`, „Lesart und Grenze“ als `ui.expansion`.
+  Er ersetzt die heutigen „Was zeigt dieser Reiter?“-Aufklapper der Analyse und ergänzt
+  `results_view` (Ergebnisse, Läufe, Lernpfad) und `compare_page`.
+- Die Antwortkarten der Ergebnisseite (M7) bleiben oberhalb der Blöcke: sie sind die Antwort,
+  der Block erklärt sie.
 - Tests: je Auswertung ein Lesebeispiel an T2 bzw. T4/T5 mit den erwarteten Knotennamen und
   Zahlen aus derselben Quelle wie die Grafik (keine zweite Rechnung).
 
@@ -87,8 +98,9 @@ dieselbe Reihenfolge, nach dem Hex-Prinzip „Antwort zuerst“:
   Pfad, Tornado, Spearman-ρ; dazu aus der Oberfläche u. a. Verteilung, P10/P50/P90, Median,
   Erwartungswert, Standardabweichung, Ereignis, Ausgabe, Zielwert, Horizont, Korrelation,
   Rangkorrelation, Sweep, Risikomatrix, VaR/ES, Standardfehler, Konfidenz.
-- **Erreichbar von jeder Seite:** eigene Seite „Glossar“ in der Navigation; dazu Tooltips an
-  Feldern und Kennzahlen (aus `short`).
+- **Erreichbar von jeder Seite:** eigene Seite „Glossar“ (`/glossar`) in der Navigation; dazu
+  Tooltips an Feldern und Kennzahlen (aus `short`) über NiceGUIs `.tooltip()`. Im Glossar ist
+  jeder Begriff ansprungfähig (`/glossar#quantil`), Tooltips verweisen nicht weiter.
 - **Tests:**
   - Pflichtliste ⊆ Glossar.
   - Jeder Glossarbegriff kommt in mindestens einem UI-Text (`messages.py`) vor (kein toter
@@ -110,14 +122,24 @@ dieselbe Reihenfolge, nach dem Hex-Prinzip „Antwort zuerst“:
   vorhanden, Lauf nacharbeit vorhanden, Vergleichsseite besucht, Analyse besucht). Ein Schritt
   außer der Reihe wird angenommen, der Banner zeigt dann den ersten offenen Schritt.
 - T2 ist eine Vorlage und schreibgeschützt; der Rundgang ändert nichts am Modell.
-- Logik rein in `present/guide.py` (`tour_step(state_facts) → Step`), Anzeige in `views`.
-- Test: Oberflächentest läuft alle fünf Schritte durch und prüft den Banner nach jedem Schritt.
+- Logik rein in `present/guide.py` (`tour_step(facts) → Step`). Die Fakten liefert die
+  Sitzung (`web/session.py`): offenes Modell, Szenario-IDs der Läufe im Lauf-Cache, besuchte
+  Seiten (neu: `Session.visited`, gesetzt von der Hülle beim Seitenwechsel).
+- **NiceGUI (E13):** Der Banner steht in der Hülle (`web/main.py`) zwischen Kopfzeile und
+  Seitenkopf und wird bei jedem Seitenwechsel neu aufgebaut; Läufe im Hintergrund-Thread
+  aktualisieren ihn nach Abschluss (`refresh`), damit Schritt 2 und 3 ohne Seitenwechsel
+  weiterschalten.
+- Test (`tests/test_web_tour.py`): Oberflächentest läuft alle fünf Schritte durch und prüft den
+  Banner nach jedem Schritt; „Rundgang beenden“ blendet ihn aus.
 
 ***
 
 ## 7. Leere Auswertungen (Edge cases)
 
 Statt einer leeren Fläche ein Satz mit Grund und, wo möglich, was man tun kann:
+
+Die heutigen Einzelhinweise (z. B. `analysis.no_events`, `compare.need_two`,
+`analysis.crit_no_extremum`) gehen in diese Gründe über.
 
 | Fall | Auswertung | Satz (sinngemäß) |
 |---|---|---|
@@ -149,7 +171,12 @@ synthetischen Modell.
   `three_point` (low/mode/high) bzw. `quantiles` (P10/P50/P90), mit einem Satz, was die Spanne
   bedeutet. Neue Eingabearten gibt es nicht; die Modi existieren seit M1.
 
-Beides ist bestätigt (E7, E8); der Spike in M7 baut davon je einen ersten Bildschirm.
+Beides ist bestätigt (E7, E8). **Stand nach M7:** Arbeitsfläche, Graph-Klick, Probelauf mit
+P10/P50/P90, Kurzangabe und Mini-Verteilung sind geliefert (`web/workbench.py`,
+`present/brief.py`). Offen für M8 (E14): Ein neuer unsicherer Knoten startet mit Eingabeart
+`quantiles` (P10/P50/P90) und einem Satz zur Bedeutung der Spanne; `three_point` und `params`
+bleiben über die Auswahl „Eingabe“ erreichbar. Das betrifft nur den Vorschlag beim Anlegen im
+Formular, nicht das Schema.
 
 ***
 
@@ -181,9 +208,12 @@ Beides ist bestätigt (E7, E8); der Spike in M7 baut davon je einen ersten Bilds
 | E9 | Hex-What-if-Regler auf Ergebnisseite | **nein**: Szenarien + Vergleich und Sweep decken das ab; ein dritter Weg zum selben Ziel erklärt sich schlechter |
 | E10 | Ort der Texte | `messages.py` wie bisher; Glossar als Daten in `present/glossary.py` |
 | E11 | Durchgang | Beobachtungsbogen mit fünf Aufgaben (Abschnitt 9) |
+| E12 | Seitenkopf in NiceGUI | einmal in der Hülle (`web/main.py`), Seiten setzen keinen eigenen Titel |
+| E13 | Rundgang-Banner in NiceGUI | in der Hülle; besuchte Seiten in der Sitzung; nach Hintergrundläufen aktualisiert |
+| E14 | Spanne als erste Eingabeart | neuer unsicherer Knoten startet mit `quantiles` (P10/P50/P90) |
 
-E7 und E8 erweitern den Lieferumfang; das PRD ergänzt M8 darum, sobald M7 die Oberfläche
-festgelegt hat.
+E7 und E8 erweitern den Lieferumfang. Der größte Teil ist mit M7 geliefert; das PRD ergänzt M8
+um den Rest (E14) nur nach Freigabe.
 
 ***
 
@@ -191,12 +221,16 @@ festgelegt hat.
 
 | AP | Inhalt | Tests |
 |---|---|---|
-| AP1 | `present/guide.py` Seitenverzeichnis, Seitenkopf, alle Seiten | Oberflächentest je Seite |
-| AP2 | `present/reading.py`, `web/explain.py`, Ergebnisse/Vergleich/Analyse umbauen | Lesebeispiele T2/T4/T5, leere Fälle |
-| AP3 | `present/glossary.py`, Seite Glossar, Tooltips | drei Glossar-Tests, Oberflächentest |
-| AP4 | Rundgang | Oberflächentest fünf Schritte |
-| AP5 | (E7) Probelauf + Trace, Graph-Klick | Trace-Werte = Vorschau, Oberflächentest |
-| AP6 | (E8) Kurzangabe, Mini-Verteilung, Spanne vorn | Kurzangabe je Familie, Oberflächentest |
+Reihenfolge wie in M7: ein Commit je Arbeitspaket auf `main`, Tests zuerst, Gate grün.
+
+| AP | Inhalt | Tests |
+|---|---|---|
+| AP1 | `present/guide.py` Seitenverzeichnis, Seitenkopf in der Hülle, alle Seiten | `test_web_guide.py`: Kopf je Seite, nächster Schritt je Zustand |
+| AP2 | `present/reading.py`, `web/explain.py`, Ergebnisse/Vergleich/Analyse umbauen, leere Fälle | Lesebeispiele T2/T4/T5, leere Fälle (synthetische Modelle), Oberflächentest |
+| AP3 | `present/glossary.py`, Seite `/glossar`, Tooltips | drei Glossar-Tests, Oberflächentest |
+| AP4 | Rundgang: `tour_step`, `Session.visited`, Banner in der Hülle | `test_web_tour.py`: fünf Schritte |
+| AP5 | (E7) Probelauf + Trace, Graph-Klick | mit M7 geliefert (`test_web_model.py`) |
+| AP6 | (E8, E14) Spanne als erste Eingabeart; Kurzangabe und Mini-Verteilung mit M7 geliefert | Formulartest: neuer Knoten startet mit P10/P50/P90 |
 | AP7 | Doku: README (Rundgang, Glossar), `docs/architecture.md`, PRD-Status | Doku-Links-Test |
 | AP8 | Durchgang mit Fachperson, Befunde | manuell |
 
