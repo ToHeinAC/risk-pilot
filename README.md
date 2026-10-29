@@ -26,6 +26,10 @@ uv run streamlit run src/app/ui/main.py
 Open <http://localhost:8642>. **Stop it** with "App beenden" in the sidebar: it asks once, then
 sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the terminal works too.
 
+**New interface (M7, in progress):** `uv run python -m app.web.main`, then
+<http://localhost:8643> (`RISK_PILOT_PORT` to change it). Pages move over one by one; until then
+they point to the Streamlit app. The power icon top right ends the process the same way.
+
 - **Tutorials** (`examples/`): T1 sum of two uniforms, T2 mini schedule, each with its analytic
   solution shown next to the simulation; T3 train connection (two-peaked arrival), T4 portfolio
   of three assets (correlation group, VaR/ES), T5 fusion power plant (piecewise maturity years,

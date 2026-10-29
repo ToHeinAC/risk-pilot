@@ -107,6 +107,26 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | E3 | Migration | in einem Zug, Seite für Seite, Streamlit bis zum Ende lauffähig | entschieden (29.10.2026) |
 | E4 | Optik | Optik des Spikes (Tokens aus `web/theme.py`), zunächst nur hell; dunkler Modus später | entschieden (29.10.2026) |
 
+### 4.1 Fortschritt
+
+| Schritt | Inhalt | Stand |
+|---|---|---|
+| 1 | Grundgerüst: `web/main.py` (Seitenleiste, Beenden, Fehlergrenze), `web/session.py` (Zustand je Tab, auch von `ui/state.py` genutzt), `web/theme.py`, Port `RISK_PILOT_PORT` (8643) | erledigt |
+| 2 | Modell: Arbeitsfläche, Formular, YAML, Speichern | offen |
+| 3 | Simulation, Ergebnisse | offen |
+| 4 | Szenarien, Vergleich | offen |
+| 5 | Analyse | offen |
+| 6 | Start, Lernpfad, Läufe | offen |
+| 7 | Umschalten: Port 8642, Streamlit und AppTest entfernen, Doku, PRD-Constraints | offen |
+
 ## 6. Testzuordnung AppTest → User
 
-(wird in Phase 2 gefüllt)
+| Heute (AppTest) | Neu (`tests/test_web_*.py`) |
+|---|---|
+| `test_app.py::test_exit_sends_sigterm_to_own_pid` | `test_web_shell.py::test_exit_asks_first_and_ends_only_this_process` |
+| — (neu) Warnung bei ungespeicherten Änderungen | `test_web_shell.py::test_exit_warns_about_unsaved_changes` |
+| — (neu) unerwarteter Fehler wird Meldung, Hülle läuft weiter | `test_web_shell.py::test_unexpected_error_in_a_page_becomes_a_message` |
+| — (neu) alle Seiten in der Navigation | `test_web_shell.py::test_navigation_lists_every_page_and_opens_it` |
+| `test_adapters_process.py`: Port nicht Standard | `test_web_shell.py::test_port_defaults_beside_streamlit_and_is_configurable` |
+
+Weitere Zeilen kommen mit jedem Schritt dazu.

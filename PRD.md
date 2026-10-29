@@ -40,7 +40,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - Repository-Gate bleibt verbindlich: Testsuite offline und ≤ 60 s, Branch-Coverage ≥ 85 %,
   pyright strict in `src/`. Langlaufende Statistiktests nur mit eigener Markierung außerhalb des
   Gates und nach Freigabe.
-- Kern (`src/app/` ohne `adapters/` und `ui/`) ist rein: keine Datei-, Netzwerk- oder
+- Kern (`src/app/` ohne `adapters/`, `ui/` und `web/`) ist rein: keine Datei-, Netzwerk- oder
   Datenbankzugriffe.
 - Modelle sind YAML-Dateien; das Pydantic-Schema ist der Vertrag. Nutzer- und Laufdaten liegen in
   `data/` (gitignored), Tutorials in `examples/` (versioniert).

@@ -22,3 +22,8 @@ def runs_dir() -> Path:
 def examples_dir() -> Path:
     """Versioned tutorials; ``RISK_PILOT_EXAMPLES_DIR``, default ``examples/`` of the repo."""
     return Path(os.environ.get("RISK_PILOT_EXAMPLES_DIR", str(_REPO / "examples")))
+
+
+def port() -> int:
+    """Port of the new UI; ``RISK_PILOT_PORT``, default 8643 beside Streamlit's 8642 (M7)."""
+    return int(os.environ.get("RISK_PILOT_PORT", "8643"))

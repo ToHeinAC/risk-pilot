@@ -291,6 +291,9 @@ UI: dict[str, dict[str, str]] = {
         "ui.page_simulation": "Simulation",
         "ui.page_ergebnisse": "Ergebnisse",
         "ui.page_laeufe": "Läufe",
+        "web.page_follows": "Diese Seite wird gerade umgestellt. Bis dahin steht sie in der "
+        "bisherigen App auf Port 8642 bereit.",
+        "web.no_model": "Kein Modell geöffnet",
         "ui.start_intro": "Weltmodelle aus Bausteinen bauen, per Monte Carlo simulieren und die "
         "Ergebnisse mit ihrer numerischen Unsicherheit lesen. Tutorials und Lektionen sind "
         "schreibgeschützt; „Als Vorlage kopieren“ legt ein eigenes Modell an.",

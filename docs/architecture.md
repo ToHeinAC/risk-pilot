@@ -4,9 +4,10 @@
 
 | Layer | Where | Rule |
 |---|---|---|
-| Core logic | `src/app/` except `adapters/` and `ui/` | Pure functions, fully typed, no I/O. Unit-tested directly. |
+| Core logic | `src/app/` except `adapters/`, `ui/` and `web/` | Pure functions, fully typed, no I/O. Unit-tested directly. |
 | Adapters | `src/app/adapters/` | The only place for file and process I/O: model files, CSV columns, runs, settings, shutdown. |
-| Entry point | `src/app/ui/` (Streamlit) | Thin: read widgets, call core and adapters, render. Tested with AppTest. |
+| Entry point | `src/app/ui/` (Streamlit) | Thin: read widgets, call core and adapters, render. Tested with AppTest. Removed at the end of M7. |
+| Entry point (M7) | `src/app/web/` (NiceGUI) | Thin, same rule; `session.py` holds the per-tab state without UI import. Tested in-process with NiceGUI's user simulation, no browser. |
 
 Core packages (M1, [spec](specs/m1-rechenkern.md)):
 
@@ -21,7 +22,7 @@ Core packages (M1, [spec](specs/m1-rechenkern.md)):
 | `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); M6: `preview.py` (node preview from a small run), `export.py` (metrics CSV, HTML report); no Streamlit import |
 | `lessons/` (M2) | Learning path: manifest schema, knob (`with_value`), analytic checks per lesson, reading list |
 
-Dependency direction: `ui` -> `present`, `lessons`, `adapters` -> `analysis`, `engine` -> `model`
+Dependency direction: `ui`, `web` -> `present`, `lessons`, `adapters` -> `analysis`, `engine` -> `model`
 -> `expr`, `dists` -> `errors`.
 
 Adapters added in M6: `export.py` writes the Parquet bytes (pyarrow). In the UI, `form.py` and
