@@ -199,7 +199,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M3.
 
 ### M5 — Abhängigkeiten und Tutorials T3–T5
-- **Status:** in progress (implemented, tested and reviewed 29.10.2026; manual click-through pending)
+- **Status:** done (verified by: tests/test_correlations.py, test_dists.py, test_fit.py,
+  test_stats.py, test_adapters_files.py, test_examples.py, test_present_text.py, test_app.py;
+  review and manual click-through 29.10.2026)
 - **Deliverable:** Korrelationsgruppen, Stützstellen- und empirische Verteilung, Quantil-Fit,
   Horizont/Zensierung, `examples/t3_bahn.yaml`, `t4_portfolio.yaml`, `t5_fusion.yaml` mit als
   illustrativ gekennzeichneten Zahlen.
