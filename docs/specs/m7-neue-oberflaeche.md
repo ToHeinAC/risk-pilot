@@ -117,7 +117,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | 4 | Szenarien (Baum, Unterschiedstabelle, Anlegen, Override setzen und entfernen, Duplizieren, Loslösen; ungültige Änderungen werden erklärt und nicht übernommen, `web/scenario_edit.py` ohne UI) und Vergleich (Läufe im Hintergrund-Thread, Paartabellen, Differenzstatistik, Verteilungskurven, veralteter Vergleich wird ausgeblendet) | erledigt |
 | 5 | Analyse (Einstellungen, Lauf im Hintergrund-Thread, sechs Reiter mit Erklärung; Tornado und Sweep als eigene Läufe; Ergebnis und Einstellungen bleiben beim Seitenwechsel erhalten; Rechenlogik ohne UI in `web/analysing.py`, von beiden Oberflächen genutzt). Nebenbei: Diagramme zeigen ihre Legende wieder | erledigt |
 | 6 | Lernpfad (Lektionsliste mit Fortschritt, Erklärung, Vorhersage, Simulieren, Stellschraube als Umschalter, Vorher/Nachher mit Referenzprüfung, Kopie als Vorlage) und Läufe (Liste, Laden mit Kennzahlabgleich; ein defekter Lauf wird Meldung, die Seite bleibt bedienbar). Laden ohne UI in `web/running.py`, von beiden Oberflächen genutzt. Damit sind alle Seiten umgestellt | erledigt |
-| 7 | Umschalten: Port 8642, Streamlit und AppTest entfernen, Doku, PRD-Constraints | offen |
+| 7 | Umschalten: Port 8642, Streamlit, AppTest-Tests und `.streamlit/` entfernt, Abhängigkeit aus `uv.lock`, Doku und PRD §3 angepasst; gewählte Lektion hervorgehoben | erledigt |
 
 ## 6. Testzuordnung AppTest → User
 
@@ -127,7 +127,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | — (neu) Warnung bei ungespeicherten Änderungen | `test_web_shell.py::test_exit_warns_about_unsaved_changes` |
 | — (neu) unerwarteter Fehler wird Meldung, Hülle läuft weiter | `test_web_shell.py::test_unexpected_error_in_a_page_becomes_a_message` |
 | — (neu) alle Seiten in der Navigation | `test_web_shell.py::test_navigation_lists_every_page_and_opens_it` |
-| `test_adapters_process.py`: Port nicht Standard | `test_web_shell.py::test_port_defaults_beside_streamlit_and_is_configurable` |
+| `test_adapters_process.py`: Port nicht Standard | `test_web_shell.py::test_port_is_the_project_port_and_configurable` |
 
 | `test_app.py::test_start_page_lists_tutorials_and_learning_path` | `test_web_start.py::test_start_lists_tutorials_and_learning_path` |
 | `test_app.py::test_t1_open_simulate_and_show_metrics` (Öffnen, Prüfung) | `test_web_start.py::test_open_tutorial_shows_model_page_and_name` |
@@ -186,5 +186,6 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | `test_app.py::test_lesson_shows_validity_lines_and_progress`, `…::test_lesson_file_stays_byte_identical` | `test_web_lessons.py::test_lesson_shows_validity_lines_and_progress` |
 | `test_app.py::test_lesson_copy_as_template`, `…::test_lesson_copy_name_follows_selected_lesson` | `test_web_lessons.py::test_lesson_copy_as_template_and_name_follows_lesson` |
 | `test_app.py::test_every_lesson_runs_and_turns_without_error` | `test_web_lessons.py::test_every_lesson_runs_and_turns_without_error` |
+| `test_family_extension.py::test_new_family_card_shows_its_fields` (AppTest) | dieselbe Funktion, jetzt mit der User-Simulation |
 
-Weitere Zeilen kommen mit jedem Schritt dazu.
+Alle AppTest-Tests sind ersetzt und mit Streamlit entfernt (Schritt 7).

@@ -1,4 +1,4 @@
-"""The analysis run and its derived results; no UI import (shared by both UIs until M7 ends)."""
+"""The analysis run and its derived results; no UI import."""
 
 from collections.abc import Mapping
 from dataclasses import dataclass

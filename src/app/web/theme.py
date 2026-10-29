@@ -36,6 +36,7 @@ body {{ background:{CANVAS}; color:{INK};
 .rp-selected td {{ background:{ACCENT_SOFT} !important; }}
 .rp-nav .q-item {{ border-radius:8px; margin:2px 8px; }}
 .rp-nav .q-item.rp-active {{ background:{ACCENT_SOFT}; color:{ACCENT}; font-weight:600; }}
+.q-item.rp-current {{ background:{ACCENT_SOFT}; color:{ACCENT}; font-weight:600; }}
 """
 
 PLOT: dict[str, Any] = {

@@ -1,27 +1,26 @@
 """A distribution family registered in a test works without changes to engine or UI (M6 AK 5)."""
 
 from collections.abc import Mapping
-from pathlib import Path
 from typing import ClassVar, Literal
 
 import numpy as np
 import pytest
+from nicegui.testing import User
 from scipy import stats
-from streamlit.testing.v1 import AppTest
+from web_util import drive, open_model, value
 
 from app.adapters import files, settings
 from app.analysis.analytic import dkw_epsilon, ks_distance
 from app.dists import registry
 from app.dists.base import FloatArray, Frozen, Params, ParamSpec, Violation, violation
 from app.engine.simulate import simulate
+from app.messages import t
 from app.model import form
 from app.model.compile import compile_model
 from app.model.yaml_io import model_from_yaml
 from app.model.yaml_patch import load_data
 from app.present.preview import node_preview
 
-ROOT = Path(__file__).resolve().parent.parent
-MAIN = str(ROOT / "src" / "app" / "ui" / "main.py")
 N = 20_000
 TEXT = (
     "schema_version: 1\nmodel: logistik\nsettings: {seed: 4}\nnodes:\n"
@@ -73,11 +72,14 @@ def test_new_family_in_form_and_preview() -> None:
 
 def test_new_family_card_shows_its_fields() -> None:
     files.create_model_text(settings.models_dir(), "logistik", TEXT)
-    at = AppTest.from_file(MAIN, default_timeout=60).run()
-    at.button(key="open_logistik").click().run()
-    at.switch_page("pages/modell.py").run()
-    assert not at.exception
-    assert at.selectbox(key="form.x.dist").value == "test_logistik"
-    assert at.text_input(key="form.x.param.loc").value == "5"
-    assert at.text_input(key="form.x.param.scale").value == "2"
-    assert "Vorschau der Verteilung" in "\n".join(str(m.value) for m in at.markdown)
+
+    async def steps(user: User) -> None:
+        await open_model(user, "logistik")
+        user.find(marker="nodes").trigger("pick", "x")
+        await user.should_see(marker="form.x.param.scale")
+        assert value(user, "form.x.dist") == "test_logistik"
+        assert value(user, "form.x.param.loc") == "5"
+        assert value(user, "form.x.param.scale") == "2"
+        await user.should_see(t("form.preview"))
+
+    drive(steps)

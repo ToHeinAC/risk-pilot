@@ -25,5 +25,5 @@ def examples_dir() -> Path:
 
 
 def port() -> int:
-    """Port of the new UI; ``RISK_PILOT_PORT``, default 8643 beside Streamlit's 8642 (M7)."""
-    return int(os.environ.get("RISK_PILOT_PORT", "8643"))
+    """Port of the app; ``RISK_PILOT_PORT``, default 8642 (the project port)."""
+    return int(os.environ.get("RISK_PILOT_PORT", "8642"))

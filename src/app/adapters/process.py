@@ -5,5 +5,5 @@ import signal
 
 
 def shutdown() -> None:
-    """Send SIGTERM to this process (the Streamlit server running the app)."""
+    """Send SIGTERM to this process (the server running the app)."""
     os.kill(os.getpid(), signal.SIGTERM)

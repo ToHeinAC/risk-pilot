@@ -17,18 +17,15 @@ numerical uncertainty. Spec and milestones: [PRD.md](PRD.md); computation core (
 [docs/specs/m1-rechenkern.md](docs/specs/m1-rechenkern.md); first app (M2):
 [docs/specs/m2-erste-app.md](docs/specs/m2-erste-app.md).
 
-**Start the app** (German UI, port 8642 from `.streamlit/config.toml`):
+**Start the app** (German UI, NiceGUI, port 8642; set `RISK_PILOT_PORT` to change it):
 
 ```
-uv run streamlit run src/app/ui/main.py
+uv run python -m app.web.main
 ```
 
-Open <http://localhost:8642>. **Stop it** with "App beenden" in the sidebar: it asks once, then
-sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the terminal works too.
-
-**New interface (M7, in progress):** `uv run python -m app.web.main`, then
-<http://localhost:8643> (`RISK_PILOT_PORT` to change it). Pages move over one by one; until then
-they point to the Streamlit app. The power icon top right ends the process the same way.
+Open <http://localhost:8642>. **Stop it** with the power icon top right ("App beenden"): it asks
+once, then sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the terminal
+works too.
 
 - **Tutorials** (`examples/`): T1 sum of two uniforms, T2 mini schedule, each with its analytic
   solution shown next to the simulation; T3 train connection (two-peaked arrival), T4 portfolio
@@ -103,7 +100,6 @@ docs/architecture.md code layers, gate flow, harness design decisions
 docs/harness-review.md review state and decision log of /harness-review
 src/app/             code (computation core, see docs/specs/m1-rechenkern.md)
 examples/            tutorial models T1, T2 and the learning path (YAML + explanations)
-.streamlit/          app config (port 8642)
 scripts/             benchmark, not part of the test suite
 tests/               pytest suite (offline) and the docs checks
 .claude/settings.json            shared permissions and hooks

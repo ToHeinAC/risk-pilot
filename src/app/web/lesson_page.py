@@ -111,7 +111,7 @@ class LessonPage:
         for lesson in self.lessons.values():
             steps = self.state.progress.get(lesson.id, set())
             mark = t("lesson.done") if "turned" in steps else t("lesson.seen") if steps else ""
-            active = " rp-selected" if lesson.id == self.state.selected else ""
+            active = " rp-current" if lesson.id == self.state.selected else ""
             item = ui.item(on_click=partial(self.select, lesson.id)).classes(f"rounded{active}")
             with item.mark(f"lesson/{lesson.id}"), ui.item_section():
                 ui.item_label(lesson.title)

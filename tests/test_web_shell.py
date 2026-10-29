@@ -80,9 +80,8 @@ def test_unexpected_error_in_a_page_becomes_a_message(monkeypatch: pytest.Monkey
     drive(steps)
 
 
-def test_port_defaults_beside_streamlit_and_is_configurable(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    assert settings.port() == 8643  # Streamlit keeps 8642 until the switch
+def test_port_is_the_project_port_and_configurable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("RISK_PILOT_PORT", raising=False)
+    assert settings.port() == 8642  # the project port, not a framework default
     monkeypatch.setenv("RISK_PILOT_PORT", "9001")
     assert settings.port() == 9001

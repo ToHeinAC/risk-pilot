@@ -1,6 +1,6 @@
 """State of one browser tab: the open model, the current run and the run cache.
 
-No UI import; the Streamlit app (until M7 ends) and the NiceGUI pages share these types.
+No UI import: the pages build on these types, the logic stays testable without a browser.
 """
 
 from dataclasses import dataclass, field

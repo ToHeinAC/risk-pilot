@@ -192,7 +192,7 @@ festgelegt hat.
 | AP | Inhalt | Tests |
 |---|---|---|
 | AP1 | `present/guide.py` Seitenverzeichnis, Seitenkopf, alle Seiten | Oberflächentest je Seite |
-| AP2 | `present/reading.py`, `ui/explain.py`, Ergebnisse/Vergleich/Analyse umbauen | Lesebeispiele T2/T4/T5, leere Fälle |
+| AP2 | `present/reading.py`, `web/explain.py`, Ergebnisse/Vergleich/Analyse umbauen | Lesebeispiele T2/T4/T5, leere Fälle |
 | AP3 | `present/glossary.py`, Seite Glossar, Tooltips | drei Glossar-Tests, Oberflächentest |
 | AP4 | Rundgang | Oberflächentest fünf Schritte |
 | AP5 | (E7) Probelauf + Trace, Graph-Klick | Trace-Werte = Vorschau, Oberflächentest |

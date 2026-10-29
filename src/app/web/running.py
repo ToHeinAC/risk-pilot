@@ -1,4 +1,4 @@
-"""Simulate, cache and save runs; no UI import (shared by both UIs until M7 ends)."""
+"""Simulate, cache and save runs; no UI import."""
 
 import dataclasses
 import json

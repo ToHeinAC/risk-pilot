@@ -34,21 +34,21 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 ## 3. Constraints
 
 - Python ≥ 3.11, Abhängigkeiten nur über uv, Lizenzen Apache-2.0-kompatibel
-  (NumPy, SciPy, Pydantic, PyYAML, Streamlit, Plotly, NetworkX, PyArrow; ab M7 NiceGUI statt
-  Streamlit). Freigegebene Ausnahmen (29.10.2026): `bidict` (MPL-2.0) und `docutils` (Public
+  (NumPy, SciPy, Pydantic, PyYAML, NiceGUI, Plotly, NetworkX, PyArrow; NiceGUI hat in M7
+  Streamlit abgelöst). Freigegebene Ausnahmen (29.10.2026): `bidict` (MPL-2.0) und `docutils` (Public
   Domain/BSD, einzelne Teile GPL) als transitive Abhängigkeiten von NiceGUI, unverändert genutzt.
 - Repository-Gate bleibt verbindlich: Testsuite offline und ≤ 60 s, Branch-Coverage ≥ 85 %,
   pyright strict in `src/`. Langlaufende Statistiktests nur mit eigener Markierung außerhalb des
   Gates und nach Freigabe.
-- Kern (`src/app/` ohne `adapters/`, `ui/` und `web/`) ist rein: keine Datei-, Netzwerk- oder
+- Kern (`src/app/` ohne `adapters/` und `web/`) ist rein: keine Datei-, Netzwerk- oder
   Datenbankzugriffe.
 - Modelle sind YAML-Dateien; das Pydantic-Schema ist der Vertrag. Nutzer- und Laufdaten liegen in
   `data/` (gitignored), Tutorials in `examples/` (versioniert).
 - Ausdrücke werden nie per `eval`/`exec` ausgeführt; nur `ast`-Whitelist.
 - Zufallszahlen: ein eigener `SeedSequence`-Strom je Knoten, abgeleitet aus Lauf-Seed und
   Knoten-ID; Ziehen per Inversionsmethode aus dem Gleichverteilungsstrom des Knotens.
-- Streamlit: eigener Port in `.streamlit/config.toml` (nicht 8501); Beenden-Schaltfläche, die nur
-  den eigenen Prozess per SIGTERM beendet.
+- Oberfläche: eigener Port 8642 (`RISK_PILOT_PORT`, kein Framework-Standardport); Beenden-
+  Schaltfläche, die nur den eigenen Prozess per SIGTERM beendet.
 - Keine stille Reparatur ungültiger Eingaben (Abschneiden, Matrixprojektion, Nullsetzen).
 - Ergebnistexte in Modellsprache: „Im Modell liegen 90 % der Werte höchstens bei …“.
 
@@ -258,7 +258,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M5.
 
 ### M7 — Neue Oberfläche
-- **Status:** in progress (AK 1 met: spike decided for NiceGUI on 2026-10-29, see spec §3.1)
+- **Status:** done (2026-10-29; spike decided for NiceGUI, all pages migrated, Streamlit removed)
 - **Deliverable:** Die Oberfläche löst Streamlit ab, damit eine durchgestaltete Bedienung möglich
   wird, die Streamlits Seiten-Neulauf und Einheitsoptik nicht zulassen. Gewählt: NiceGUI
   (MIT, reines Python, ereignisgesteuert), entschieden nach einem Spike mit drei Ansichten nach
@@ -305,10 +305,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   Trigger: Ziel verfehlt → schnellere Inversion je Familie, ohne die Kopplungseigenschaft aufzugeben.
 - **60-s-Gate gegen statistische Tests:** Referenztests nutzen N ≤ 100 000 und feste Seeds. Trigger:
   Suite > 45 s → langsame Tests markieren und außerhalb des Gates fahren (nach Freigabe).
-- **Ablösung von Streamlit (M7):** Der Spike hat die bessere Bedienung bestätigt (NiceGUI,
-  ≈ 25–55 ms je Änderung, Tests ohne Browser offline). Restrisiko: Migrationsaufwand und
-  Testumstellung über alle Seiten; Trigger: eine Seite lässt sich nicht gleichwertig testen →
-  vor dem Weiterbauen mit dem Nutzer klären.
+- **Ablösung von Streamlit (M7):** erledigt; alle Seiten laufen in NiceGUI, die Tests ohne
+  Browser offline im Gate. Restrisiko: NiceGUI-Updates ändern die Test-Simulation; Trigger: Gate
+  bricht nach einem Update → Version festhalten und mit dem Nutzer klären.
 - **Illustrative Zahlen werden als Fakten gelesen:** Hinweis im UI und in den YAML-Dateien.
 - **Spearman → latent ist nur für die Gaussian Copula exakt;** die erreichte Korrelation wird
   deshalb immer ausgewiesen.

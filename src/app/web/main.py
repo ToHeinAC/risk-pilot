@@ -1,6 +1,6 @@
-"""Entry point of the new UI (M7): ``uv run python -m app.web.main``.
+"""Entry point of the app: ``uv run python -m app.web.main``.
 
-Port from ``RISK_PILOT_PORT`` (default 8643 while Streamlit keeps 8642). One ``Session`` per
+Port from ``RISK_PILOT_PORT`` (default 8642). One ``Session`` per
 browser tab; pages are built by ``BUILDERS`` inside one shell with navigation and exit.
 """
 

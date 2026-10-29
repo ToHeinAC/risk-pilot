@@ -11,7 +11,6 @@ from app.model.graph import edges
 from app.model.scenarios import effective_model
 from app.model.yaml_io import model_from_yaml
 from app.present import structure
-from app.ui import views
 
 
 def data(fig: object) -> list[Any]:
@@ -86,11 +85,6 @@ def test_risk_figure_marks_undefined_difference() -> None:
     (trace,) = data(structure.risk_figure(rows, {"nacharbeit": "Nacharbeit"}, "d"))
     assert trace.text[0] == "Nacharbeit (y nicht bestimmbar)"
     assert list(trace.y) == [0.0]
-
-
-def test_table_escapes_pipes_in_cells() -> None:
-    text = views.table(["E[Y | Ereignis]"], [("a | b",)])
-    assert text.splitlines() == ["| E[Y \\| Ereignis] |", "|---|", "| a \\| b |"]
 
 
 def test_graph_legend_does_not_cover_colour_scale() -> None:
