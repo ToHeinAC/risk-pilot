@@ -114,7 +114,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | 1 | Grundgerüst: `web/main.py` (Seitenleiste, Beenden, Fehlergrenze), `web/session.py` (Zustand je Tab, auch von `ui/state.py` genutzt), `web/theme.py`, Port `RISK_PILOT_PORT` (8643) | erledigt |
 | 2 | Start und Modell: Arbeitsfläche (Graph, Knotentabelle mit Kurzangabe, Mini-Verteilung und P10/P50/P90 aus einem Probelauf, Knotenkarte mit Vorschau), Modellkopf, YAML-Editor auf demselben Entwurf (`web/editing.py`), Speichern mit Konfliktschutz, Verwerfen, Kopieren, CSV-Import, Stützstellen-Angebot | erledigt |
 | 3 | Simulation (Lauf im Hintergrund-Thread, Seite bleibt bedienbar) und Ergebnisse (Antwort zuerst als Kennzahlkarten, „So liest man das“ neben allen Kennzahlen, Grafiken, Speichern, drei Downloads); Lauflogik ohne UI in `web/running.py`, von beiden Oberflächen genutzt | erledigt |
-| 4 | Szenarien, Vergleich | offen |
+| 4 | Szenarien (Baum, Unterschiedstabelle, Anlegen, Override setzen und entfernen, Duplizieren, Loslösen; ungültige Änderungen werden erklärt und nicht übernommen, `web/scenario_edit.py` ohne UI) und Vergleich (Läufe im Hintergrund-Thread, Paartabellen, Differenzstatistik, Verteilungskurven, veralteter Vergleich wird ausgeblendet) | erledigt |
 | 5 | Analyse | offen |
 | 6 | Lernpfad, Läufe | offen |
 | 7 | Umschalten: Port 8642, Streamlit und AppTest entfernen, Doku, PRD-Constraints | offen |
@@ -146,7 +146,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | `test_app_form.py::test_last_change_wins_between_yaml_and_form` | `test_web_model.py::test_last_change_wins_between_yaml_and_form` |
 | `test_app_form.py::test_unreadable_yaml_locks_the_form_and_invalid_model_has_no_preview` | `test_web_model.py::test_unreadable_yaml_locks_the_form_and_invalid_model_has_no_preview` |
 | `test_app_form.py::test_delete_needs_confirmation_and_no_references` | `test_web_model.py::test_delete_needs_confirmation_and_no_references` |
-| `test_app_form.py::test_t2_rebuilt_through_the_form_gives_the_same_model_and_numbers` | `test_web_model.py::test_t2_rebuilt_through_the_form_gives_the_same_basis_model` (Szenarien folgen in Schritt 4) |
+| `test_app_form.py::test_t2_rebuilt_through_the_form_gives_the_same_model_and_numbers` | `test_web_model.py::test_t2_rebuilt_through_the_form_gives_the_same_model_and_numbers` (mit Szenarien über die Szenarienseite) |
 | `test_app.py::test_csv_column_becomes_empirical_distribution` | `test_web_model.py::test_csv_column_becomes_empirical_distribution` |
 | `test_app.py::test_quantile_conflict_offers_piecewise_in_own_model` | `test_web_model.py::test_quantile_conflict_offers_piecewise_in_own_model` |
 | `test_app.py::test_t1_open_simulate_and_show_metrics`, `…::test_simulation_reports_run_time` | `test_web_results.py::test_t1_simulate_reports_time_and_shows_metrics_with_reference` |
@@ -158,5 +158,15 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | `test_app.py::test_validation_messages_in_german_without_crash` (Simulieren gesperrt) | `test_web_results.py::test_invalid_model_blocks_simulation_and_results_wait_for_a_run` |
 | `test_app.py::test_results_show_correlations_losses_horizon_and_peaks` | `test_web_results.py::test_results_show_correlations_losses_horizon_and_peaks` |
 | `test_app.py::test_unchanged_copy_keeps_overlay_changed_copy_gets_notice` | `test_web_results.py::test_unchanged_copy_keeps_overlay_changed_copy_gets_notice` |
+| `test_app.py::test_t2_scenario_tree_and_diff_read_only` | `test_web_scenarios.py::test_t2_scenario_tree_and_diff_read_only` |
+| `test_app.py::test_edit_scenarios_in_own_copy` | `test_web_scenarios.py::test_edit_scenarios_in_own_copy` |
+| `test_app_form.py::test_scenario_page_edit_keeps_comments` | `test_web_scenarios.py::test_remove_override_and_comments_stay` (auch Entfernen) |
+| `test_app.py::test_scenario_form_refuses_invalid_edit` | `test_web_scenarios.py::test_scenario_form_refuses_invalid_edit` |
+| — (neu) ungültiges Modell sperrt die Szenarienbearbeitung | `test_web_scenarios.py::test_invalid_model_has_no_scenario_editing` |
+| `test_app.py::test_compare_page_t2` | `test_web_scenarios.py::test_compare_page_t2` |
+| `test_app.py::test_compare_without_direction_shows_shares_and_d_statistics` | `test_web_scenarios.py::test_compare_without_direction_shows_shares_and_d_statistics` |
+| `test_app.py::test_stale_comparison_hidden_after_model_change` | `test_web_scenarios.py::test_stale_comparison_hidden_after_model_change` |
+| — (neu) ohne Unterszenario kein Vergleich | `test_web_scenarios.py::test_compare_needs_a_sub_scenario` |
+| — (neu) Referenz nicht zugleich Vergleichspartner | `test_web_scenarios.py::test_reference_is_not_offered_as_partner` |
 
 Weitere Zeilen kommen mit jedem Schritt dazu.

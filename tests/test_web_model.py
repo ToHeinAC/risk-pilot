@@ -7,7 +7,7 @@ import pytest
 from nicegui import ui
 from nicegui.elements.upload_files import SmallFileUpload
 from nicegui.testing import User
-from web_util import drive, element, enabled, open_model, put, texts, value
+from web_util import drive, element, enabled, open_model, put, texts, until, value
 
 from app.adapters import files, settings
 from app.engine.simulate import simulate
@@ -272,23 +272,50 @@ async def _build_t2(user: User) -> None:
     put(user, "form.ende.name", "Projektende")
 
 
-def test_t2_rebuilt_through_the_form_gives_the_same_basis_model() -> None:
+async def _scenarios(user: User) -> None:
+    user.find(marker="nav/szenarien").click()
+    await user.should_see(marker="scenario_add")
+    reference = model_from_yaml(T2.read_text("utf-8")).scenarios
+    for sid, node, field, new in (
+        ("b_schneller", "b", "mean", "12"),
+        ("nacharbeit", "nacharbeit", "p", "0.2"),
+    ):
+        s = reference[sid]
+        put(user, "scenario_new_id", sid)
+        put(user, "scenario_new_name", s.name)
+        put(user, "scenario_new_why", s.why)
+        put(user, "scenario_new_parent", BASIS)
+        user.find(marker="scenario_add").click()
+        await until(lambda sid=sid: value(user, "scenario_pick") == sid)
+        put(user, "override_node", node)
+        put(user, "override_field", field)
+        put(user, "override_value", new)
+        put(user, "override_why", str(s.overrides[node]["why"]))
+        user.find(marker="override_set").click()
+        await user.should_see(marker="override_remove")
+
+
+def test_t2_rebuilt_through_the_form_gives_the_same_model_and_numbers() -> None:
     own("schema_version: 1\nmodel: x\nnodes: {}\n", "nachbau")
 
     async def steps(user: User) -> None:
         await open_model(user, "nachbau")
         await _build_t2(user)
+        await _scenarios(user)
+        user.find(marker="nav/modell").click()
+        await user.should_see(marker="save_model")
         user.find(marker="save_model").click()
         await user.should_see(t("ui.saved"))
 
     drive(steps)
-    built = effective_model(files.load_model(settings.models_dir() / "nachbau.yaml"), BASIS)
-    reference = effective_model(model_from_yaml(T2.read_text("utf-8")), BASIS)
+    built = files.load_model(settings.models_dir() / "nachbau.yaml")
+    reference = model_from_yaml(T2.read_text("utf-8"))
     assert content_hash(built) == content_hash(reference)
     assert built.title == reference.title
-    ours = simulate(compile_model(built), n=5000).samples["ende"]
-    theirs = simulate(compile_model(reference), n=5000).samples["ende"]
-    assert np.array_equal(ours, theirs)
+    for sid in (BASIS, "b_schneller", "nacharbeit"):
+        ours = simulate(compile_model(effective_model(built, sid)), n=5000).samples["ende"]
+        theirs = simulate(compile_model(effective_model(reference, sid)), n=5000).samples["ende"]
+        assert np.array_equal(ours, theirs), sid
 
 
 def test_csv_column_becomes_empirical_distribution() -> None:

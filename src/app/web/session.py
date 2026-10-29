@@ -53,10 +53,20 @@ RunKey = tuple[str, int, int]  # (model hash, N, seed)
 
 
 @dataclass
+class CompareView:
+    """Runs of the last comparison; ``text`` is the draft they were made from."""
+
+    text: str
+    ref: str
+    runs: dict[str, RunView]
+
+
+@dataclass
 class Session:
     model: OpenModel | None = None
     run: RunView | None = None
     runs: dict[RunKey, RunView] = field(default_factory=dict[RunKey, RunView])
+    compare: CompareView | None = None
 
 
 def is_example(path: Path) -> bool:
@@ -67,6 +77,7 @@ def open_model(session: Session, path: Path) -> None:
     """Open ``path``: tutorials read-only, the previous run is dropped."""
     session.model = OpenModel(str(path), files.read_text(path), readonly=is_example(path))
     session.run = None
+    session.compare = None
 
 
 def save(model: OpenModel, force: bool) -> str | None:

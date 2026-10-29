@@ -51,6 +51,23 @@ def texts(user: User) -> str:
     return "\n".join(parts)
 
 
+async def until(check: Callable[[], bool], retries: int = 100) -> None:
+    """Wait until ``check`` holds; click handlers run as tasks, not at once."""
+    for _ in range(retries):
+        if check():
+            return
+        await asyncio.sleep(0.01)
+    raise AssertionError("condition not met")
+
+
+def cells(user: User, marker: str) -> list[tuple[str, ...]]:
+    """The rows of the table marked ``marker``, every cell as text, in column order."""
+    table = element(user, marker)
+    assert isinstance(table, ui.table)
+    keys = [str(c["field"]) for c in table.columns]
+    return [tuple(str(row[k]) for k in keys) for row in table.rows]
+
+
 def _all(user: User, kind: type[Element]) -> list[Any]:
     try:
         return list(user.find(kind).elements)

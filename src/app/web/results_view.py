@@ -52,13 +52,14 @@ def card(kicker: str, value: str, caption: str = "") -> None:
             ui.label(caption).classes("rp-muted text-sm")
 
 
-def table(headers: list[str], rows: list[tuple[str, ...]]) -> None:
+def table(headers: list[str], rows: list[tuple[str, ...]]) -> ui.table:
     columns = [
         {"name": str(i), "label": h, "field": str(i), "align": "left"}
         for i, h in enumerate(headers)
     ]
     data = [{str(i): cell for i, cell in enumerate(row)} for row in rows]
-    ui.table(columns=columns, rows=data).props("flat dense hide-pagination").classes("w-full")
+    shown = ui.table(columns=columns, rows=data, pagination=0)
+    return shown.props("flat dense hide-pagination").classes("w-full")
 
 
 def _unit(unit: str | None) -> str:

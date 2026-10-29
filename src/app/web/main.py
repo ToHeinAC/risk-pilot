@@ -12,7 +12,15 @@ from nicegui import ui
 
 from app.adapters import process, settings
 from app.messages import t
-from app.web import model_page, results_page, simulation_page, start, theme
+from app.web import (
+    compare_page,
+    model_page,
+    results_page,
+    scenario_page,
+    simulation_page,
+    start,
+    theme,
+)
 from app.web.session import OpenModel, Session
 
 EXIT_DELAY = 0.3  # seconds: the goodbye text reaches the browser before SIGTERM
@@ -40,8 +48,10 @@ BUILDERS.update(
     {
         "/": start.page,
         "/modell": model_page.page,
+        "/szenarien": scenario_page.page,
         "/simulation": simulation_page.page,
         "/ergebnisse": results_page.page,
+        "/vergleich": compare_page.page,
     }
 )
 
