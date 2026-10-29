@@ -12,7 +12,6 @@ from app.web.session import Session
 
 
 def page(session: Session) -> None:
-    ui.label(t("ui.page_simulation")).classes("text-2xl font-semibold")
     model = session.model
     if model is None:
         ui.label(t("ui.no_model")).classes("rp-muted")

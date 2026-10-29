@@ -98,8 +98,6 @@ class StartPage:
 
 def page(session: Session) -> None:
     start = StartPage(session)
-    ui.label("Risk Pilot").classes("text-2xl font-semibold")
-    ui.label(t("ui.start_intro")).classes("rp-muted max-w-3xl")
     with ui.column().classes("rp-panel p-4 gap-2 w-full"):
         ui.label(t("ui.page_lernpfad")).classes("text-lg font-semibold")
         ui.label(t("ui.lernpfad_intro")).classes("rp-muted")

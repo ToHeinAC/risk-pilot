@@ -292,6 +292,31 @@ UI: dict[str, dict[str, str]] = {
         "ui.page_ergebnisse": "Ergebnisse",
         "ui.page_laeufe": "Läufe",
         "web.no_model": "Kein Modell geöffnet",
+        "guide.next_label": "Nächster Schritt:",
+        "guide.next_open": "ein Tutorial oder eigenes Modell auf der Startseite öffnen",
+        "guide.next_lernpfad": "mit dem Lernpfad beginnen oder ein Tutorial öffnen",
+        "guide.next_model": "das offene Modell ansehen und bearbeiten",
+        "guide.next_start": "ein Tutorial öffnen und selbst ein Modell bauen",
+        "guide.next_simulate": "das Modell simulieren",
+        "guide.next_run_here": "oben Szenario und N wählen und „Simulieren“ drücken",
+        "guide.next_results": "die Ergebnisse lesen",
+        "guide.next_compare": "Szenarien vergleichen",
+        "guide.next_analyse": "die Struktur analysieren: welche Eingaben das Ergebnis treiben",
+        "guide.next_scenarios": "ein Szenario anlegen und wieder vergleichen",
+        "guide.purpose_modell": "Hier baust du das Modell: Knoten im Graph und in der Tabelle "
+        "wählen, in der Karte bearbeiten oder direkt im YAML; ein Probelauf zeigt sofort, was an "
+        "jedem Knoten herauskommt.",
+        "guide.purpose_szenarien": "Szenarien sind Varianten des Modells: Sie überschreiben "
+        "einzelne Werte des Hauptszenarios mit Begründung, damit sich ihre Wirkung vergleichen "
+        "lässt.",
+        "guide.purpose_simulation": "Hier rechnest du ein Szenario durch: N Iterationen mit "
+        "festem Seed, damit jedes Ergebnis wiederholbar ist.",
+        "guide.purpose_ergebnisse": "Die Antwort des letzten Laufs: Wahrscheinlichkeiten und "
+        "Quantile der Ausgaben mit ihrer numerischen Unsicherheit, in Sätzen und Grafiken.",
+        "guide.purpose_vergleich": "Szenarien gegeneinander: alle laufen mit demselben Seed, "
+        "deshalb zeigen die Differenzen nur die Wirkung der Overrides.",
+        "guide.purpose_laeufe": "Gespeicherte Läufe des offenen Modells: laden, um ihre "
+        "Ergebnisse wieder anzusehen, ohne neu zu rechnen.",
         "web.col_node": "Knoten",
         "web.col_brief": "Eingabe",
         "web.col_spark": "Verteilung",

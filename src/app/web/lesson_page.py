@@ -276,5 +276,4 @@ class LessonPage:
 
 
 def page(session: Session) -> None:
-    ui.label(t("ui.page_lernpfad")).classes("text-2xl font-semibold")
     LessonPage(session).build()

@@ -1,7 +1,7 @@
 # Pflichtenheft M8 — UX und Selbsterklärung
 
 **Stand:** 29. Oktober 2026, Entwurf, auf NiceGUI überführt (M7 abgeschlossen,
-[m7-neue-oberflaeche.md](m7-neue-oberflaeche.md)); E2–E11 bestätigt, E12–E14 zur Freigabe ·
+[m7-neue-oberflaeche.md](m7-neue-oberflaeche.md)); E2–E14 bestätigt (E12–E14 am 29.10.2026) ·
 **Bezug:** [PRD.md](../../PRD.md), Meilenstein M8 (AK 1–5, Edge cases) · **Voraussetzung:** M1–M7
 
 Dieses Pflichtenheft legt fest, **wie** M8 umgesetzt wird. Das PRD bleibt der Vertrag für das
@@ -208,12 +208,12 @@ Formular, nicht das Schema.
 | E9 | Hex-What-if-Regler auf Ergebnisseite | **nein**: Szenarien + Vergleich und Sweep decken das ab; ein dritter Weg zum selben Ziel erklärt sich schlechter |
 | E10 | Ort der Texte | `messages.py` wie bisher; Glossar als Daten in `present/glossary.py` |
 | E11 | Durchgang | Beobachtungsbogen mit fünf Aufgaben (Abschnitt 9) |
-| E12 | Seitenkopf in NiceGUI | einmal in der Hülle (`web/main.py`), Seiten setzen keinen eigenen Titel |
-| E13 | Rundgang-Banner in NiceGUI | in der Hülle; besuchte Seiten in der Sitzung; nach Hintergrundläufen aktualisiert |
-| E14 | Spanne als erste Eingabeart | neuer unsicherer Knoten startet mit `quantiles` (P10/P50/P90) |
+| E12 | Seitenkopf in NiceGUI | **bestätigt:** einmal in der Hülle (`web/main.py`), Seiten setzen keinen eigenen Titel |
+| E13 | Rundgang-Banner in NiceGUI | **bestätigt:** in der Hülle; besuchte Seiten in der Sitzung; nach Hintergrundläufen aktualisiert |
+| E14 | Spanne als erste Eingabeart | **bestätigt:** neuer unsicherer Knoten startet mit `quantiles` (P10/P50/P90) |
 
-E7 und E8 erweitern den Lieferumfang. Der größte Teil ist mit M7 geliefert; das PRD ergänzt M8
-um den Rest (E14) nur nach Freigabe.
+E7 und E8 erweitern den Lieferumfang. Der größte Teil ist mit M7 geliefert; das PRD führt den Rest (E14) seit
+der Freigabe am 29.10.2026 in M8.
 
 ***
 
@@ -222,6 +222,9 @@ um den Rest (E14) nur nach Freigabe.
 | AP | Inhalt | Tests |
 |---|---|---|
 Reihenfolge wie in M7: ein Commit je Arbeitspaket auf `main`, Tests zuerst, Gate grün.
+
+**Stand:** AP1 erledigt (`present/guide.py`, Kopf in `web/main.py`, `tests/test_present_guide.py`,
+`tests/test_web_guide.py`); AP5 mit M7 geliefert.
 
 | AP | Inhalt | Tests |
 |---|---|---|

@@ -130,7 +130,6 @@ class ModelPage:
 
     def build(self) -> None:
         with ui.row().classes("w-full items-center gap-3"):
-            ui.label(t("ui.page_modell")).classes("text-2xl font-semibold")
             ui.label(self.path.name).classes("rp-muted font-mono")
             ui.space()
             self.bar()

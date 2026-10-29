@@ -56,5 +56,4 @@ class RunsPage:
 
 
 def page(session: Session) -> None:
-    ui.label(t("ui.page_laeufe")).classes("text-2xl font-semibold")
     RunsPage(session).body()

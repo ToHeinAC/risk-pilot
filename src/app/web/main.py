@@ -12,6 +12,7 @@ from nicegui import ui
 
 from app.adapters import process, settings
 from app.messages import t
+from app.present import guide
 from app.web import (
     analysis_page,
     compare_page,
@@ -123,6 +124,22 @@ def _go(path: str) -> Callable[[], None]:
     return lambda: ui.navigate.to(path)
 
 
+def _page_head(path: str, session: Session) -> None:
+    """Title, what the page is for, and the next step for the current state (M8 AK 1)."""
+    title = next(key for other, key, _icon in PAGES if other == path)
+    facts = guide.Facts(has_model=session.model is not None, has_run=session.run is not None)
+    step = guide.next_step(path, facts)
+    with ui.column().classes("gap-1 w-full"):
+        ui.label(t(title)).classes("text-2xl font-semibold")
+        ui.label(t(guide.PAGES[path].purpose)).classes("rp-muted max-w-3xl").mark("page_purpose")
+        with ui.row().classes("items-center gap-1 text-sm"):
+            ui.label(t("guide.next_label")).classes("font-semibold")
+            if step.target is None:
+                ui.label(t(step.text))
+            else:
+                ui.link(t(step.text), step.target).mark("next_step")
+
+
 def _page(path: str, session: Session, nav: dict[str, ui.item]) -> Callable[[], None]:
     """Build one page; an unexpected error becomes a German message, the shell keeps running."""
 
@@ -130,6 +147,7 @@ def _page(path: str, session: Session, nav: dict[str, ui.item]) -> Callable[[], 
         for other, item in nav.items():
             item.classes(add="rp-active" if other == path else "", remove="rp-active")
         try:
+            _page_head(path, session)
             BUILDERS[path](session)
         except Exception as exc:  # last line of defence, shown to the user
             ui.label(t("ui.unexpected", detail=f"{type(exc).__name__}: {exc}")).classes(

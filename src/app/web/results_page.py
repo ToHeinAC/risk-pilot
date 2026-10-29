@@ -68,7 +68,6 @@ def _save(run: RunView) -> None:
 
 
 def page(session: Session) -> None:
-    ui.label(t("ui.page_ergebnisse")).classes("text-2xl font-semibold")
     run = session.run
     if run is None:
         ui.label(t("ui.no_run")).classes("rp-muted")

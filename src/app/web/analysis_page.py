@@ -118,7 +118,6 @@ class AnalysisPage:
         self.labels = scenario_labels(checked)
 
     def build(self) -> None:
-        ui.label(t("analysis.intro")).classes("rp-muted")
         with ui.expansion(t("analysis.guide_label"), icon="map").classes("rp-panel w-full"):
             ui.markdown(t("analysis.guide")).classes("px-4")
         sid, output, n, seed = self._start()
@@ -210,7 +209,6 @@ class AnalysisPage:
 
 
 def page(session: Session) -> None:
-    ui.label(t("ui.page_analyse")).classes("text-2xl font-semibold")
     model = session.model
     if model is None:
         ui.label(t("ui.no_model")).classes("rp-muted")
