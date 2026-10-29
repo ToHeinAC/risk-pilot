@@ -56,6 +56,7 @@ CODES: dict[str, tuple[str, ...]] = {
     "corr.node_unknown": ("group", "name"),
     "corr.node_type": ("group", "type"),
     "corr.node_twice": ("groups",),
+    "corr.node_repeated": ("group",),
     "corr.shape": ("group", "k"),
     "corr.diagonal": ("group",),
     "corr.range": ("group",),

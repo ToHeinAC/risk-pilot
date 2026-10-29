@@ -3,6 +3,7 @@
 import csv
 import hashlib
 import io
+import math
 import os
 import re
 from pathlib import Path
@@ -125,7 +126,10 @@ def csv_column(data: bytes, column: str) -> tuple[list[float], int]:
             skipped += 1
             continue
         try:
-            values.append(float(cell.replace(",", ".") if delimiter != "," else cell))
+            value = float(cell.replace(",", ".") if delimiter != "," else cell)
+            if not math.isfinite(value):
+                raise ValueError(cell)
+            values.append(value)
         except ValueError:
             raise InputError(
                 Issue("csv.number", line=line, params={"value": cell, "column": column})

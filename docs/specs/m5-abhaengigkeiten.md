@@ -78,7 +78,7 @@ scenarios:
 | Fall | Code |
 |---|---|
 | Gruppe mit weniger als zwei Knoten | `corr.too_small` |
-| Knoten unbekannt, falscher Typ oder in zwei Gruppen | `corr.node_unknown`, `corr.node_type`, `corr.node_twice` |
+| Knoten unbekannt, falscher Typ, in zwei Gruppen oder doppelt in einer | `corr.node_unknown`, `corr.node_type`, `corr.node_twice`, `corr.node_repeated` |
 | Matrix nicht k×k, Diagonale ≠ 1, \|ρ\| > 1, nicht symmetrisch | `corr.shape`, `corr.diagonal`, `corr.range`, `corr.asymmetric` |
 | Spearman-Matrix nicht positiv semidefinit | `corr.not_psd` (kleinster Eigenwert genannt) |
 | Latente Matrix 2 sin(π ρ_s / 6) nicht positiv semidefinit | `corr.latent_not_psd` (selten; Erklärung im Text) |
@@ -118,7 +118,7 @@ scenarios:
   `values[floor(u · n)]`. Diskret für Tornado-Quantile (M4).
 - **CSV-Import (E5):** Auf der Modellseite eine CSV-Datei hochladen, Spalte wählen, Zielknoten
   wählen → die Werte werden als `values`-Liste ins YAML geschrieben (nur eigene Modelle). Leere
-  Zellen werden übersprungen und gezählt; nicht lesbare Zahlen brechen den Import mit Zeilenangabe
+  Zellen werden übersprungen und gezählt; nicht lesbare oder nicht endliche Zahlen (`nan`, `inf`) brechen den Import mit Zeilenangabe
   ab. Höchstens 100 000 Werte. Die Datei muss UTF-8 sein; andere Kodierungen werden gemeldet
   (`csv.encoding`), nicht geraten.
 

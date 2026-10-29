@@ -73,6 +73,7 @@ def test_nodes_outside_groups_keep_their_draws() -> None:
             "  h: {nodes: [a, c], spearman: [[1, 0], [0, 1]]}\n",
             "corr.node_twice",
         ),
+        (group("[a, a]", "[[1, 0.5], [0.5, 1]]"), "corr.node_repeated"),
         (group("[a, b]", "[[1, 0, 0], [0, 1, 0]]"), "corr.shape"),
         (group("[a, b]", "[[1, 0.2], [0.2, 0.9]]"), "corr.diagonal"),
         (group("[a, b]", "[[1, 1.2], [1.2, 1]]"), "corr.range"),

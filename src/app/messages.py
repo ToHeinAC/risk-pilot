@@ -72,6 +72,8 @@ _DE: dict[str, str] = {
     "corr.node_type": "Korrelationsgruppe „{group}“: {node} hat den Typ „{type}“; erlaubt sind "
     "unsichere Knoten und Ereignisse.",
     "corr.node_twice": "{node} steht in mehreren Korrelationsgruppen ({groups}); erlaubt ist eine.",
+    "corr.node_repeated": "Korrelationsgruppe „{group}“: {node} steht mehrfach in der Liste; "
+    "jeder Knoten darf nur einmal vorkommen.",
     "corr.shape": "Korrelationsgruppe „{group}“: Die Matrix muss {k} Zeilen mit je {k} "
     "Werten haben.",
     "corr.diagonal": "Korrelationsgruppe „{group}“: Auf der Diagonale muss überall 1 stehen.",

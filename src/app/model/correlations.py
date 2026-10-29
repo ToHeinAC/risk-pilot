@@ -43,6 +43,9 @@ def _member_issues(model: Model, gid: str, group: CorrelationGroup) -> list[Issu
     if len(group.nodes) < 2:
         return [Issue("corr.too_small", params=base)]
     issues: list[Issue] = []
+    repeated = sorted({n for n in group.nodes if group.nodes.count(n) > 1})
+    for name in repeated:
+        issues.append(Issue("corr.node_repeated", name, params=base))
     for name in group.nodes:
         node = model.nodes.get(name)
         if node is None:

@@ -107,6 +107,14 @@ def test_csv_column_reports_line_of_bad_number() -> None:
     assert exc.value.issue.code == "csv.column"
 
 
+@pytest.mark.parametrize("cell", ["nan", "inf", "-Infinity"])
+def test_csv_column_rejects_non_finite(cell: str) -> None:
+    with pytest.raises(InputError) as exc:
+        files.csv_column(f"x\n1\n{cell}\n".encode(), "x")
+    assert exc.value.issue.code == "csv.number"
+    assert exc.value.issue.line == 3
+
+
 def test_csv_in_another_encoding_is_reported() -> None:
     data = "größe\n1\n".encode("latin-1")
     with pytest.raises(InputError) as exc:
