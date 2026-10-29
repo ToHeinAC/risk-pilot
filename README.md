@@ -53,6 +53,14 @@ sends SIGTERM to the app's own process only (no port kill). Ctrl+C in the termin
   at its P10 and P90, same seed), sweep of one literal parameter over k values, Spearman rank
   correlation (descriptive) and a risk matrix per event (p̂ with Wilson, conditional difference
   with Welch interval).
+- **Form editor and export** (M6, [spec](docs/specs/m6-formular-export.md)): the model page has
+  the tabs "Formular" and "YAML" on one draft. The form edits the model header, every node by
+  type (parameter fields come from the distribution family) and shows a preview of each
+  uncertain node (density, CDF, mean, median, P5/P95, share outside `bounds`). Form edits patch
+  the YAML text in place, so comments and layout stay. "Neues leeres Modell" on the start page.
+  The results page exports metrics as CSV, raw samples as Parquet and a standalone HTML report.
+- **Reference:** model format and semantics in [docs/model-semantics.md](docs/model-semantics.md),
+  statistics and extension points in [docs/statistical-methods.md](docs/statistical-methods.md).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.
 - Data location: `RISK_PILOT_DATA_DIR` (default `data/`, gitignored).
 

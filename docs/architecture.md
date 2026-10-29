@@ -13,16 +13,20 @@ Core packages (M1, [spec](specs/m1-rechenkern.md)):
 | Package | Role |
 |---|---|
 | `errors.py`, `messages.py` | Issue/Notice with stable codes and parameters; German message catalogue, `render()` |
-| `model/` | Pydantic schema, YAML text <-> model, reference graph and typed edges (`graph.edges`, M4), `compile_model`; `scenarios.py` (M3): chain, effective model, validation, diff, editing; M5: `correlations.py` (group checks, Spearman -> latent, matrix factor), `edits.py` (quantiles -> piecewise, CSV values -> empirical) |
+| `model/` | Pydantic schema, YAML text <-> model, reference graph and typed edges (`graph.edges`, M4), `compile_model`; `scenarios.py` (M3): chain, effective model, validation, diff, editing; M5: `correlations.py` (group checks, Spearman -> latent, matrix factor), `edits.py` (quantiles -> piecewise, CSV values -> empirical); M6 ([spec](specs/m6-formular-export.md)): `yaml_patch.py` (YAML text <-> raw data with ruamel.yaml; patches the text in place, comments and layout stay), `form.py` (form values <-> raw data, works on invalid models too) |
 | `expr/` | Expression language: AST whitelist, static types, vectorised evaluation, function registry; `activity.py` (M4): which references decide a result per iteration |
 | `dists/` | Distribution families (inversion sampling), registry; M5: `piecewise`, `empirical`, input mode `quantiles` with `fit.py` (least squares, deviation relative to P90 − P10) |
 | `engine/` | One random stream per node, `simulate` (`keep="all"` holds every node's array for the M4 analyses); `copula.py` (M5): correlated uniforms from the members' own streams, achieved ρ |
 | `analysis/` | Summary statistics with intervals (M5: horizon, VaR/ES, multimodality), analytic references for T1–T4; `compare.py` (M3): paired differences, batch means, P(B better); M4 ([spec](specs/m4-struktur.md)): `criticality.py` (decisive path, index, constellations), `tornado.py`, `sweep.py`, `sensitivity.py` (Spearman), `riskmatrix.py` (Wilson, Welch) |
-| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); no Streamlit import |
+| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); M6: `preview.py` (node preview from a small run), `export.py` (metrics CSV, HTML report); no Streamlit import |
 | `lessons/` (M2) | Learning path: manifest schema, knob (`with_value`), analytic checks per lesson, reading list |
 
 Dependency direction: `ui` -> `present`, `lessons`, `adapters` -> `analysis`, `engine` -> `model`
 -> `expr`, `dists` -> `errors`.
+
+Adapters added in M6: `export.py` writes the Parquet bytes (pyarrow). In the UI, `form.py` and
+`form_card.py` render the form; all draft rewrites (form, CSV import, scenarios) go through
+`views.rewrite_data`, which patches the YAML text instead of re-dumping it.
 
 UI notes: every page calls `views.sidebar_exit()` itself, because AppTest re-renders only the page
 after a widget interaction under `st.navigation`. All visible texts come from `messages.UI` via

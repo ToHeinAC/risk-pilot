@@ -233,7 +233,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M4.
 
 ### M6 — Formular-Editor und Export
-- **Status:** planned
+- **Status:** in progress (implemented, tested and reviewed 29.10.2026; manual click-through pending)
 - **Deliverable:** Knotentabelle und Knotenkarten mit Verteilungsvorschau und Begründungsfeld,
   Export, Dokumentation der Erweiterungspunkte (`docs/model-semantics.md`,
   `docs/statistical-methods.md`).
