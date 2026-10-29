@@ -220,9 +220,10 @@ ungefragt in `data/` geschrieben (E9).
 **Reihenfolge:** AP1 → AP2 → AP3 → AP4 → AP5 → AP6 → AP7.
 
 - [x] PRD M6 AK 1–5 und Edge cases durch Tests belegt; Gate grün.
-- [ ] Manuell: T2 im Formular nachbauen, Vorschau prüfen, alle drei Exporte öffnen.
-- [ ] Streamlit-Risiko aus PRD §5 bewertet (Formular flüssig bedienbar?).
-- [ ] README, `docs/`; PRD M6 **Status** `done (verified by: …)`; Review.
+- [x] Manuell: T2 im Formular nachbauen, Vorschau prüfen, alle drei Exporte öffnen (29.10.2026).
+- [x] Streamlit-Risiko aus PRD §5 bewertet: Neulauf nach Formularänderung an T5 ≈ 0,09 s, im
+  manuellen Durchgang flüssig; kein Wechsel zu NiceGUI nötig.
+- [x] README, `docs/`; PRD M6 **Status** `done (verified by: …)`; Review.
 
 ***
 

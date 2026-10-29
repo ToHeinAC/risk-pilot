@@ -233,7 +233,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M4.
 
 ### M6 — Formular-Editor und Export
-- **Status:** in progress (implemented, tested and reviewed 29.10.2026; manual click-through pending)
+- **Status:** done (verified by: tests/test_form.py, test_yaml_patch.py, test_preview.py,
+  test_app_form.py, test_export.py, test_family_extension.py, test_app.py; review and manual
+  click-through 29.10.2026)
 - **Deliverable:** Knotentabelle und Knotenkarten mit Verteilungsvorschau und Begründungsfeld,
   Export, Dokumentation der Erweiterungspunkte (`docs/model-semantics.md`,
   `docs/statistical-methods.md`).
