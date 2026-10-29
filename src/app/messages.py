@@ -435,7 +435,8 @@ UI: dict[str, dict[str, str]] = {
         "compare.run": "Vergleichen",
         "compare.same_seed": "Alle Szenarien laufen mit demselben Seed: Unterschiede entstehen nur "
         "durch die Overrides (gemeinsame Zufallszahlen).",
-        "compare.need_two": "Für einen Vergleich braucht das Modell mindestens ein Unterszenario.",
+        "compare.need_two": "Das Modell hat nur das Hauptszenario; ein Unterszenario lässt sich "
+        "auf der Seite „Szenarien“ anlegen.",
         "compare.pair": "„{b}“ gegen „{a}“",
         "compare.diff": "Differenz B − A [95-%-Intervall]",
         "compare.d_caption": "Verteilung der Differenz B − A je Iteration",
@@ -502,48 +503,101 @@ UI: dict[str, dict[str, str]] = {
         "- **Rangkorrelation:** schneller Überblick aus einem Lauf, welche Eingaben mit dem "
         "Ergebnis gleichlaufen.\n"
         "- **Risikomatrix:** Ereignisse nach Wahrscheinlichkeit und Folge einordnen.",
-        "analysis.help_label": "Was zeigt dieser Reiter?",
-        "analysis.help_graph": "**Frage:** Wie hängen die Knoten zusammen?\n\n"
-        "**Lesart:** Pfeile laufen von links (Eingaben) nach rechts (Ausgabe). Das Symbol zeigt "
-        "den Knotentyp, die Linienart, ob ein Knoten in einer Formel oder in einem "
-        "Verteilungsparameter steckt. Die Farbe zeigt die gewählte Einfärbung; blasse Knoten "
-        "wirken nicht auf die Ausgabe.\n\n"
-        "**Grenze:** Der Graph zeigt Struktur, keine Stärke der Wirkung.",
-        "analysis.help_crit": "**Frage:** Welche Knoten bestimmen das Ergebnis tatsächlich?\n\n"
-        "**Lesart:** Bei max/min zählt nur der Gewinner, bei where nur der gewählte Zweig. Der "
-        "Index ist der Anteil der Iterationen, in denen ein Knoten so auf dem entscheidenden "
-        "Pfad liegt – wie der Kritikalitätsindex im Terminplan. Die Konstellationen zeigen, "
-        "welche Eingaben gemeinsam entscheiden.\n\n"
-        "**Grenze:** Ein Index von 100 % heißt nicht „wichtig“, nur „immer beteiligt“; wie stark "
-        "ein Knoten wirkt, zeigen Tornado und Sweep.",
-        "analysis.help_tornado": "**Frage:** Welche unsichere Eingabe verschiebt das Ergebnis am "
-        "stärksten?\n\n"
-        "**Lesart:** Je Eingabe wird das Modell zweimal gerechnet, mit der Eingabe fest auf "
-        "ihrem P10 und ihrem P90; alles andere bleibt zufällig wie im Ausgangslauf. Der Balken "
-        "reicht von der Kennzahl bei P10 bis zu der bei P90; oben steht die Eingabe mit dem "
-        "größten Ausschlag.\n\n"
-        "**Grenze:** Jede Eingabe wird einzeln bewegt; Wechselwirkungen mehrerer Eingaben zeigt "
-        "der Tornado nicht.",
-        "analysis.help_sweep": "**Frage:** Wie ändert sich das Ergebnis, wenn ich einen Wert "
-        "gezielt verändere?\n\n"
-        "**Lesart:** Ein Planwert (Konstante, Verteilungsparameter oder Wahrscheinlichkeit) "
-        "läuft über k Werte; je Wert ein Lauf mit demselben Seed. Die Kurve zeigt die gewählte "
-        "Kennzahl, die Balken ihre numerische Unsicherheit.\n\n"
-        "**Grenze:** Alle anderen Werte bleiben wie im Modell; der Sweep sagt nicht, welcher "
-        "Wert realistisch ist.",
-        "analysis.help_rho": "**Frage:** Welche Eingaben laufen mit dem Ergebnis gleich?\n\n"
-        "**Lesart:** ρ nach Spearman zwischen −1 und 1: nahe 1 heißt „hohe Eingabe, hohes "
+        "explain.graph.question": "Wie hängen die Knoten zusammen?",
+        "explain.graph.how": "**Lesart:** Pfeile laufen von links (Eingaben) nach rechts "
+        "(Ausgabe). Das Symbol "
+        "zeigt den Knotentyp, die Linienart, ob ein Knoten in einer Formel oder in einem "
+        "Verteilungsparameter steckt. Die Farbe zeigt die gewählte Einfärbung; blasse "
+        "Knoten wirken nicht auf die Ausgabe.\n\n**Grenze:** Der Graph zeigt Struktur, keine "
+        "Stärke der Wirkung.",
+        "explain.crit.question": "Welche Knoten bestimmen das Ergebnis tatsächlich?",
+        "explain.crit.how": "**Lesart:** Bei max/min zählt nur der Gewinner, bei where nur der "
+        "gewählte Zweig. "
+        "Der Index ist der Anteil der Iterationen, in denen ein Knoten so auf dem "
+        "entscheidenden Pfad liegt – wie der Kritikalitätsindex im Terminplan. Die "
+        "Konstellationen zeigen, welche Eingaben gemeinsam entscheiden.\n\n**Grenze:** Ein "
+        "Index von 100 % heißt nicht „wichtig“, nur „immer beteiligt“; wie stark ein "
+        "Knoten wirkt, zeigen Tornado und Sweep.",
+        "explain.tornado.question": "Welche unsichere Eingabe verschiebt das Ergebnis am "
+        "stärksten?",
+        "explain.tornado.how": "**Lesart:** Je Eingabe wird das Modell zweimal gerechnet, mit "
+        "der Eingabe fest "
+        "auf ihrem P10 und ihrem P90; alles andere bleibt zufällig wie im Ausgangslauf. "
+        "Der Balken reicht von der Kennzahl bei P10 bis zu der bei P90; oben steht die "
+        "Eingabe mit dem größten Ausschlag.\n\n**Grenze:** Jede Eingabe wird einzeln bewegt; "
+        "Wechselwirkungen mehrerer Eingaben zeigt der Tornado nicht.",
+        "explain.sweep.question": "Wie ändert sich das Ergebnis, wenn ich einen Wert gezielt "
+        "verändere?",
+        "explain.sweep.how": "**Lesart:** Ein Planwert (Konstante, Verteilungsparameter oder "
+        "Wahrscheinlichkeit) läuft über k Werte; je Wert ein Lauf mit demselben Seed. Die "
+        "Kurve zeigt die gewählte Kennzahl, die Balken ihre numerische "
+        "Unsicherheit.\n\n**Grenze:** Alle anderen Werte bleiben wie im Modell; der Sweep "
+        "sagt nicht, welcher Wert realistisch ist.",
+        "explain.rho.question": "Welche Eingaben laufen mit dem Ergebnis gleich?",
+        "explain.rho.how": "**Lesart:** ρ nach Spearman zwischen −1 und 1: nahe 1 heißt „hohe "
+        "Eingabe, hohes "
         "Ergebnis“, nahe 0 kein monotoner Zusammenhang. Berechnet aus einem Lauf, daher "
-        "schnell.\n\n"
-        "**Grenze:** Deskriptiv: keine Ursache und keine Wirkungsstärke; Eingaben mit kleiner "
-        "Streuung können trotz starker Wirkung ein kleines ρ haben.",
-        "analysis.help_risk": "**Frage:** Welche Ereignisse sind wahrscheinlich und "
-        "folgenreich?\n\n"
-        "**Lesart:** Waagerecht die Eintrittswahrscheinlichkeit, senkrecht, um wie viel das "
-        "Ergebnis im Mittel höher liegt, wenn das Ereignis eintritt – wie eine klassische "
-        "Risikomatrix, aber aus der Simulation. Die Balken zeigen die Unsicherheit.\n\n"
-        "**Grenze:** Die Differenz ist keine kausale Wirkung, wenn Ereignisse gemeinsame "
-        "Ursachen haben oder zusammenwirken.",
+        "schnell.\n\n**Grenze:** Deskriptiv: keine Ursache und keine Wirkungsstärke; "
+        "Eingaben mit kleiner Streuung können trotz starker Wirkung ein kleines ρ haben.",
+        "explain.risk.question": "Welche Ereignisse sind wahrscheinlich und folgenreich?",
+        "explain.risk.how": "**Lesart:** Waagerecht die Eintrittswahrscheinlichkeit, senkrecht, "
+        "um wie viel "
+        "das Ergebnis im Mittel höher liegt, wenn das Ereignis eintritt – wie eine "
+        "klassische Risikomatrix, aber aus der Simulation. Die Balken zeigen die "
+        "Unsicherheit.\n\n**Grenze:** Die Differenz ist keine kausale Wirkung, wenn "
+        "Ereignisse gemeinsame Ursachen haben oder zusammenwirken.",
+        "explain.result.question": "Was sagt der Lauf über diese Ausgabe?",
+        "explain.result.how": "**Lesart:** Die Karten oben sind die Antwort; die Sätze darunter "
+        "lesen sie in "
+        "Modellsprache. Das Histogramm zeigt, wie oft welche Werte vorkommen, die "
+        "Verteilungskurve den Anteil der Iterationen bis zu einem Wert. Jede Zahl trägt "
+        "ihr Intervall: so genau ist sie bei diesem N.\n\n**Grenze:** Das Intervall misst "
+        "nur die Simulationsunsicherheit, nicht ob die Eingaben stimmen; das Ergebnis gilt "
+        "im Modell.",
+        "explain.compare.question": "Was ändert dieses Szenario gegenüber der Referenz?",
+        "explain.compare.how": "**Lesart:** Beide Szenarien laufen mit demselben Seed, Iteration "
+        "für Iteration "
+        "gepaart. Die Tabelle zeigt die Kennzahlen und ihre Differenz mit 95-%-Intervall, "
+        "der Satz darunter, wie oft das Szenario besser oder kleiner ist; die Verteilung "
+        "der Differenz zeigt, wie stark es je Iteration abweicht.\n\n**Grenze:** Der "
+        "Vergleich zeigt die Wirkung der Overrides im Modell, nicht ob diese Werte "
+        "realistisch sind.",
+        "explain.how_label": "Lesart und Grenze",
+        "read.median": "Im Modell liegt {name} in der Hälfte der Iterationen höchstens bei "
+        "{median}.",
+        "read.target": "Das Ziel wird in {p} der Iterationen erreicht.",
+        "read.share": "Im Modell trifft {name} in {p} der Iterationen zu; bei einer "
+        "Ja/Nein-Ausgabe "
+        "zählt nur dieser Anteil.",
+        "read.no_values": "Für diese Ausgabe gibt es keine Werte innerhalb des Horizonts.",
+        "read.compare": "Im Modell liegt {name} in „{b}“ im Mittel {amount} {direction} als in "
+        "„{a}“.",
+        "read.compare_same": "Im Modell liegt {name} in „{b}“ im Mittel genauso wie in „{a}“.",
+        "read.points": "{diff} Prozentpunkte",
+        "read.higher": "höher",
+        "read.lower": "niedriger",
+        "read.graph_complete": "Das Modell hat {n} Knoten; alle Eingaben tragen eine Begründung.",
+        "read.graph_missing": "Das Modell hat {n} Knoten; {k} Eingaben fehlt noch eine "
+        "Begründung (Einfärbung "
+        "„Begründung fehlt“).",
+        "read.crit": "Im Modell liegt {node} in {p} der Iterationen auf dem entscheidenden Pfad zu "
+        "{name} – öfter als jede andere Eingabe.",
+        "read.tornado": "Im Modell verschiebt {node} die Kennzahl „{metric}“ für {name} von "
+        "{low} auf "
+        "{high}, wenn die Eingabe von P10 auf P90 geht – mehr als jede andere Eingabe.",
+        "read.sweep": "Im Modell {direction} der Wert von {name} von {y0} auf {y1}, wenn {param} "
+        "von "
+        "{x0} auf {x1} geht.",
+        "read.sweep_short": "Für eine Aussage braucht der Sweep mindestens zwei gültige Werte.",
+        "read.rises": "steigt",
+        "read.falls": "sinkt",
+        "read.stays": "bleibt",
+        "read.rho": "Im Modell läuft {node} am stärksten mit {name} gleich (ρ = {rho}).",
+        "read.risk": "Tritt {node} ein (im Modell in {p} der Iterationen), liegt {name} im Mittel "
+        "{amount} {direction}.",
+        "read.risk_undefined": "Kein Ereignis tritt im Modell sowohl ein als auch nicht ein; die "
+        "Differenz ist "
+        "deshalb nicht bestimmbar.",
         "analysis.run": "Analysieren",
         "analysis.memory": "Dieser Lauf hält alle {nodes} Knoten im Speicher, etwa {mb} MB.",
         "analysis.stale": "Modell, Szenario oder Einstellungen haben sich geändert; bitte neu "
@@ -594,7 +648,8 @@ UI: dict[str, dict[str, str]] = {
         "analysis.tornado_caption": "Je unsichere Eingabe zwei Läufe mit demselben Seed, die "
         "Eingabe auf ihr P10 bzw. P90 fixiert; alle anderen Knoten ziehen dieselben "
         "Zufallszahlen. Ausgangswert: {base}.",
-        "analysis.no_uncertain": "Das Modell hat keine unsicheren Eingaben.",
+        "analysis.no_uncertain": "Das Modell hat keine unsicheren Eingaben; ohne sie gibt es "
+        "nichts, das das Ergebnis verschiebt.",
         "analysis.col_p10": "P10",
         "analysis.col_p90": "P90",
         "analysis.at_p10": "Eingabe auf P10",
@@ -618,7 +673,8 @@ UI: dict[str, dict[str, str]] = {
         "analysis.undefined": "nicht bestimmbar",
         "analysis.risk_caption": "Die Differenz ist keine kausale Wirkung, wenn Ereignisse "
         "gemeinsame Ursachen haben oder zusammenwirken.",
-        "analysis.no_events": "Das Modell hat keine Ereignisse.",
+        "analysis.no_events": "Das Modell hat keine Ereignisse; die Risikomatrix braucht "
+        "mindestens eines.",
         "analysis.col_p": "p̂ [95-%-Intervall, Wilson]",
         "analysis.col_diff": "E[Y | Ereignis] − E[Y | kein Ereignis] [95 %, Welch]",
         "analysis.risk_undefined": "y nicht bestimmbar",

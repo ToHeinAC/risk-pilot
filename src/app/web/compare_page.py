@@ -9,11 +9,11 @@ from app.engine.simulate import N_MAX
 from app.errors import SimulationError
 from app.messages import render, t
 from app.model.schema import BASIS, OutputNode
-from app.present import figures
+from app.present import figures, reading
 from app.present.compare import better_sentence, compare_rows, d_rows, direction_sentence
 from app.present.text import validity_line
 from app.present.validation import CheckResult, check_text
-from app.web import results_view, running, theme
+from app.web import explain, results_view, running, theme
 from app.web.session import CompareView, OpenModel, RunView, Session
 
 MAX_OTHERS = 3
@@ -30,18 +30,24 @@ def _pair(base: RunView, other: RunView, sid: str, output: str) -> str:
         target=base.compiled.nodes[output].target,
         better=better,
     )
-    ui.label(t("compare.pair", b=other.scenario, a=base.scenario)).classes("text-lg font-semibold")
-    headers = [t("ui.metric"), base.scenario, other.scenario, t("compare.diff")]
-    results_view.table(headers, compare_rows(c, unit)).mark(f"compare_{output}_{sid}")
-    sentence = better_sentence(c, base.scenario, other.scenario)
-    ui.label(sentence or direction_sentence(c, base.scenario, other.scenario)).classes("rp-answer")
-    if c.kind == "num":
-        ui.label(t("compare.d_table")).classes("rp-kicker")
-        results_view.table([t("ui.metric"), t("ui.value")], d_rows(c, unit)).mark(
-            f"compare_d_{output}_{sid}"
-        )
-        ui.label(t("compare.d_caption")).classes("rp-muted text-sm")
-        theme.plot(figures.histogram(c.d, unit, []), 260)
+    ui.label(t("compare.pair", b=other.scenario, a=base.scenario)).classes("text-xl font-semibold")
+    found = reading.compare(c, base.scenario, other.scenario, node.name or output, unit)
+
+    def draw() -> None:
+        headers = [t("ui.metric"), base.scenario, other.scenario, t("compare.diff")]
+        results_view.table(headers, compare_rows(c, unit)).mark(f"compare_{output}_{sid}")
+        sentence = better_sentence(c, base.scenario, other.scenario)
+        text = sentence or direction_sentence(c, base.scenario, other.scenario)
+        ui.label(text).classes("rp-answer")
+        if c.kind == "num":
+            ui.label(t("compare.d_table")).classes("rp-kicker")
+            results_view.table([t("ui.metric"), t("ui.value")], d_rows(c, unit)).mark(
+                f"compare_d_{output}_{sid}"
+            )
+            ui.label(t("compare.d_caption")).classes("rp-muted text-sm")
+            theme.plot(figures.histogram(c.d, unit, []), 260)
+
+    explain.block("compare", found, draw)
     return c.kind
 
 

@@ -9,9 +9,9 @@ from app.analysis.tornado import DEFAULT_N, MANY_RUNS, Metric, Tornado, run_coun
 from app.engine.simulate import N_MAX
 from app.errors import SimulationError
 from app.messages import render, t
-from app.present import structure
+from app.present import reading, structure
 from app.present.text import integer, number
-from app.web import results_view, theme
+from app.web import explain, results_view, theme
 from app.web.analysing import AnalysisState, Base
 
 
@@ -43,9 +43,7 @@ class TornadoTab:
 
     def build(self) -> None:
         runs = run_count(self.base.compiled)
-        if runs == 0:
-            results_view.note(t("analysis.no_uncertain"))
-            return
+        # no uncertain inputs: the evaluation block shows the reason instead (explain.block)
         metrics: list[str] = ["mean", "median"]
         if self.base.compiled.nodes[self.base.output].target is not None:
             metrics.append("target")
@@ -99,6 +97,9 @@ class TornadoTab:
         result: Tornado = stored[1]
         names = self.base.names
         with self.area:
+            output = names[self.base.output]
+            unit = self.base.compiled.model.nodes[self.base.output].unit
+            explain.reading("tornado", reading.tornado(result, names, output, unit))
             base_text = structure.tornado_base(result)
             ui.label(t("analysis.tornado_caption", base=base_text)).classes("rp-muted text-sm")
             headers = [
@@ -215,5 +216,8 @@ class SweepTab:
         x_title = f"{self.base.names[node]} · {field}"
         figure: Any = structure.sweep_figure(series, x_title, t(f"analysis.metric_{metric}"))
         with self.area:
+            output = self.base.names[self.base.output]
+            unit = self.base.compiled.model.nodes[self.base.output].unit
+            explain.reading("sweep", reading.sweep(series, x_title, output, unit, share))
             results_view.table(headers, structure.sweep_rows(series, share)).mark("ana_sweep_table")
             theme.plot(figure, 340)

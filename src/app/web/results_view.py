@@ -11,7 +11,7 @@ from app.analysis.stats import Summary
 from app.messages import render, t
 from app.model.compile import content_hash
 from app.model.schema import Model, OutputNode
-from app.present import figures
+from app.present import figures, reading
 from app.present.references import Curve, has_reference, tutorial_reference
 from app.present.results import correlation_rows
 from app.present.text import (
@@ -26,7 +26,7 @@ from app.present.text import (
     target_sentence,
     validity_line,
 )
-from app.web import theme
+from app.web import explain, theme
 from app.web.session import RunView
 
 INFO_NOTICES = frozenset({"fit.deviation"})  # hints, not warnings (fit within 2 %)
@@ -141,24 +141,34 @@ def output(run: RunView, name: str) -> None:
     summary = run.summaries[name]
     unit = run.compiled.model.nodes[name].unit
     x = run.result.samples[name]
+    found = reading.result(summary, run.compiled.model.nodes[name].name or name, unit)
     if summary.share is not None:
-        card(t("result.share_label"), percent(summary.share.p))
-        ui.label(share_sentence(summary.share)).classes("rp-answer")
-        metrics(metric_rows(summary, unit))
-        theme.plot(figures.share_bar(x), 260)
+        share = summary.share
+        card(t("result.share_label"), percent(share.p))
+
+        def draw_share() -> None:
+            ui.label(share_sentence(share)).classes("rp-answer")
+            metrics(metric_rows(summary, unit))
+            theme.plot(figures.share_bar(x), 260)
+
+        explain.block("result", found, draw_share)
         return
     pdf, cdf = _reference(run, name)
     _cards(summary, unit)
-    with ui.row().classes("w-full gap-4 no-wrap max-lg:flex-wrap items-start"):
-        with ui.column().classes("flex-[3] min-w-0 gap-2"):
-            ui.label(t("web.reading")).classes("rp-kicker")
-            _sentences(run, name, summary, unit)
-        with ui.column().classes("rp-panel p-4 flex-[2] min-w-64 gap-2"):
-            ui.label(t("web.all_metrics")).classes("rp-kicker")
-            metrics(metric_rows(summary, unit))
-    for hint in precision_hints(summary):
-        note(hint, "warning")
-    _charts(x, unit, pdf, cdf)
+
+    def draw() -> None:
+        with ui.row().classes("w-full gap-4 no-wrap max-lg:flex-wrap items-start"):
+            with ui.column().classes("flex-[3] min-w-0 gap-2"):
+                ui.label(t("web.reading")).classes("rp-kicker")
+                _sentences(run, name, summary, unit)
+            with ui.column().classes("rp-panel p-4 flex-[2] min-w-64 gap-2"):
+                ui.label(t("web.all_metrics")).classes("rp-kicker")
+                metrics(metric_rows(summary, unit))
+        for hint in precision_hints(summary):
+            note(hint, "warning")
+        _charts(x, unit, pdf, cdf)
+
+    explain.block("result", found, draw)
 
 
 def correlations(run: RunView) -> None:

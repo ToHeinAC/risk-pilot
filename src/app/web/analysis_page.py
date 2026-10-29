@@ -1,6 +1,7 @@
 """Analysis: structure of one scenario – graph, criticality, tornado, sweep, Spearman, risks."""
 
 from collections.abc import Callable
+from functools import partial
 
 from nicegui import run, ui
 
@@ -9,10 +10,10 @@ from app.errors import SimulationError
 from app.messages import render, t
 from app.model.compile import CompiledModel
 from app.model.graph import edges
-from app.present import structure
+from app.present import reading, structure
 from app.present.text import integer
 from app.present.validation import CheckResult, check_text, scenario_labels
-from app.web import analysing, results_view, theme
+from app.web import analysing, explain, results_view, theme
 from app.web.analysing import MEMORY_HINT_MB, AnalysisState, Base, Key
 from app.web.analysis_tools import SweepTab, TornadoTab
 from app.web.session import OpenModel, Session
@@ -53,8 +54,6 @@ def _graph_tab(base: Base, _state: AnalysisState) -> None:
 
 def _criticality_tab(base: Base, _state: AnalysisState) -> None:
     crit = base.crit
-    if not crit.selects_path:
-        results_view.note(t("analysis.crit_no_extremum"))
     for node, p in crit.indices:
         if base.compiled.nodes[node].type != "derived":
             ui.label(structure.criticality_sentence(base.names[node], p)).classes("rp-answer")
@@ -75,9 +74,6 @@ def _rho_tab(base: Base, _state: AnalysisState) -> None:
 
 
 def _risk_tab(base: Base, _state: AnalysisState) -> None:
-    if not base.risks:
-        results_view.note(t("analysis.no_events"))
-        return
     results_view.note(t("analysis.risk_caption"), "warning")
     unit = base.compiled.model.nodes[base.output].unit
     headers = [t("analysis.col_node"), t("analysis.col_p"), t("analysis.col_diff")]
@@ -97,17 +93,35 @@ BUILDERS: dict[str, Tab] = {
 }
 
 
+def _reading(name: str, base: Base) -> reading.Reading | None:
+    """The reading example of a tab; None where it follows from the tab's own run."""
+    output = base.names[base.output]
+    unit = base.compiled.model.nodes[base.output].unit
+    if name == "graph":
+        return reading.graph(base.compiled.model)
+    if name == "crit":
+        return reading.criticality(base.crit, base.names, output, base.compiled)
+    if name == "risk":
+        return reading.risk(base.risks, base.names, output, unit)
+    missing = reading.needs_uncertain(base.compiled)
+    if missing is not None or name != "rho":
+        return missing
+    return reading.rho(base.rho, base.names, output)
+
+
 def _tabs(base: Base, state: AnalysisState) -> None:
     with ui.tabs().props("dense no-caps align=left").classes("w-full").mark("ana_tabs") as tabs:
         heads = [ui.tab(t(f"analysis.tab_{name}")) for name in TABS]
     with ui.tab_panels(tabs, value=heads[0]).classes("w-full bg-transparent"):
         for head, name in zip(heads, TABS, strict=True):
             with ui.tab_panel(head).classes("p-0 gap-3"):
-                with ui.expansion(t("analysis.help_label"), icon="help_outline").classes(
-                    "rp-panel w-full"
-                ):
-                    ui.markdown(t(f"analysis.help_{name}")).classes("px-4")
-                BUILDERS[name](base, state)
+                found = _reading(name, base)
+                if name == "risk" and base.risks:  # undefined differences still show the table
+                    output = base.names[base.output]
+                    unit = base.compiled.model.nodes[base.output].unit
+                    explain.reading(name, reading.risk(base.risks, base.names, output, unit))
+                    found = None
+                explain.block(name, found, partial(BUILDERS[name], base, state))
 
 
 class AnalysisPage:

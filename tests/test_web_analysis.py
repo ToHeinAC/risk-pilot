@@ -83,7 +83,7 @@ def test_analysis_without_extremum_explains_empty_criticality() -> None:
         await analyse(user, "t1_faltung")
         page = texts(user)
         assert "kein max, min oder where" in page
-        assert "Das Modell hat keine Ereignisse." in page
+        assert t("analysis.no_events") in page
 
     drive(steps)
 
@@ -96,7 +96,7 @@ def test_analysis_tabs_explain_question_reading_and_limit() -> None:
             assert question in page
         assert "Graph:" in page  # the guide "Wann welche Auswertung?"
         labels = [str(e.text) for e in user.find(ui.expansion).elements]
-        assert labels.count(t("analysis.help_label")) == len(QUESTIONS)
+        assert labels.count(t("explain.how_label")) == len(QUESTIONS)
         assert t("analysis.guide_label") in labels
 
     drive(steps)
