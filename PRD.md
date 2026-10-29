@@ -237,6 +237,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Deliverable:** Knotentabelle und Knotenkarten mit Verteilungsvorschau und Begründungsfeld,
   Export, Dokumentation der Erweiterungspunkte (`docs/model-semantics.md`,
   `docs/statistical-methods.md`).
+  Pflichtenheft: [docs/specs/m6-formular-export.md](docs/specs/m6-formular-export.md).
 - **Acceptance criteria:**
   1. Knotenkarte zeigt beim Eintragen Dichte, CDF, Mittelwert, Median, P5/P95 und den Anteil
      unzulässiger Werte.
@@ -247,9 +248,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   4. Export: Kennzahlen als CSV, Rohstichproben als Parquet, Bericht als eigenständige HTML-Datei.
   5. Eine in einem Test registrierte neue Verteilungsfamilie ist ohne Änderung an Engine und UI
      im Modell nutzbar.
-- **Edge cases:** YAML-Kommentare gehen beim Speichern aus dem Formular verloren (Hinweis vor dem
-  Speichern); gleichzeitige Bearbeitung in Formular und YAML-Editor (letzte Änderung gewinnt mit
-  Hinweis).
+- **Edge cases:** YAML-Kommentare und Formatierung bleiben beim Bearbeiten im Formular erhalten
+  (Entscheidung 29.10.2026); gleichzeitige Bearbeitung in Formular und YAML-Editor (letzte
+  Änderung gewinnt mit Hinweis).
 - **Dependencies:** M5.
 
 ### M7 — UX und Selbsterklärung
