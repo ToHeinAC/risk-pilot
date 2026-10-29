@@ -112,11 +112,11 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | Schritt | Inhalt | Stand |
 |---|---|---|
 | 1 | Grundgerüst: `web/main.py` (Seitenleiste, Beenden, Fehlergrenze), `web/session.py` (Zustand je Tab, auch von `ui/state.py` genutzt), `web/theme.py`, Port `RISK_PILOT_PORT` (8643) | erledigt |
-| 2 | Modell: Arbeitsfläche, Formular, YAML, Speichern | offen |
+| 2 | Start und Modell: Arbeitsfläche (Graph, Knotentabelle mit Kurzangabe, Mini-Verteilung und P10/P50/P90 aus einem Probelauf, Knotenkarte mit Vorschau), Modellkopf, YAML-Editor auf demselben Entwurf (`web/editing.py`), Speichern mit Konfliktschutz, Verwerfen, Kopieren, CSV-Import, Stützstellen-Angebot | erledigt |
 | 3 | Simulation, Ergebnisse | offen |
 | 4 | Szenarien, Vergleich | offen |
 | 5 | Analyse | offen |
-| 6 | Start, Lernpfad, Läufe | offen |
+| 6 | Lernpfad, Läufe | offen |
 | 7 | Umschalten: Port 8642, Streamlit und AppTest entfernen, Doku, PRD-Constraints | offen |
 
 ## 6. Testzuordnung AppTest → User
@@ -128,5 +128,26 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | — (neu) unerwarteter Fehler wird Meldung, Hülle läuft weiter | `test_web_shell.py::test_unexpected_error_in_a_page_becomes_a_message` |
 | — (neu) alle Seiten in der Navigation | `test_web_shell.py::test_navigation_lists_every_page_and_opens_it` |
 | `test_adapters_process.py`: Port nicht Standard | `test_web_shell.py::test_port_defaults_beside_streamlit_and_is_configurable` |
+
+| `test_app.py::test_start_page_lists_tutorials_and_learning_path` | `test_web_start.py::test_start_lists_tutorials_and_learning_path` |
+| `test_app.py::test_t1_open_simulate_and_show_metrics` (Öffnen, Prüfung) | `test_web_start.py::test_open_tutorial_shows_model_page_and_name` |
+| `test_app.py::test_copy_template_keeps_source_and_refuses_existing_name` | `test_web_start.py::test_copy_template_keeps_source_and_refuses_existing_name` |
+| `test_app_form.py::test_new_model_from_start_page_opens_in_the_form` | `test_web_start.py::test_new_model_opens_empty_in_the_form` |
+| `test_app.py::test_tutorials_t3_to_t5_listed_copyable_and_marked_illustrative` | `test_web_start.py::test_tutorials_t3_to_t5_copy_as_illustrative` |
+| `test_app.py::test_non_utf8_model_file_does_not_crash_start` | `test_web_start.py::test_unreadable_model_file_does_not_break_start` |
+| `test_app.py::test_tutorial_is_read_only`, `test_app_form.py::test_tutorial_form_is_read_only` | `test_web_model.py::test_tutorial_is_read_only` |
+| `test_app.py::test_validation_messages_in_german_without_crash` | `test_web_model.py::test_validation_messages_in_german` (Simulationsteil folgt in Schritt 3) |
+| `test_app.py::test_edit_and_save_own_model`, `…::test_editor_draft_survives_page_change` | `test_web_model.py::test_edit_save_and_draft_survives_page_change` |
+| `test_app.py::test_save_conflict_offers_overwrite_and_invalid_draft_warns` | `test_web_model.py::test_save_conflict_offers_overwrite_and_invalid_draft_warns` |
+| — (neu) Verwerfen | `test_web_model.py::test_discard_restores_the_file` |
+| `test_app.py::test_model_page_offers_copy_for_tutorial` | `test_web_model.py::test_model_page_offers_copy_for_tutorial` |
+| — (neu) Graph-Klick und Tabellenauswahl, Probelauf in der Tabelle | `test_web_model.py::test_graph_click_and_table_pick_open_the_node_card` |
+| `test_app_form.py::test_form_edit_keeps_comments_after_saving` | `test_web_model.py::test_form_edit_keeps_comments_after_saving` |
+| `test_app_form.py::test_last_change_wins_between_yaml_and_form` | `test_web_model.py::test_last_change_wins_between_yaml_and_form` |
+| `test_app_form.py::test_unreadable_yaml_locks_the_form_and_invalid_model_has_no_preview` | `test_web_model.py::test_unreadable_yaml_locks_the_form_and_invalid_model_has_no_preview` |
+| `test_app_form.py::test_delete_needs_confirmation_and_no_references` | `test_web_model.py::test_delete_needs_confirmation_and_no_references` |
+| `test_app_form.py::test_t2_rebuilt_through_the_form_gives_the_same_model_and_numbers` | `test_web_model.py::test_t2_rebuilt_through_the_form_gives_the_same_basis_model` (Szenarien folgen in Schritt 4) |
+| `test_app.py::test_csv_column_becomes_empirical_distribution` | `test_web_model.py::test_csv_column_becomes_empirical_distribution` |
+| `test_app.py::test_quantile_conflict_offers_piecewise_in_own_model` | `test_web_model.py::test_quantile_conflict_offers_piecewise_in_own_model` |
 
 Weitere Zeilen kommen mit jedem Schritt dazu.

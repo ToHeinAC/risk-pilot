@@ -46,7 +46,12 @@ def node_preview(compiled: CompiledModel, node_id: str, n: int = PREVIEW_N) -> P
         result = simulate(compiled, n=n, keep="all")
     except SimulationError as exc:
         raise PreviewError(exc.issue) from exc
-    x = np.asarray(result.samples[node_id], dtype=np.float64)
+    return preview_of(compiled, node_id, result.samples[node_id])
+
+
+def preview_of(compiled: CompiledModel, node_id: str, samples: NDArray[Any]) -> Preview:
+    """The preview from draws already made (the workbench's trial run, M7)."""
+    x = np.asarray(samples, dtype=np.float64)
     bounds = compiled.model.nodes[node_id].bounds
     lo = bounds.min if bounds else None
     hi = bounds.max if bounds else None

@@ -6,13 +6,14 @@ browser tab; pages are built by ``BUILDERS`` inside one shell with navigation an
 
 import asyncio
 from collections.abc import Callable
+from pathlib import Path
 
 from nicegui import ui
 
 from app.adapters import process, settings
 from app.messages import t
-from app.web import theme
-from app.web.session import Session
+from app.web import model_page, start, theme
+from app.web.session import OpenModel, Session
 
 EXIT_DELAY = 0.3  # seconds: the goodbye text reaches the browser before SIGTERM
 PAGES = (
@@ -35,6 +36,7 @@ def _follows(_session: Session) -> None:
 
 
 BUILDERS: dict[str, Builder] = {path: _follows for path, _key, _icon in PAGES}
+BUILDERS.update({"/": start.page, "/modell": model_page.page})
 
 
 def new_session() -> Session:
@@ -70,12 +72,19 @@ def _exit_dialog(session: Session) -> Callable[[], None]:
     return open_dialog
 
 
+def _model_name(model: OpenModel | None) -> str:
+    if model is None:
+        return t("web.no_model")
+    return Path(model.path).name + (" •" if model.dirty else "")
+
+
 def _header(session: Session, open_exit: Callable[[], None]) -> None:
     with ui.header().classes("bg-white text-dark border-b items-center px-4 gap-4 h-14"):
         ui.label("Risk Pilot").classes("text-lg font-semibold")
         ui.space()
-        name = session.model.path if session.model is not None else t("web.no_model")
-        ui.label(name).classes("rp-muted text-sm").mark("model_name")
+        ui.label().classes("rp-muted text-sm").mark("model_name").bind_text_from(
+            session, "model", _model_name
+        )
         ui.button(icon="power_settings_new", on_click=open_exit).props("flat round").tooltip(
             t("ui.exit")
         ).mark("exit")

@@ -4,9 +4,13 @@ No UI import; the Streamlit app (until M7 ends) and the NiceGUI pages share thes
 """
 
 from dataclasses import dataclass, field
+from pathlib import Path
 
+from app.adapters import files, settings
 from app.analysis.stats import Summary
 from app.engine.simulate import SimulationResult
+from app.errors import InputError
+from app.messages import render, t
 from app.model.compile import CompiledModel
 
 
@@ -53,3 +57,38 @@ class Session:
     model: OpenModel | None = None
     run: RunView | None = None
     runs: dict[RunKey, RunView] = field(default_factory=dict[RunKey, RunView])
+
+
+def is_example(path: Path) -> bool:
+    return settings.examples_dir().resolve() in path.resolve().parents
+
+
+def open_model(session: Session, path: Path) -> None:
+    """Open ``path``: tutorials read-only, the previous run is dropped."""
+    session.model = OpenModel(str(path), files.read_text(path), readonly=is_example(path))
+    session.run = None
+
+
+def save(model: OpenModel, force: bool) -> str | None:
+    """Write the draft; refused (message) if the file changed since opening, unless forced."""
+    expected = None if force else files.text_hash(model.file_text)
+    try:
+        files.save_model_text(Path(model.path), model.text, expected)
+    except InputError as exc:
+        return render(exc.issue)
+    model.file_text = model.text
+    return None
+
+
+def copy_as(source: Path, new_id: str) -> tuple[bool, str]:
+    """Copy a model as template under ``new_id``; never overwrites. (done, message)"""
+    try:
+        target = files.copy_model(source, settings.models_dir(), new_id.strip())
+    except InputError as exc:
+        return False, render(exc.issue)
+    return True, t("ui.copied", name=target.stem)
+
+
+def free_copy_id(source: Path) -> str:
+    existing = {p.stem for p in files.list_models(settings.models_dir())}
+    return files.suggest_id(f"{source.stem}_kopie", existing)

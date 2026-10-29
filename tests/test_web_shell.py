@@ -37,6 +37,7 @@ def test_navigation_lists_every_page_and_opens_it() -> None:
 def test_exit_asks_first_and_ends_only_this_process(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[str] = []
     monkeypatch.setattr(process, "shutdown", lambda: calls.append("sigterm"))
+    monkeypatch.setattr(main, "EXIT_DELAY", 0.01)
 
     async def steps(user: User) -> None:
         await user.open("/")

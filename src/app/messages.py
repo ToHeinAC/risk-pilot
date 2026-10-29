@@ -294,6 +294,17 @@ UI: dict[str, dict[str, str]] = {
         "web.page_follows": "Diese Seite wird gerade umgestellt. Bis dahin steht sie in der "
         "bisherigen App auf Port 8642 bereit.",
         "web.no_model": "Kein Modell geöffnet",
+        "web.col_node": "Knoten",
+        "web.col_brief": "Eingabe",
+        "web.col_spark": "Verteilung",
+        "web.spread": "Relative Streuung",
+        "web.graph_needs_valid": "Der Graph erscheint, sobald das Modell fehlerfrei ist und eine "
+        "Ausgabe hat.",
+        "web.graph_caption": "Farbe: relative Streuung (P90 − P10) / P50 im Probelauf, dunkel = "
+        "breit. Einen Knoten anklicken öffnet ihn rechts.",
+        "web.pick_node": "Einen Knoten im Graph oder in der Tabelle anklicken.",
+        "web.more_fields": "Beschreibung, Begründung, Grenzen",
+        "web.trial": "Probelauf in {ms} ms",
         "ui.start_intro": "Weltmodelle aus Bausteinen bauen, per Monte Carlo simulieren und die "
         "Ergebnisse mit ihrer numerischen Unsicherheit lesen. Tutorials und Lektionen sind "
         "schreibgeschützt; „Als Vorlage kopieren“ legt ein eigenes Modell an.",
