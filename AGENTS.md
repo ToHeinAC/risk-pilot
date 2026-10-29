@@ -38,6 +38,6 @@ Step-by-step usage of this template: [docs/HOWTO.md](docs/HOWTO.md).
 
 - `pre-commit run --all-files` only lints files git tracks. `git add` new files before relying on
   the gate.
-- Coverage (≥ 85 % branch) is only measured by the gate's `pytest --cov`, so a single test file
-  never fails on it.
+- Coverage (≥ 85 % branch) is only measured by the gate's `pytest --cov -n 8` (parallel via
+  pytest-xdist, keeps the suite under 60 s), so a single test file never fails on it.
 - The Stop hook runs the full gate when `.py` files changed and sends Claude back once if it fails.

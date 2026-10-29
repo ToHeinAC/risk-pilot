@@ -25,6 +25,7 @@ dev = [
     "pytest>=9.1",
     "pytest-cov>=7.1",
     "pytest-timeout>=2.4",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.16",
     "scipy-stubs>=1.17.1.5",
     "types-networkx>=3.6.1.20261024",
