@@ -24,7 +24,8 @@ def expression_fields(node: Node) -> Iterator[tuple[str, str]]:
         yield "expr", node.expr
 
 
-def _names(text: str) -> set[str]:
+def expression_names(text: str) -> set[str]:
+    """Names an expression refers to (calls excluded); empty if it does not parse."""
     try:
         tree = parse_expression(text)
     except ExprIssue:
@@ -37,7 +38,8 @@ def collect_refs(model: Model) -> dict[str, set[str]]:
     """Node ID -> IDs of the nodes its expressions reference (syntactically)."""
     ids = set(model.nodes)
     return {
-        node_id: {name for _, text in expression_fields(node) for name in _names(text)} & ids
+        node_id: {name for _, text in expression_fields(node) for name in expression_names(text)}
+        & ids
         for node_id, node in model.nodes.items()
     }
 
@@ -63,7 +65,7 @@ def edges(model: Model) -> list[Edge]:
     for node_id, node in model.nodes.items():
         for field, text in expression_fields(node):
             kind: EdgeKind = "ausdruck" if field == "expr" else "parameter"
-            found |= {Edge(ref, node_id, kind) for ref in _names(text) & ids}
+            found |= {Edge(ref, node_id, kind) for ref in expression_names(text) & ids}
     for group in model.correlations.values():
         members = sorted(set(group.nodes) & ids)
         found |= {Edge(a, b, "korrelation") for a, b in combinations(members, 2)}

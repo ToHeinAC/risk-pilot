@@ -71,6 +71,12 @@ CODES: dict[str, tuple[str, ...]] = {
     "csv.column": ("column", "columns"),
     "csv.number": ("value", "column"),
     "csv.too_many": ("count", "limit"),
+    "form.no_mapping": (),
+    "form.patch_failed": (),
+    "form.list": ("value",),
+    "form.number": ("value",),
+    "form.exists": ("id",),
+    "form.referenced": ("refs",),
 }
 
 

@@ -11,7 +11,8 @@ from app.model.edits import to_empirical, to_piecewise
 from app.model.scenarios import mark_unknown_inactive
 from app.model.yaml_io import model_from_yaml
 from app.present.validation import CheckResult, check_text
-from app.ui import state, views
+from app.ui import form as form_ui
+from app.ui import form_card, state, views
 
 
 def _show_check(result: CheckResult) -> None:
@@ -175,12 +176,18 @@ def body() -> None:
     if explanation.is_file():
         with st.expander(t("ui.explanation"), expanded=False):
             st.markdown(files.read_text(explanation))
-    if state.EDITOR not in st.session_state:
-        st.session_state[state.EDITOR] = model.draft  # restore after visiting another page
-    model.draft = st.text_area(
-        t("ui.editor"), key=state.EDITOR, height=420, disabled=model.readonly
-    )
+    form_tab, yaml_tab = st.tabs([t("model.tab_form"), t("model.tab_yaml")])
+    with yaml_tab:
+        if state.EDITOR not in st.session_state:
+            st.session_state[state.EDITOR] = model.draft  # restore after visiting another page
+        model.draft = st.text_area(
+            t("ui.editor"), key=state.EDITOR, height=420, disabled=model.readonly
+        )
     result = check_text(model.text)
+    with form_tab:
+        picked = form_ui.body(model.readonly)
+        if picked is not None:
+            form_card.card(picked[0], picked[1], result, model.readonly)
     _hints(result, model.readonly)
     if model.dirty:
         st.warning(t("ui.unsaved"))

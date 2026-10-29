@@ -15,7 +15,8 @@ from app.messages import render, t
 from app.model.compile import CompiledModel, content_hash, model_hash
 from app.model.scenarios import effective_model, tree
 from app.model.schema import BASIS, Model, OutputNode
-from app.model.yaml_io import model_from_yaml, model_to_yaml
+from app.model.yaml_io import model_from_yaml
+from app.model.yaml_patch import Data, patch
 from app.present import figures
 from app.present.references import Curve, has_reference, tutorial_reference
 from app.present.results import correlation_rows, summaries_for
@@ -150,16 +151,18 @@ def scenario_labels(checked: CheckResult) -> dict[str, str]:
 
 
 def rewrite(model: Model) -> None:
-    """Write an edited model back into the open model's draft (keeps the template comment).
+    """Write an edited model back into the open model's draft; comments and layout stay (M6 E4).
 
     Call from widget callbacks only: they run before the editor widget exists in this run.
     """
+    rewrite_data(model.model_dump(mode="json", exclude_unset=True))
+
+
+def rewrite_data(data: Data) -> None:
+    """Write edited raw data (from the form) into the draft, patching the YAML text in place."""
     open_model = state.get_model()
     assert open_model is not None
-    text = model_to_yaml(model)
-    template = files.template_of(open_model.draft)
-    if template:
-        text = f"# Kopie von {template}\n{text}"
+    text = patch(open_model.draft, data)
     open_model.draft = text
     st.session_state[state.EDITOR] = text
 

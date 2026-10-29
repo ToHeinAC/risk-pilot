@@ -645,3 +645,10 @@ def test_quantile_conflict_offers_piecewise_in_own_model() -> None:
     draft = str(at.text_area(key="editor").value)
     assert "dist: piecewise" in draft
     assert "2090" in draft
+
+
+def test_results_offer_three_downloads() -> None:
+    at = simulate(open_model(start(), "t2_terminplan"), 2000)
+    assert "Exportieren" in texts(at)
+    labels = [str(getattr(b, "proto").label) for b in at.get("download_button")]  # noqa: B009
+    assert labels == ["Kennzahlen (CSV)", "Rohstichproben (Parquet)", "Bericht (HTML)"]
