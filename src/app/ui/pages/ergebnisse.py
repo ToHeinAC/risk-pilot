@@ -3,13 +3,11 @@
 import streamlit as st
 
 from app.adapters import export as export_adapter
-from app.adapters import runs, settings
-from app.analysis.stats import summary_to_dict
 from app.messages import t
-from app.model.compile import content_hash
 from app.present import export
 from app.present.text import number
 from app.ui import state, views
+from app.web import running
 
 LARGE = 100 * 1024 * 1024
 
@@ -62,22 +60,7 @@ def body() -> None:
     if size > LARGE:
         st.warning(t("ui.run_large", mb=number(size / 1024 / 1024)))
     if st.button(t("ui.save_run"), key="save_run"):
-        summaries = {k: summary_to_dict(v) for k, v in run.summaries.items()}
-        extra = {
-            "scenario": run.scenario,
-            "scenario_id": run.scenario_id,
-            "scenario_name": run.scenario,
-            "effective_hash": content_hash(run.compiled.model),
-            "correlations": {g: m.tolist() for g, m in run.result.correlations.items()},
-        }
-        path = runs.save_run(
-            settings.runs_dir(),
-            run.result.meta,
-            run.model_text,
-            run.result.samples,
-            summaries,
-            extra,
-        )
+        path = running.save(run)
         st.success(t("ui.run_saved", name=path.name))
     _exports(run)
 

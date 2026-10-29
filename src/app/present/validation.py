@@ -123,3 +123,13 @@ def check_text(text: str) -> CheckResult:
         [render(n) for n in notices],
         {sid: [render(n) for n in notices if n.scenario == sid] for sid in model.scenarios},
     )
+
+
+def scenario_labels(checked: CheckResult) -> dict[str, str]:
+    """Scenario names indented by their depth in the tree (for select boxes)."""
+    if checked.model is None:
+        return {sid: name for sid, (name, _) in checked.scenarios.items()}
+    depth = dict(tree(checked.model))
+    return {
+        sid: "\u2003" * depth.get(sid, 0) + name for sid, (name, _) in checked.scenarios.items()
+    }

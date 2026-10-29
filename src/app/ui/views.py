@@ -1,7 +1,5 @@
 """Streamlit building blocks shared by several pages."""
 
-import dataclasses
-import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -9,17 +7,14 @@ import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 
 from app.adapters import files, process, settings
-from app.engine.simulate import simulate
-from app.errors import InputError, ModelError, SimulationError
+from app.errors import InputError, SimulationError
 from app.messages import render, t
-from app.model.compile import CompiledModel, content_hash, model_hash
-from app.model.scenarios import effective_model, tree
+from app.model.compile import CompiledModel, content_hash
 from app.model.schema import BASIS, Model, OutputNode
-from app.model.yaml_io import model_from_yaml
 from app.model.yaml_patch import Data, patch
 from app.present import figures
 from app.present.references import Curve, has_reference, tutorial_reference
-from app.present.results import correlation_rows, summaries_for
+from app.present.results import correlation_rows
 from app.present.text import (
     beyond_sentence,
     metric_rows,
@@ -31,8 +26,8 @@ from app.present.text import (
     target_sentence,
     validity_line,
 )
-from app.present.validation import CheckResult
 from app.ui import state
+from app.web import running, session
 
 INFO_NOTICES = frozenset({"fit.deviation"})  # hints, not warnings (fit within 2 %)
 
@@ -54,12 +49,9 @@ def table(headers: list[str], rows: list[tuple[str, ...]]) -> str:
     return "\n".join(lines)
 
 
-def is_example(path: Path) -> bool:
-    return settings.examples_dir().resolve() in path.resolve().parents
-
-
 def open_model(path: Path) -> None:
-    state.set_model(state.OpenModel(str(path), files.read_text(path), readonly=is_example(path)))
+    readonly = session.is_example(path)
+    state.set_model(state.OpenModel(str(path), files.read_text(path), readonly=readonly))
 
 
 def run_page(body: Callable[[], None]) -> None:
@@ -75,24 +67,7 @@ def run_page(body: Callable[[], None]) -> None:
         st.error(t("ui.unexpected", detail=f"{type(exc).__name__}: {exc}"))
 
 
-def template_and_hash(compiled: CompiledModel, text: str) -> tuple[str, str | None]:
-    """The tutorial this model is (a copy of) and that tutorial's content hash, if any."""
-    template = files.template_of(text) or compiled.model.model
-    path = settings.examples_dir() / f"{template}.yaml"
-    if not path.is_file():
-        return template, None
-    try:
-        return template, content_hash(effective_model(files.load_model(path), BASIS))
-    except ModelError:
-        return template, None
-
-
-def _full_hash(text: str, compiled: CompiledModel) -> str:
-    """Hash of the whole model text (with scenarios); the effective model's if unparsable."""
-    try:
-        return model_hash(model_from_yaml(text))
-    except ModelError:
-        return compiled.model_hash
+template_and_hash = running.template_and_hash
 
 
 def run_model(
@@ -105,49 +80,13 @@ def run_model(
     notices: list[str] | None = None,
 ) -> state.RunView | None:
     """Simulate (or reuse the cached run); errors are shown, never raised."""
-    key = (compiled.model_hash, n, seed)
-    cached = state.cache().get(key)
-    if cached is not None and cached.scenario == scenario:
-        return cached
-    started = time.perf_counter()
     try:
-        result = simulate(compiled, n=n, seed=seed)
+        return running.compute_run(
+            state.cache(), compiled, text, n, seed, scenario, scenario_id, notices
+        )
     except SimulationError as exc:
         st.error(render(exc.issue))
         return None
-    seconds = time.perf_counter() - started
-    meta = {
-        **result.meta,
-        "model_hash": _full_hash(text, compiled),
-        "effective_hash": content_hash(compiled.model),
-    }
-    result = dataclasses.replace(result, meta=meta)
-    template, original = template_and_hash(compiled, text)
-    summaries = summaries_for(compiled, result)
-    run = state.RunView(
-        text,
-        compiled,
-        result,
-        summaries,
-        scenario,
-        template,
-        original,
-        seconds,
-        list(notices or []),
-        scenario_id,
-    )
-    state.cache()[key] = run
-    return run
-
-
-def scenario_labels(checked: CheckResult) -> dict[str, str]:
-    """Scenario names indented by their depth in the tree (for select boxes)."""
-    if checked.model is None:
-        return {sid: name for sid, (name, _) in checked.scenarios.items()}
-    depth = dict(tree(checked.model))
-    return {
-        sid: "\u2003" * depth.get(sid, 0) + name for sid, (name, _) in checked.scenarios.items()
-    }
 
 
 def rewrite(model: Model) -> None:

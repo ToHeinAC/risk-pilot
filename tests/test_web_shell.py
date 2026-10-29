@@ -28,7 +28,7 @@ def test_navigation_lists_every_page_and_opens_it() -> None:
         await user.open("/")
         for _path, key, _icon in main.PAGES:
             await user.should_see(t(key))
-        user.find(marker="nav/simulation").click()
+        user.find(marker="nav/vergleich").click()
         await user.should_see(t("web.page_follows"))
 
     drive(steps)

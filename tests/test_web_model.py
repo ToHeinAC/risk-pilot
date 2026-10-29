@@ -88,7 +88,7 @@ def test_edit_save_and_draft_survives_page_change() -> None:
         put(user, "editor", new)
         await user.should_see(t("ui.unsaved"))
         user.find(marker="nav/simulation").click()
-        await user.should_see(t("web.page_follows"))
+        await user.should_see(marker="sim_run")
         user.find(marker="nav/modell").click()
         await user.should_see(marker="editor")
         assert editor(user) == new

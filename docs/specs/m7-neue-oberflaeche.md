@@ -113,7 +113,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 |---|---|---|
 | 1 | Grundgerüst: `web/main.py` (Seitenleiste, Beenden, Fehlergrenze), `web/session.py` (Zustand je Tab, auch von `ui/state.py` genutzt), `web/theme.py`, Port `RISK_PILOT_PORT` (8643) | erledigt |
 | 2 | Start und Modell: Arbeitsfläche (Graph, Knotentabelle mit Kurzangabe, Mini-Verteilung und P10/P50/P90 aus einem Probelauf, Knotenkarte mit Vorschau), Modellkopf, YAML-Editor auf demselben Entwurf (`web/editing.py`), Speichern mit Konfliktschutz, Verwerfen, Kopieren, CSV-Import, Stützstellen-Angebot | erledigt |
-| 3 | Simulation, Ergebnisse | offen |
+| 3 | Simulation (Lauf im Hintergrund-Thread, Seite bleibt bedienbar) und Ergebnisse (Antwort zuerst als Kennzahlkarten, „So liest man das“ neben allen Kennzahlen, Grafiken, Speichern, drei Downloads); Lauflogik ohne UI in `web/running.py`, von beiden Oberflächen genutzt | erledigt |
 | 4 | Szenarien, Vergleich | offen |
 | 5 | Analyse | offen |
 | 6 | Lernpfad, Läufe | offen |
@@ -149,5 +149,14 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | `test_app_form.py::test_t2_rebuilt_through_the_form_gives_the_same_model_and_numbers` | `test_web_model.py::test_t2_rebuilt_through_the_form_gives_the_same_basis_model` (Szenarien folgen in Schritt 4) |
 | `test_app.py::test_csv_column_becomes_empirical_distribution` | `test_web_model.py::test_csv_column_becomes_empirical_distribution` |
 | `test_app.py::test_quantile_conflict_offers_piecewise_in_own_model` | `test_web_model.py::test_quantile_conflict_offers_piecewise_in_own_model` |
+| `test_app.py::test_t1_open_simulate_and_show_metrics`, `…::test_simulation_reports_run_time` | `test_web_results.py::test_t1_simulate_reports_time_and_shows_metrics_with_reference` |
+| `test_app.py::test_t2_shows_clark_and_target_sentence` | `test_web_results.py::test_t2_answer_first_target_and_clark` |
+| `test_app.py::test_results_offer_three_downloads` | `test_web_results.py::test_results_offer_three_downloads` (lädt die Dateien auch herunter) |
+| `test_app.py::test_simulate_sub_scenario_shows_it_in_validity_line` | `test_web_results.py::test_sub_scenario_in_validity_line_and_saved_meta` |
+| `test_app.py::test_simulation_scenario_list_is_indented` | `test_web_results.py::test_scenario_list_is_indented` |
+| `test_app.py::test_scenario_hints_reach_results_page` | `test_web_results.py::test_scenario_hints_reach_results_page` |
+| `test_app.py::test_validation_messages_in_german_without_crash` (Simulieren gesperrt) | `test_web_results.py::test_invalid_model_blocks_simulation_and_results_wait_for_a_run` |
+| `test_app.py::test_results_show_correlations_losses_horizon_and_peaks` | `test_web_results.py::test_results_show_correlations_losses_horizon_and_peaks` |
+| `test_app.py::test_unchanged_copy_keeps_overlay_changed_copy_gets_notice` | `test_web_results.py::test_unchanged_copy_keeps_overlay_changed_copy_gets_notice` |
 
 Weitere Zeilen kommen mit jedem Schritt dazu.

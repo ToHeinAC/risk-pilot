@@ -19,7 +19,7 @@ from app.model.compile import CompiledModel
 from app.model.graph import edges
 from app.present import structure
 from app.present.text import integer, number
-from app.present.validation import check_text
+from app.present.validation import check_text, scenario_labels
 from app.ui import state, views
 
 BASE = "analysis_base"
@@ -276,7 +276,7 @@ def body() -> None:
     st.caption(t("analysis.intro"))
     with st.expander(t("analysis.guide_label")):
         st.markdown(t("analysis.guide"))
-    labels = views.scenario_labels(checked)
+    labels = scenario_labels(checked)
     sid = str(
         st.selectbox(
             t("ui.scenario"),

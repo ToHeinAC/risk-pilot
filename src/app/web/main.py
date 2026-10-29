@@ -12,7 +12,7 @@ from nicegui import ui
 
 from app.adapters import process, settings
 from app.messages import t
-from app.web import model_page, start, theme
+from app.web import model_page, results_page, simulation_page, start, theme
 from app.web.session import OpenModel, Session
 
 EXIT_DELAY = 0.3  # seconds: the goodbye text reaches the browser before SIGTERM
@@ -36,7 +36,14 @@ def _follows(_session: Session) -> None:
 
 
 BUILDERS: dict[str, Builder] = {path: _follows for path, _key, _icon in PAGES}
-BUILDERS.update({"/": start.page, "/modell": model_page.page})
+BUILDERS.update(
+    {
+        "/": start.page,
+        "/modell": model_page.page,
+        "/simulation": simulation_page.page,
+        "/ergebnisse": results_page.page,
+    }
+)
 
 
 def new_session() -> Session:

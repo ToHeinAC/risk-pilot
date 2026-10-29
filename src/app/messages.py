@@ -305,6 +305,8 @@ UI: dict[str, dict[str, str]] = {
         "web.pick_node": "Einen Knoten im Graph oder in der Tabelle anklicken.",
         "web.more_fields": "Beschreibung, Begründung, Grenzen",
         "web.trial": "Probelauf in {ms} ms",
+        "web.reading": "So liest man das",
+        "web.all_metrics": "Alle Kennzahlen",
         "ui.start_intro": "Weltmodelle aus Bausteinen bauen, per Monte Carlo simulieren und die "
         "Ergebnisse mit ihrer numerischen Unsicherheit lesen. Tutorials und Lektionen sind "
         "schreibgeschützt; „Als Vorlage kopieren“ legt ein eigenes Modell an.",

@@ -5,7 +5,7 @@ import streamlit as st
 from app.engine.simulate import N_MAX
 from app.messages import t
 from app.present.text import decimal, integer
-from app.present.validation import check_text
+from app.present.validation import check_text, scenario_labels
 from app.ui import state, views
 
 
@@ -20,7 +20,7 @@ def body() -> None:
         st.error(t("ui.sim_blocked"))
         return
     scenarios = checked.scenarios
-    labels = views.scenario_labels(checked)
+    labels = scenario_labels(checked)
     scenario_id = str(
         st.selectbox(
             t("ui.scenario"),
