@@ -32,6 +32,10 @@ def _graph_tab(base: Base, _state: AnalysisState) -> None:
         "criticality": {node: p.p for node, p in base.crit.indices},
         "why": structure.missing_why(model),
     }
+    select = ui.select(
+        choices, value="sensitivity", label=t("analysis.color"), on_change=lambda: draw()
+    )
+    select.props("outlined dense").classes("min-w-64").mark("graph_color")
     area = ui.column().classes("w-full")
 
     def draw() -> None:
@@ -43,9 +47,6 @@ def _graph_tab(base: Base, _state: AnalysisState) -> None:
             )
             theme.plot(figure, 440).mark("ana_graph")
 
-    select = ui.select(choices, value="sensitivity", label=t("analysis.color"), on_change=draw)
-    select.props("outlined dense").classes("min-w-64").mark("graph_color")
-    select.move(target_index=0)
     draw()
     ui.label(t("analysis.graph_caption")).classes("rp-muted text-sm")
 
