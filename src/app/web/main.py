@@ -13,6 +13,7 @@ from nicegui import ui
 from app.adapters import process, settings
 from app.messages import t
 from app.web import (
+    analysis_page,
     compare_page,
     model_page,
     results_page,
@@ -52,6 +53,7 @@ BUILDERS.update(
         "/simulation": simulation_page.page,
         "/ergebnisse": results_page.page,
         "/vergleich": compare_page.page,
+        "/analyse": analysis_page.page,
     }
 )
 

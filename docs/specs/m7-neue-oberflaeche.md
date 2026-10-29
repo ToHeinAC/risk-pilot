@@ -115,7 +115,7 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | 2 | Start und Modell: Arbeitsfläche (Graph, Knotentabelle mit Kurzangabe, Mini-Verteilung und P10/P50/P90 aus einem Probelauf, Knotenkarte mit Vorschau), Modellkopf, YAML-Editor auf demselben Entwurf (`web/editing.py`), Speichern mit Konfliktschutz, Verwerfen, Kopieren, CSV-Import, Stützstellen-Angebot | erledigt |
 | 3 | Simulation (Lauf im Hintergrund-Thread, Seite bleibt bedienbar) und Ergebnisse (Antwort zuerst als Kennzahlkarten, „So liest man das“ neben allen Kennzahlen, Grafiken, Speichern, drei Downloads); Lauflogik ohne UI in `web/running.py`, von beiden Oberflächen genutzt | erledigt |
 | 4 | Szenarien (Baum, Unterschiedstabelle, Anlegen, Override setzen und entfernen, Duplizieren, Loslösen; ungültige Änderungen werden erklärt und nicht übernommen, `web/scenario_edit.py` ohne UI) und Vergleich (Läufe im Hintergrund-Thread, Paartabellen, Differenzstatistik, Verteilungskurven, veralteter Vergleich wird ausgeblendet) | erledigt |
-| 5 | Analyse | offen |
+| 5 | Analyse (Einstellungen, Lauf im Hintergrund-Thread, sechs Reiter mit Erklärung; Tornado und Sweep als eigene Läufe; Ergebnis und Einstellungen bleiben beim Seitenwechsel erhalten; Rechenlogik ohne UI in `web/analysing.py`, von beiden Oberflächen genutzt). Nebenbei: Diagramme zeigen ihre Legende wieder | erledigt |
 | 6 | Lernpfad, Läufe | offen |
 | 7 | Umschalten: Port 8642, Streamlit und AppTest entfernen, Doku, PRD-Constraints | offen |
 
@@ -168,5 +168,13 @@ beginnt. Der Spike-Code bleibt auf seinem Branch und dient als Vorlage, nicht al
 | `test_app.py::test_stale_comparison_hidden_after_model_change` | `test_web_scenarios.py::test_stale_comparison_hidden_after_model_change` |
 | — (neu) ohne Unterszenario kein Vergleich | `test_web_scenarios.py::test_compare_needs_a_sub_scenario` |
 | — (neu) Referenz nicht zugleich Vergleichspartner | `test_web_scenarios.py::test_reference_is_not_offered_as_partner` |
+| `test_app.py::test_analysis_page_t2_all_tabs` | `test_web_analysis.py::test_analysis_page_t2_all_tabs` |
+| `test_app.py::test_analysis_sweep_reports_invalid_values` | `test_web_analysis.py::test_analysis_sweep_reports_invalid_values` |
+| `test_app.py::test_analysis_colourings_and_undefined_risk_marked` | `test_web_analysis.py::test_analysis_colourings_and_undefined_risk_marked` |
+| `test_app.py::test_analysis_without_extremum_explains_empty_criticality` | `test_web_analysis.py::test_analysis_without_extremum_explains_empty_criticality` |
+| `test_app.py::test_analysis_tabs_explain_question_reading_and_limit` | `test_web_analysis.py::test_analysis_tabs_explain_question_reading_and_limit` |
+| — (neu) geänderte Einstellungen markieren die Analyse als veraltet | `test_web_analysis.py::test_changed_settings_mark_the_analysis_stale` |
+| — (neu) ungültiges Modell sperrt die Analyse | `test_web_analysis.py::test_invalid_model_blocks_analysis` |
+| — (neu) Analyse, Tornado und Sweep überstehen einen Seitenwechsel | `test_web_analysis.py::test_analysis_survives_a_page_change`, `…::test_tornado_and_sweep_results_survive_a_page_change` |
 
 Weitere Zeilen kommen mit jedem Schritt dazu.

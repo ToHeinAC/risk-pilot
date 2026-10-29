@@ -45,7 +45,6 @@ PLOT: dict[str, Any] = {
     "colorway": [ACCENT, "#e07b39", GOOD, "#8e5bd6"],
     "xaxis": {"gridcolor": LINE, "zeroline": False},
     "yaxis": {"gridcolor": LINE, "zeroline": False},
-    "showlegend": False,
 }
 
 

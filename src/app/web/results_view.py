@@ -10,6 +10,7 @@ from nicegui import ui
 from app.analysis.stats import Summary
 from app.messages import render, t
 from app.model.compile import content_hash
+from app.model.schema import Model, OutputNode
 from app.present import figures
 from app.present.references import Curve, has_reference, tutorial_reference
 from app.present.results import correlation_rows
@@ -35,6 +36,14 @@ def note(text: str, kind: str = "info") -> None:
     """A hint line; ``kind`` is info, warning, error or success."""
     colour = {"info": "rp-muted", "warning": "text-warning", "error": "text-negative"}
     ui.label(text).classes(colour.get(kind, "text-positive"))
+
+
+def horizon_hint(model: Model, output: str) -> None:
+    """Comparison and analysis work on raw values, also beyond an output's horizon."""
+    node = model.nodes[output]
+    if isinstance(node, OutputNode) and node.horizon is not None:
+        name = node.name or output
+        note(t("result.horizon_raw", name=name, horizon=number(node.horizon)))
 
 
 def metrics(rows: list[tuple[str, str]]) -> None:

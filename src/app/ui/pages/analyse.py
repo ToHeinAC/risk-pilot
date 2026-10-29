@@ -1,18 +1,13 @@
 """Analysis: structure of one scenario – graph, criticality, tornado, sweep, Spearman, risks."""
 
 from collections.abc import Mapping
-from dataclasses import dataclass
 from typing import Any, cast
 
 import streamlit as st
-from numpy.typing import NDArray
 
-from app.analysis.criticality import Criticality, criticality
-from app.analysis.riskmatrix import RiskRow, risk_matrix
-from app.analysis.sensitivity import RankCorrelation, spearman
 from app.analysis.sweep import DEFAULT_K, plan_sweep, run_sweep, sweep_params, sweep_values
 from app.analysis.tornado import DEFAULT_N, MANY_RUNS, Metric, Tornado, run_count, tornado
-from app.engine.simulate import N_MAX, simulate
+from app.engine.simulate import N_MAX
 from app.errors import SimulationError
 from app.messages import render, t
 from app.model.compile import CompiledModel
@@ -21,48 +16,20 @@ from app.present import structure
 from app.present.text import integer, number
 from app.present.validation import check_text, scenario_labels
 from app.ui import state, views
+from app.web import analysing
+from app.web.analysing import MEMORY_HINT_MB, Base, Key
 
 BASE = "analysis_base"
 TORNADO = "analysis_tornado"
 SWEEP = "analysis_sweep"
-MEMORY_HINT_MB = 500
-Key = tuple[str, str, str, int, int]  # draft, scenario, output, N, seed
-
-
-@dataclass(frozen=True)
-class Base:
-    """One run with every node kept, and what is computed from it."""
-
-    key: Key
-    compiled: CompiledModel
-    output: str
-    names: Mapping[str, str]
-    crit: Criticality
-    rho: list[RankCorrelation]
-    risks: list[RiskRow]
-
-
-def _names(compiled: CompiledModel) -> dict[str, str]:
-    return {i: node.name or i for i, node in compiled.model.nodes.items()}
 
 
 def _compute(key: Key, compiled: CompiledModel, output: str) -> Base | None:
     try:
-        samples: Mapping[str, NDArray[Any]] = simulate(
-            compiled, n=key[3], seed=key[4], keep="all"
-        ).samples
+        return analysing.compute(key, compiled, output)
     except SimulationError as exc:
         st.error(render(exc.issue))
         return None
-    return Base(
-        key,
-        compiled,
-        output,
-        _names(compiled),
-        criticality(compiled, samples, output),
-        spearman(compiled, samples, output),
-        risk_matrix(compiled, samples, output),
-    )
 
 
 def _graph_tab(base: Base) -> None:
@@ -257,7 +224,7 @@ def _settings(compiled: CompiledModel, names: Mapping[str, str]) -> tuple[str, i
     defaults = compiled.model.settings
     n = int(st.number_input(t("ui.n"), 100, N_MAX, defaults.n, step=1000, key="ana_n"))
     seed = int(st.number_input(t("ui.seed"), min_value=0, value=defaults.seed, key="ana_seed"))
-    mb = n * len(compiled.nodes) * 8 / 1e6
+    mb = analysing.memory_mb(compiled, n)
     if mb > MEMORY_HINT_MB:
         st.warning(t("analysis.memory", nodes=len(compiled.nodes), mb=integer(round(mb))))
     return output, n, seed
@@ -286,7 +253,7 @@ def body() -> None:
         )
     )
     compiled = checked.scenarios[sid][1]
-    output, n, seed = _settings(compiled, _names(compiled))
+    output, n, seed = _settings(compiled, analysing.names(compiled))
     key: Key = (open_model.draft, sid, output, n, seed)
     if st.button(t("analysis.run"), key="ana_run", type="primary"):
         st.session_state[BASE] = _compute(key, compiled, output)

@@ -12,6 +12,7 @@ from app.engine.simulate import SimulationResult
 from app.errors import InputError
 from app.messages import render, t
 from app.model.compile import CompiledModel
+from app.web.analysing import AnalysisState
 
 
 @dataclass
@@ -67,6 +68,7 @@ class Session:
     run: RunView | None = None
     runs: dict[RunKey, RunView] = field(default_factory=dict[RunKey, RunView])
     compare: CompareView | None = None
+    analysis: AnalysisState = field(default_factory=AnalysisState)
 
 
 def is_example(path: Path) -> bool:
@@ -78,6 +80,7 @@ def open_model(session: Session, path: Path) -> None:
     session.model = OpenModel(str(path), files.read_text(path), readonly=is_example(path))
     session.run = None
     session.compare = None
+    session.analysis = AnalysisState()
 
 
 def save(model: OpenModel, force: bool) -> str | None:

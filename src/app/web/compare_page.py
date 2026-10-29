@@ -11,20 +11,12 @@ from app.messages import render, t
 from app.model.schema import BASIS, OutputNode
 from app.present import figures
 from app.present.compare import better_sentence, compare_rows, d_rows, direction_sentence
-from app.present.text import number, validity_line
+from app.present.text import validity_line
 from app.present.validation import CheckResult, check_text
 from app.web import results_view, running, theme
 from app.web.session import CompareView, OpenModel, RunView, Session
 
 MAX_OTHERS = 3
-
-
-def _horizon_hint(base: RunView, output: str) -> None:
-    """Comparison works on raw values, also beyond an output's horizon."""
-    node = base.compiled.model.nodes[output]
-    if isinstance(node, OutputNode) and node.horizon is not None:
-        name = node.name or output
-        results_view.note(t("result.horizon_raw", name=name, horizon=number(node.horizon)))
 
 
 def _pair(base: RunView, other: RunView, sid: str, output: str) -> str:
@@ -55,7 +47,7 @@ def _pair(base: RunView, other: RunView, sid: str, output: str) -> str:
 
 def _output(view: CompareView, output: str) -> None:
     base = view.runs[view.ref]
-    _horizon_hint(base, output)
+    results_view.horizon_hint(base.compiled.model, output)
     for sid, other in view.runs.items():
         if sid != view.ref:
             with ui.column().classes("rp-panel p-4 w-full gap-2"):
