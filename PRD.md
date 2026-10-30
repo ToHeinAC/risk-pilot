@@ -21,7 +21,8 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - Evidenzgraph, Review- und Freigabeworkflow, Mehrbenutzerbetrieb.
 - Datenbank, Server-Betrieb, Authentifizierung, Mandantentrennung, Bezahlfunktionen.
 - Periodendimension (Zeitschritte, Rebalancing, `prev`/`cumprod`); Portfolio nur Buy-and-Hold.
-- Grafischer Drag-and-drop-Modelleditor; der Graph ist Ansicht.
+- Visuelles Programmieren freier Formeln; Ausdrücke bleiben Text (der grafische Editor aus M9
+  setzt nur Vorauswahl-Ausdrücke zusammen).
 - Ressourcen- und Kalenderlogik in Terminplänen.
 - Zyklische Modelle, Systemdynamik mit Differentialgleichungen.
 - Bayessche Inferenz, automatische „beste Verteilung“, Datenfit über Quantil-Fit hinaus.
@@ -300,6 +301,33 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M7. Pflichtenheft (Entwurf):
   [docs/specs/m8-ux-selbsterklaerung.md](docs/specs/m8-ux-selbsterklaerung.md).
 
+### M9 — Grafischer Editor
+- **Status:** not started (scope approved 2026-10-30)
+- **Deliverable:** Modelle und Szenarien lassen sich auf einer Zeichenfläche nach dem Leitbild
+  n8n zusammenstellen: Knoten aus einer Palette platzieren, verbinden und die Art der
+  Verknüpfung in einem Dialog mit Vorauswahlen festlegen. Anlass: Rückmeldung vom 30.10.2026,
+  das Zusammenstellen von Projekten und Szenarien ist noch zu komplex. Pflichtenheft (Entwurf):
+  [docs/specs/m9-grafischer-editor.md](docs/specs/m9-grafischer-editor.md).
+- **Acceptance criteria:**
+  1. Spike entschieden: Canvas-Komponente gewählt (lokal gebündelt, Lizenz kompatibel) oder
+     Abbruch mit Begründung.
+  2. Verbinden zweier Knoten öffnet einen Dialog, der nur für die Knotentypen gültige
+     Vorauswahlen anbietet (u. a. Summe, Maximum, Minimum, Verzögerung bei Ereignis,
+     Parameterabhängigkeit, Korrelation) und den entstehenden Ausdruck vor dem Übernehmen zeigt.
+  3. Das YAML bleibt die einzige Quelle: Kanten werden aus Ausdrücken und Korrelationsgruppen
+     abgeleitet; Fläche, Formular und YAML-Editor zeigen denselben Entwurf; Kommentare bleiben
+     erhalten.
+  4. T2 lässt sich vollständig über die Fläche nachbauen und liefert dieselben Zahlen wie
+     `examples/t2_terminplan.yaml` (Test ohne Browser).
+  5. Knotenpositionen stehen im optionalen Block `layout` des Modell-YAML und ändern den
+     Inhalts-Hash nicht; Knoten ohne Position werden automatisch angeordnet.
+  6. Im Szenario-Modus ist die Struktur gesperrt; geänderte Knoten sind markiert, und ein Klick
+     öffnet einen Override-Dialog mit den zulässigen Feldern, dem Elternwert und Begründung.
+- **Edge cases:** Kante aus einem freien Ausdruck löschen (Ausdruck wird geöffnet, nie still
+  umgeschrieben); Verbindung, die einen Zyklus erzeugt (abgelehnt mit Meldung); abgelöste
+  Szenarien (schreibgeschützt); Positionen gelöschter Knoten (Hinweis); 100 Knoten.
+- **Dependencies:** M8.
+
 ## 5. Open risks & assumptions
 
 - **Inversionsmethode ist für manche Familien langsam** (SciPy-`ppf` bei beta, student_t, gamma).
@@ -319,7 +347,7 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 
 ## 6. Definition of done
 
-- [ ] M1–M8 stehen auf `done` mit Verweis auf die prüfenden Tests.
+- [ ] M1–M9 stehen auf `done` mit Verweis auf die prüfenden Tests.
 - [ ] `uv run pre-commit run --all-files` ist grün.
 - [ ] T1–T5 laufen in der App und als Regressionstests; T1–T4 bestehen ihre analytischen Abnahmen.
 - [ ] Ein eigenes Modell lässt sich aus einer kopierten Vorlage aufbauen, in mindestens zwei
