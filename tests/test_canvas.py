@@ -182,3 +182,30 @@ def test_uncorrelate_removes_members_and_empty_groups() -> None:
         "spearman": [[1.0, 0.5], [0.5, 1.0]],
     }
     assert canvas.uncorrelate(left, "b", "a")["correlations"] == {}
+
+
+def test_links_follow_expressions_parameters_and_groups_on_raw_data() -> None:
+    data = _data(
+        a=U,
+        b={**U, "mean": "a * 2"},
+        e={"type": "event", "p": "a"},
+        z={"type": "output", "expr": "max(a, b) + nope"},
+    )
+    data["correlations"] = {"g": {"nodes": ["a", "e"], "spearman": [[1, 0.2], [0.2, 1]]}}
+    assert canvas.links(data) == [
+        canvas.Link("a", "b", "parameter"),
+        canvas.Link("a", "e", "korrelation"),
+        canvas.Link("a", "e", "parameter"),
+        canvas.Link("a", "z", "ausdruck"),
+        canvas.Link("b", "z", "ausdruck"),
+    ]
+
+
+def test_links_match_the_model_graph_on_every_tutorial() -> None:
+    from app.model.graph import edges
+    from app.model.yaml_io import model_from_yaml
+
+    for name in ("t1_faltung", "t2_terminplan", "t3_bahn", "t4_portfolio", "t5_fusion"):
+        text = files.read_text(settings.examples_dir() / f"{name}.yaml")
+        found = [(e.source, e.target, e.kind) for e in edges(model_from_yaml(text))]
+        assert [(k.source, k.target, k.kind) for k in canvas.links(load_data(text))] == found

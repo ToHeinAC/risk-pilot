@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
 **Stand:** 30. Oktober 2026, Entwurf; E1–E3, E6 und E10 bestätigt (30.10.2026), E4, E5 und
-E7–E9 offen; AP1–AP3 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+E8 und E9 offen; E7 umgesetzt wie vorgeschlagen; AP1–AP4 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -73,6 +73,14 @@ Produkt, Verzögerung `+ where(e, x, 0)`, Parameter mit Faktor `a * f`, Wahrsche
 `uncorrelate` (Gruppe anlegen, erweitern, Eintrag setzen; unkorrelierte Mitglieder und Gruppen
 unter zwei Knoten fallen weg). Noch nicht umgesetzt: „Wahl zwischen zwei Werten“
 (`where(e, x, y)`) und „Übernehmen“ – beide nur für leere Ausdrücke sinnvoll; mit E4 zu klären.
+
+**Fläche (AP4, 30.10.2026):** `src/app/web/canvas/` (Vue-Flow-Element, Bündel in `lib/`,
+THIRD_PARTY_NOTICES.md), `present/canvas_view.py` (Knoten und Kanten aus dem Roh-Entwurf, auch
+bei ungültigem Modell; Kanten-ID `art:quelle->ziel`), Werkbank: Verschieben schreibt `layout`,
+Klick öffnet die Karte, „Neu anordnen“, „Ansicht einpassen“; die Ansicht wird nur beim ersten
+Zeichnen eingepasst, spätere Änderungen behalten Zoom und Ausschnitt. Tutorials sind nur
+Ansicht. Verbinden und Kante löschen sind bis AP5 abgeschaltet. Die Farbe nach relativer
+Streuung des alten Graphen entfällt; die Tabelle darunter zeigt P10/P50/P90.
 
 ## 5. Palette und neue Knoten (E5)
 
@@ -188,7 +196,7 @@ bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
 | E4 | Vorauswahlen | Vorschlag Abschnitt 4; zu bestätigen |
 | E5 | Palette | Vorschlag Abschnitt 5; zu bestätigen |
 | E6 | Canvas-Komponente | **bestätigt (30.10.2026):** Vue Flow (Abschnitt 8.1) |
-| E7 | Ort auf der Modellseite | Vorschlag: Fläche ersetzt den Plotly-Graphen im Reiter „Formular“; Tabelle darunter bleibt |
+| E7 | Ort auf der Modellseite | **umgesetzt (AP4, 30.10.2026):** Fläche ersetzt den Plotly-Graphen im Reiter „Formular“; Tabelle darunter bleibt |
 | E8 | Szenarienseite | Vorschlag: bleibt für Baum, Diff, Duplizieren und Ablösen; Overrides auch dort weiter möglich |
 | E9 | Kante löschen bei freiem Ausdruck | Vorschlag: Ausdruck öffnen, nie automatisch umschreiben |
 | E10 | Schlüssel `layout` | **bestätigt (30.10.2026):** oberste Ebene statt je Knoten, damit Knotendefinitionen kurz bleiben |

@@ -139,7 +139,7 @@ def test_model_page_offers_copy_for_tutorial() -> None:
     assert (settings.models_dir() / "aus_modellseite.yaml").is_file()
 
 
-def test_graph_click_and_table_pick_open_the_node_card() -> None:
+def test_canvas_click_and_table_pick_open_the_node_card() -> None:
     async def steps(user: User) -> None:
         await open_model(user, "t2_terminplan")
         table = element(user, "nodes")
@@ -148,7 +148,7 @@ def test_graph_click_and_table_pick_open_the_node_card() -> None:
         assert rows["b"]["brief"] == "um 15 d ± 3"
         assert "<rect" in rows["b"]["spark"]  # trial run fills the table
         assert rows["b"]["p10"]
-        user.find(marker="graph").trigger("plotly_click", {"points": [{"customdata": "c"}]})
+        user.find(marker="canvas").trigger("pick", "c")
         await user.should_see(marker="form.c.param.mean")
         pick(user, "a")
         await user.should_see(marker="form.a.param.mean")

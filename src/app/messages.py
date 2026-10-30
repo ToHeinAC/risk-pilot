@@ -339,9 +339,9 @@ UI: dict[str, dict[str, str]] = {
         "tour.step_compare": "Hauptszenario und „nacharbeit“ im Vergleich ansehen",
         "tour.step_analyse": "in der Analyse den Reiter Tornado ansehen: Welche Eingabe treibt das "
         "Ergebnis?",
-        "guide.purpose_modell": "Hier baust du das Modell: Knoten im Graph und in der Tabelle "
-        "wählen, in der Karte bearbeiten oder direkt im YAML; ein Probelauf zeigt sofort, was an "
-        "jedem Knoten herauskommt.",
+        "guide.purpose_modell": "Hier baust du das Modell: Knoten auf der Fläche und in der "
+        "Tabelle wählen, in der Karte bearbeiten oder direkt im YAML; ein Probelauf zeigt sofort, "
+        "was an jedem Knoten herauskommt.",
         "guide.purpose_szenarien": "Szenarien sind Varianten des Modells: Sie überschreiben "
         "einzelne Werte des Hauptszenarios mit Begründung, damit sich ihre Wirkung vergleichen "
         "lässt.",
@@ -356,12 +356,11 @@ UI: dict[str, dict[str, str]] = {
         "web.col_node": "Knoten",
         "web.col_brief": "Eingabe",
         "web.col_spark": "Verteilung",
-        "web.spread": "Relative Streuung",
-        "web.graph_needs_valid": "Der Graph erscheint, sobald das Modell fehlerfrei ist und eine "
-        "Ausgabe hat.",
-        "web.graph_caption": "Farbe: relative Streuung (P90 − P10) / P50 im Probelauf, dunkel = "
-        "breit. Einen Knoten anklicken öffnet ihn rechts.",
-        "web.pick_node": "Einen Knoten im Graph oder in der Tabelle anklicken.",
+        "canvas.caption": "Knoten anklicken öffnet ihn rechts; verschieben speichert die Position "
+        "im YAML. Linie: Ausdruck, gestrichelt: Parameter, gepunktet: Korrelation.",
+        "canvas.arrange": "Neu anordnen",
+        "canvas.fit": "Ansicht einpassen",
+        "web.pick_node": "Einen Knoten auf der Fläche oder in der Tabelle anklicken.",
         "web.more_fields": "Beschreibung, Begründung, Grenzen",
         "web.trial": "Probelauf in {ms} ms",
         "web.reading": "So liest man das",

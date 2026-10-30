@@ -1,27 +1,23 @@
-"""Model workbench (M7, GoRules principle): graph, node table and node card in one place.
+"""Model workbench (M7, GoRules principle): canvas (M9), node table and node card in one place.
 
 Guesstimate principle: every row shows the node's input in brief, its distribution in small
 and P10/P50/P90 from the trial run, which reruns on every change.
 """
 
-# plotly ships without type stubs; its members are untyped for pyright.
-# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
-# pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 from collections.abc import Callable
 from typing import Any
 
-import plotly.graph_objects as go
 from nicegui import events, ui
 
 from app.messages import t
-from app.model import form
-from app.model.graph import edges
+from app.model import form, layout
 from app.model.schema import Model
 from app.model.yaml_patch import Data
-from app.present import structure
+from app.present import canvas_view, structure
 from app.present.brief import brief, spark_svg
 from app.present.text import number, percent
-from app.web import node_card, theme
+from app.web import node_card
+from app.web.canvas import FlowCanvas
 from app.web.editing import ModelEdit
 
 TYPES = ("uncertain", "constant", "event", "choice", "derived", "output")
@@ -73,39 +69,6 @@ def _row(edit: ModelEdit, data: Data, node_id: str, model: Model | None) -> dict
     return row
 
 
-def _spread(edit: ModelEdit) -> dict[str, float]:
-    """Relative spread (P90 − P10) / |P50| per node, scaled to [0, 1] for the graph colours."""
-    raw = {
-        k: (tr.p90 - tr.p10) / abs(tr.p50)
-        for k, tr in edit.traces.items()
-        if tr.p50 and tr.p90 > tr.p10
-    }
-    top = max(raw.values(), default=0.0)
-    return {k: v / top for k, v in raw.items()} if top > 0 else {}
-
-
-def _ring(fig: go.Figure, pos: tuple[float, float]) -> None:
-    marker = {"size": 34, "color": "rgba(0,0,0,0)", "line": {"width": 3, "color": theme.ACCENT}}
-    fig.add_trace(
-        go.Scatter(x=[pos[0]], y=[pos[1]], mode="markers", hoverinfo="skip", marker=marker)
-    )
-
-
-def _graph(edit: ModelEdit, model: Model) -> go.Figure:
-    links = edges(model)
-    outputs = [i for i, n in model.nodes.items() if n.type == "output"]
-    fig = structure.graph_figure(model, links, _spread(edit), t("web.spread"), outputs[0])
-    pos = structure.positions(model, links)
-    if edit.selected in pos:
-        _ring(fig, pos[edit.selected])
-    traces: list[Any] = list(fig.data)
-    fig.data = tuple(tr for tr in traces if not tr.marker.showscale)  # colour bar -> caption
-    fig.update_layout(margin={"l": 10, "r": 10, "t": 10, "b": 10})
-    fig.update_xaxes(visible=False)
-    fig.update_yaxes(visible=False)
-    return fig
-
-
 class Workbench:
     """The form side of the model page; each part redraws on its own, so a field being typed
     in keeps its focus. ``changed`` tells the page that the draft changed."""
@@ -113,6 +76,7 @@ class Workbench:
     def __init__(self, edit: ModelEdit, changed: Callable[[bool], None]) -> None:
         self.edit = edit
         self.changed = changed  # argument: redraw the node card too
+        self.canvas: FlowCanvas | None = None
 
     @ui.refreshable_method
     def notes(self) -> None:
@@ -121,15 +85,45 @@ class Workbench:
         elif self.edit.written:
             ui.label(t("form.written")).classes("rp-muted text-sm")
 
-    @ui.refreshable_method
-    def graph(self) -> None:
-        compiled = self.edit.checked().compiled
-        if compiled is None or not any(n.type == "output" for n in compiled.model.nodes.values()):
-            ui.label(t("web.graph_needs_valid")).classes("rp-muted p-2")
+    def graph(self, data: Data) -> None:
+        """The canvas (M9): drawn from the raw draft, so an invalid model is drawn too."""
+        readonly = self.edit.model.readonly
+        with ui.row().classes("w-full items-center gap-1 px-1"):
+            ui.label(t("canvas.caption")).classes("rp-muted text-xs")
+            ui.space()
+            if not readonly:
+                ui.button(t("canvas.arrange"), icon="account_tree", on_click=self.arrange).props(
+                    "flat dense no-caps"
+                ).mark("canvas_arrange")
+            ui.button(t("canvas.fit"), icon="fit_screen", on_click=self.fit).props(
+                "flat dense no-caps"
+            ).mark("canvas_fit")
+        canvas = FlowCanvas(*canvas_view.view(data, self.edit.selected), readonly)
+        canvas.classes("w-full h-[420px] rp-canvas").mark("canvas")
+        canvas.on("move", self.on_move)
+        canvas.on("pick", lambda e: self.select(str(e.args)))
+        self.canvas = canvas
+
+    def redraw(self) -> None:
+        data = self.edit.data()
+        if self.canvas is not None and data is not None:
+            self.canvas.draw(*canvas_view.view(data, self.edit.selected))
+
+    def fit(self) -> None:
+        if self.canvas is not None:
+            self.canvas.fit()
+
+    def on_move(self, e: events.GenericEventArguments) -> None:
+        if self.edit.model.readonly:
             return
-        plot = theme.plot(_graph(self.edit, compiled.model), 320).mark("graph")
-        plot.on("plotly_click", self.on_graph_click)
-        ui.label(t("web.graph_caption")).classes("rp-muted text-xs px-2")
+        node_id, x, y = str(e.args["id"]), float(e.args["x"]), float(e.args["y"])
+        self.edit.change(lambda d: layout.move(d, node_id, x, y))
+        self.changed(False)
+
+    def arrange(self) -> None:
+        self.edit.change(lambda d: layout.arrange(d, canvas_view.auto(d)))
+        self.changed(False)
+        self.fit()
 
     @ui.refreshable_method
     def table(self) -> None:
@@ -191,14 +185,9 @@ class Workbench:
 
     def select(self, node_id: str) -> None:
         self.edit.selected = node_id
-        for part in (self.graph, self.table, self.card):
+        self.redraw()
+        for part in (self.table, self.card):
             part.refresh()
-
-    def on_graph_click(self, e: events.GenericEventArguments) -> None:
-        points = e.args.get("points") or []
-        node_id = points[0].get("customdata") if points else None
-        if isinstance(node_id, str):
-            self.select(node_id)
 
     @ui.refreshable_method
     def card(self) -> None:
@@ -215,7 +204,8 @@ class Workbench:
             node_card.preview(self.edit, self.edit.selected)
 
     def refresh(self, card: bool) -> None:
-        for part in (self.notes, self.graph, self.table, self.preview):
+        self.redraw()
+        for part in (self.notes, self.table, self.preview):
             part.refresh()
         if card:
             self.card.refresh()
@@ -228,7 +218,7 @@ class Workbench:
         self.header(data)
         with ui.row().classes("w-full gap-4 no-wrap max-lg:flex-wrap items-start"):
             with ui.column().classes("rp-panel p-2 flex-[3] min-w-0 w-full gap-1"):
-                self.graph()
+                self.graph(data)
             with ui.column().classes("rp-panel p-4 flex-[2] min-w-80 w-full gap-3"):
                 self.card()
         with ui.column().classes("rp-panel p-2 w-full gap-1 min-w-0 overflow-hidden"):

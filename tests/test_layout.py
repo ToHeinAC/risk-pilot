@@ -60,10 +60,33 @@ def test_move_into_the_yaml_keeps_comments_and_writes_flow() -> None:
 
 
 def test_placed_keeps_stored_and_lays_out_the_rest() -> None:
-    model = _model("layout:\n  a: [5, 7]\n")
-    pos = layout.placed(model, positions(model, edges(model)))
-    assert pos["a"] == (5.0, 7.0)
-    assert pos["z"][0] > pos["a"][0] - 5  # a layer to the right of the auto origin
+    data = load_data(BASE + "layout:\n  a: [5, 7]\n  z: [1, 2, 3]\n")
+    pos = layout.placed(data, {"a": (0.0, 0.0), "z": (1.0, 0.0)})
+    assert pos == {"a": (5.0, 7.0), "z": (layout.STEP_X, 0.0)}  # a broken position is ignored
+
+
+def test_layers_put_each_node_one_layer_right_of_its_latest_input() -> None:
+    # rows centred per layer, in the order of the given IDs
+    links = [("a", "c"), ("b", "c"), ("c", "d"), ("a", "d")]
+    assert layout.layers(["a", "b", "c", "d", "e"], links) == {
+        "a": (0.0, 1.0),
+        "b": (0.0, 0.0),
+        "e": (0.0, -1.0),
+        "c": (1.0, 0.0),
+        "d": (2.0, 0.0),
+    }
+
+
+def test_layers_survive_a_cycle() -> None:
+    assert set(layout.layers(["a", "b"], [("a", "b"), ("b", "a")])) == {"a", "b"}
+
+
+def test_layers_match_the_structure_layout_on_t2() -> None:
+    model = model_from_yaml(files.read_text(settings.examples_dir() / "t2_terminplan.yaml"))
+    links = [(e.source, e.target) for e in edges(model) if e.kind != "korrelation"]
+    mine = layout.layers(list(model.nodes), links)
+    theirs = positions(model, edges(model))
+    assert {n: x for n, (x, _) in mine.items()} == {n: x for n, (x, _) in theirs.items()}
 
 
 def test_arrange_sets_every_node_from_the_layered_layout() -> None:

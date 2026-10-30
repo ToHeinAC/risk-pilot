@@ -67,6 +67,10 @@ works too.
   (also as tooltips). "Rundgang an T2 starten" on the start page guides through open, simulate,
   scenario, comparison and analysis with a banner on every page; progress is read from the
   state. A new uncertain node starts with the range input P10/P50/P90.
+- **Canvas** (M9, in progress, [spec](docs/specs/m9-grafischer-editor.md)): the model page
+  draws the model on a canvas (Vue Flow) instead of the static graph, also while the draft is
+  invalid. Moving a node writes its position to the optional `layout` block of the YAML, which
+  changes no number and no hash; "Neu anordnen" lays out every node, a click opens the node card.
 - **Reference:** model format and semantics in [docs/model-semantics.md](docs/model-semantics.md),
   statistics and extension points in [docs/statistical-methods.md](docs/statistical-methods.md).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.

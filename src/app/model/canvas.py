@@ -9,11 +9,12 @@ with ``yaml_patch.patch``.
 import ast
 import copy
 from dataclasses import dataclass
+from itertools import combinations
 from typing import Any, cast
 
 from app.errors import InputError, Issue
 from app.model.form import COMMON, param_fields
-from app.model.graph import expression_names
+from app.model.graph import EdgeKind, expression_names
 from app.model.yaml_patch import Data
 
 FUNCTIONS = ("max", "min")
@@ -92,6 +93,32 @@ def _depends(data: Data, node_id: str, on: str) -> bool:
             seen.add(current)
             todo.extend(_refs(nodes[current]))
     return False
+
+
+@dataclass(frozen=True, order=True)
+class Link:
+    """An edge on the canvas, read from raw data (valid model or not); kinds as ``graph.edges``."""
+
+    source: str
+    target: str
+    kind: EdgeKind
+
+
+def links(data: Data) -> list[Link]:
+    """Edges of the draft: references in ``expr`` (ausdruck), in parameters or ``p`` (parameter),
+    and every pair of a correlation group (korrelation, smaller ID first); sorted."""
+    nodes = _nodes(data)
+    found: set[Link] = set()
+    for node_id, node in nodes.items():
+        for key, value in node.items():
+            if isinstance(value, str) and key not in COMMON:
+                kind: EdgeKind = "ausdruck" if key == "expr" else "parameter"
+                names = expression_names(value) & set(nodes) - {node_id}
+                found |= {Link(name, node_id, kind) for name in names}
+    for group in _groups(data).values():
+        members = sorted(set(cast(list[str], group.get("nodes") or [])) & set(nodes))
+        found |= {Link(a, b, "korrelation") for a, b in combinations(members, 2)}
+    return sorted(found)
 
 
 def _free(node_id: str, field: str, text: str) -> InputError:

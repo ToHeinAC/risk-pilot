@@ -37,6 +37,21 @@ body {{ background:{CANVAS}; color:{INK};
 .rp-nav .q-item {{ border-radius:8px; margin:2px 8px; }}
 .rp-nav .q-item.rp-active {{ background:{ACCENT_SOFT}; color:{ACCENT}; font-weight:600; }}
 .q-item.rp-current {{ background:{ACCENT_SOFT}; color:{ACCENT}; font-weight:600; }}
+.rp-canvas {{ background:{CANVAS}; border-radius:8px; }}
+.rp-canvas .vue-flow__node {{ border:1px solid {LINE}; border-left:4px solid {MUTED};
+  border-radius:8px; background:{SURFACE}; color:{INK}; padding:6px 10px; min-width:130px;
+  text-align:left; font-size:.85rem; }}
+.rp-canvas .vue-flow__node.rp-uncertain {{ border-left-color:{ACCENT}; }}
+.rp-canvas .vue-flow__node.rp-event {{ border-left-color:{WARN}; }}
+.rp-canvas .vue-flow__node.rp-choice {{ border-left-color:#8e5bd6; }}
+.rp-canvas .vue-flow__node.rp-derived {{ border-left-color:{MUTED}; }}
+.rp-canvas .vue-flow__node.rp-output {{ border-left-color:{GOOD}; font-weight:600; }}
+.rp-canvas .vue-flow__node.rp-selected {{ box-shadow:0 0 0 3px {ACCENT_SOFT};
+  border-color:{ACCENT}; }}
+.rp-canvas .rp-node-type {{ font-size:.68rem; color:{MUTED}; text-transform:uppercase;
+  letter-spacing:.05em; font-weight:500; }}
+.rp-canvas .rp-edge-parameter path {{ stroke-dasharray:6 4; }}
+.rp-canvas .rp-edge-korrelation path {{ stroke-dasharray:2 4; stroke:#8e5bd6; }}
 """
 
 PLOT: dict[str, Any] = {
