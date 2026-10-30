@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
 **Stand:** 30. Oktober 2026, Entwurf; E1–E3, E6 und E10 bestätigt (30.10.2026), E4, E5 und
-E7–E9 offen; AP1 und AP2 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+E7–E9 offen; AP1–AP3 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -65,6 +65,14 @@ eines `choice`, A = B) lehnt die Fläche mit der bekannten Meldung ab.
 
 **Kante löschen:** Bei Vorauswahl-Ausdrücken wird das Argument entfernt (`max(a, b, c)` →
 `max(a, b)`; bleibt ein Argument, wird es `a`). Bei freien Ausdrücken öffnet sich der Ausdruck.
+
+**Umgesetzt (AP3, 30.10.2026)** in `src/app/model/canvas.py`: `presets` (prüft A = B und Kreis,
+liefert die Vorauswahlen, freie Ausdrücke als `edit`), `connect` (Summe, Maximum, Minimum,
+Produkt, Verzögerung `+ where(e, x, 0)`, Parameter mit Faktor `a * f`, Wahrscheinlichkeit),
+`disconnect` (entfernt ein Argument; sonst Fehler mit dem zu öffnenden Feld), `correlate` und
+`uncorrelate` (Gruppe anlegen, erweitern, Eintrag setzen; unkorrelierte Mitglieder und Gruppen
+unter zwei Knoten fallen weg). Noch nicht umgesetzt: „Wahl zwischen zwei Werten“
+(`where(e, x, y)`) und „Übernehmen“ – beide nur für leere Ausdrücke sinnvoll; mit E4 zu klären.
 
 ## 5. Palette und neue Knoten (E5)
 

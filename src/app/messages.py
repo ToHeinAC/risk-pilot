@@ -44,6 +44,17 @@ _DE: dict[str, str] = {
     "der Iterationen.",
     "range.violation": "{node}: {below} der Werte liegen unter dem zulässigen Minimum, "
     "{above} über dem Maximum. Die Werte wurden nicht verändert.",
+    "canvas.free_expression": "{node}: der Ausdruck „{expr}“ ist frei formuliert und wird nicht "
+    "automatisch umgeschrieben; bitte im Ausdruck selbst ändern.",
+    "canvas.self": "{node} kann nicht mit sich selbst verbunden werden.",
+    "canvas.cycle": "Die Verbindung {source} → {target} ergäbe einen Kreis: {source} hängt "
+    "schon von {target} ab.",
+    "canvas.no_preset": "{node} hat den Typ {type} und nimmt keine Verbindung auf.",
+    "canvas.field": "{node}: „{field}“ ist kein Parameter dieser Verteilung.",
+    "canvas.not_random": "{node} ist weder unsicher noch ein Ereignis und lässt sich nicht "
+    "korrelieren.",
+    "canvas.other_group": "{a} steht in Korrelationsgruppe „{ga}“, {b} in „{gb}“; ein Knoten "
+    "gehört zu höchstens einer Gruppe.",
     "layout.unknown_node": "{node} steht im Block „layout“, existiert aber nicht; die "
     "Position wird nicht verwendet.",
     "uniform.degenerate": "{node}: Gleichverteilung mit gleichen Grenzen, wird als Konstante "
