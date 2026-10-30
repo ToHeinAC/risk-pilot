@@ -26,6 +26,7 @@ from app.web import (
     start,
     theme,
 )
+from app.web import session as sessions
 from app.web.session import OpenModel, Session
 
 EXIT_DELAY = 0.3  # seconds: the goodbye text reaches the browser before SIGTERM
@@ -143,12 +144,44 @@ def _page_head(path: str, session: Session) -> None:
                 ui.link(t(step.text), step.target).mark("next_step")
 
 
+def _tour_banner(session: Session) -> None:
+    """While the tour runs: the first open step with a link to its page, and an end button."""
+    if not session.tour:
+        return
+    number = guide.tour_step(sessions.tour_facts(session))
+    box = ui.row().classes("rp-panel w-full items-center gap-3 px-4 py-2").mark("tour_banner")
+    with box:
+        ui.icon("tour", color="primary")
+        if number is None:
+            ui.label(t("tour.done")).classes("font-semibold")
+        else:
+            step = guide.TOUR[number - 1]
+            text = t("tour.banner", step=number, total=len(guide.TOUR), text=t(step.text))
+            ui.label(text).classes("font-semibold")
+            ui.button(t("tour.go"), on_click=_go(step.target)).props(
+                "flat dense no-caps icon-right=arrow_forward"
+            ).mark("tour_go")
+        ui.space()
+        ui.button(t("tour.end"), on_click=lambda: _end_tour(session)).props(
+            "flat dense no-caps"
+        ).mark("tour_end")
+
+
+def _end_tour(session: Session) -> None:
+    session.tour = False
+    session.refresh_tour()
+
+
 def _page(path: str, session: Session, nav: dict[str, ui.item]) -> Callable[[], None]:
     """Build one page; an unexpected error becomes a German message, the shell keeps running."""
 
     def build() -> None:
         for other, item in nav.items():
             item.classes(add="rp-active" if other == path else "", remove="rp-active")
+        session.visited.add(path)
+        banner = ui.refreshable(_tour_banner)
+        banner(session)
+        session.refresh_tour = banner.refresh
         try:
             _page_head(path, session)
             BUILDERS[path](session)

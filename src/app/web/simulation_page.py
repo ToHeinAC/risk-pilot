@@ -64,6 +64,7 @@ def page(session: Session) -> None:
         else:
             assert done is not None  # io_bound returns None only while the app shuts down
             session.run = done
+            session.refresh_tour()
             seconds = decimal(done.seconds, 2)
             message, colour = t("ui.sim_done", n=integer(count), seconds=seconds), "text-positive"
         finally:

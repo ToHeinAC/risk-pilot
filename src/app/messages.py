@@ -310,6 +310,20 @@ UI: dict[str, dict[str, str]] = {
         "guide.next_compare": "Szenarien vergleichen",
         "guide.next_analyse": "die Struktur analysieren: welche Eingaben das Ergebnis treiben",
         "guide.next_scenarios": "ein Szenario anlegen und wieder vergleichen",
+        "tour.start": "Rundgang an T2 starten",
+        "tour.start_intro": "Fünf Schritte am Mini-Terminplan T2: öffnen, simulieren, ein "
+        "Szenario simulieren, vergleichen, analysieren. Das Modell bleibt unverändert.",
+        "tour.banner": "Rundgang, Schritt {step} von {total}: {text}",
+        "tour.go": "Zur Seite",
+        "tour.end": "Rundgang beenden",
+        "tour.done": "Rundgang abgeschlossen: Du hast ein Modell simuliert, ein Szenario "
+        "verglichen und die Treiber gesehen.",
+        "tour.step_open": "Tutorial T2 „Mini-Terminplan“ auf der Startseite öffnen",
+        "tour.step_basis": "das Hauptszenario „basis“ simulieren",
+        "tour.step_nacharbeit": "das Szenario „nacharbeit“ simulieren",
+        "tour.step_compare": "Hauptszenario und „nacharbeit“ im Vergleich ansehen",
+        "tour.step_analyse": "in der Analyse den Reiter Tornado ansehen: Welche Eingabe treibt das "
+        "Ergebnis?",
         "guide.purpose_modell": "Hier baust du das Modell: Knoten im Graph und in der Tabelle "
         "wählen, in der Karte bearbeiten oder direkt im YAML; ein Probelauf zeigt sofort, was an "
         "jedem Knoten herauskommt.",

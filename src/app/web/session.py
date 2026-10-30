@@ -3,6 +3,7 @@
 No UI import: the pages build on these types, the logic stays testable without a browser.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from app.engine.simulate import SimulationResult
 from app.errors import InputError
 from app.messages import render, t
 from app.model.compile import CompiledModel
+from app.present import guide
 from app.web.analysing import AnalysisState
 
 
@@ -81,6 +83,24 @@ class Session:
     compare: CompareView | None = None
     analysis: AnalysisState = field(default_factory=AnalysisState)
     lessons: LessonState = field(default_factory=LessonState)
+    tour: bool = False  # guided tour at T2 running (M8 AK 4)
+    visited: set[str] = field(default_factory=set[str])  # pages opened, set by the shell
+    refresh_tour: Callable[[], object] = lambda: None  # redraws the banner; set by the shell
+
+
+def tour_facts(session: Session) -> guide.TourFacts:
+    """The tour's progress as the session shows it; only runs of T2 count."""
+    model = Path(session.model.path).stem if session.model is not None else None
+    runs = {
+        r.scenario_id for r in session.runs.values() if r.compiled.model.model == guide.TOUR_MODEL
+    }
+    return guide.TourFacts(model, frozenset(runs), frozenset(session.visited))
+
+
+def start_tour(session: Session) -> None:
+    session.tour = True
+    session.visited.clear()
+    session.refresh_tour()
 
 
 def is_example(path: Path) -> bool:

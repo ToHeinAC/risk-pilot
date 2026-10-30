@@ -228,7 +228,9 @@ Reihenfolge wie in M7: ein Commit je Arbeitspaket auf `main`, Tests zuerst, Gate
 Blöcke in Ergebnissen, Vergleich und allen Analyse-Reitern, Gründe leerer Auswertungen;
 `tests/test_present_reading.py`, `tests/test_web_explain.py`); AP3 erledigt
 (`present/glossary.py`, Seite `/glossar`, Tooltips; `tests/test_present_glossary.py`,
-`tests/test_web_glossary.py`); AP5 mit M7 geliefert.
+`tests/test_web_glossary.py`); AP4 erledigt (`guide.tour_step`, `Session.visited`, Banner in
+`web/main.py`, Start auf der Startseite; `tests/test_present_tour.py`, `tests/test_web_tour.py`);
+AP5 mit M7 geliefert.
 
 | AP | Inhalt | Tests |
 |---|---|---|

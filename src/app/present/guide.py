@@ -62,3 +62,48 @@ def next_step(path: str, facts: Facts) -> Step:
     if path == "/laeufe":
         return RESULTS if facts.has_run else SIMULATE
     return FOLLOWS[path]
+
+
+TOUR_MODEL = "t2_terminplan"
+
+
+@dataclass(frozen=True)
+class TourFacts:
+    """What the tour's progress is read from (M8 AK 4, E6)."""
+
+    model: str | None  # ID of the open model
+    run_scenarios: frozenset[str]  # scenarios with a run of the tour model in this session
+    visited: frozenset[str]  # pages opened in this session
+
+
+@dataclass(frozen=True)
+class TourStep:
+    text: str  # message key
+    target: str  # page where the step happens
+
+
+TOUR: tuple[TourStep, ...] = (
+    TourStep("tour.step_open", "/"),
+    TourStep("tour.step_basis", "/simulation"),
+    TourStep("tour.step_nacharbeit", "/simulation"),
+    TourStep("tour.step_compare", "/vergleich"),
+    TourStep("tour.step_analyse", "/analyse"),
+)
+
+
+def _tour_done(facts: TourFacts) -> tuple[bool, ...]:
+    return (
+        facts.model == TOUR_MODEL,
+        "basis" in facts.run_scenarios,
+        "nacharbeit" in facts.run_scenarios,
+        "/vergleich" in facts.visited,
+        "/analyse" in facts.visited,
+    )
+
+
+def tour_step(facts: TourFacts) -> int | None:
+    """Number (1-based) of the first open step; None when all five are done.
+
+    Steps done out of order count; the banner shows the first one still open.
+    """
+    return next((i + 1 for i, ok in enumerate(_tour_done(facts)) if not ok), None)

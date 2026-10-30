@@ -104,6 +104,11 @@ def page(session: Session) -> None:
         ui.button(t("ui.open_lernpfad"), on_click=lambda: ui.navigate.to("/lernpfad")).props(
             "flat no-caps"
         ).mark("open_lernpfad")
+    with ui.column().classes("rp-panel p-4 gap-2 w-full"):
+        ui.label(t("tour.start")).classes("text-lg font-semibold")
+        ui.label(t("tour.start_intro")).classes("rp-muted")
+        go = ui.button(t("tour.start"), icon="tour", on_click=lambda: sessions.start_tour(session))
+        go.props("unelevated no-caps").mark("tour_start")
     ui.label(t("ui.tutorials")).classes("text-lg font-semibold")
     with ui.row().classes("gap-4"):
         for tutorial in sorted(settings.examples_dir().glob("t*.yaml")):
