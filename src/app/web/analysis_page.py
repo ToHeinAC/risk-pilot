@@ -61,6 +61,11 @@ def _criticality_tab(base: Base, _state: AnalysisState) -> None:
     ui.label(t("analysis.constellations")).classes("text-lg font-semibold")
     headers = [t("analysis.col_constellation"), t("analysis.col_share")]
     results_view.table(headers, structure.constellation_rows(crit, base.names))
+    if crit.constellations:
+        rows = len(crit.constellations)
+        theme.plot(structure.constellation_figure(crit, base.names), 140 + 34 * rows).mark(
+            "ana_constellations"
+        )
 
 
 def _rho_tab(base: Base, _state: AnalysisState) -> None:

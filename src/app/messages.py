@@ -717,6 +717,7 @@ UI: dict[str, dict[str, str]] = {
         "über max/min oder den gewählten where-Zweig mitbestimmt. Indizes summieren nicht zu "
         "100 % (bei Gleichstand zählen alle Gewinner); die Pfadkonstellationen summieren zu 100 %.",
         "analysis.crit_axis": "Anteil der Iterationen auf dem entscheidenden Pfad",
+        "analysis.constellation_axis": "Anteil der Iterationen",
         "analysis.constellations": "Pfadkonstellationen (kritische unsichere Eingaben und "
         "Ereignisse je Iteration)",
         "analysis.constellation_none": "keine unsichere Eingabe",

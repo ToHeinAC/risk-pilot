@@ -50,7 +50,7 @@ works too.
 - **Analysis** (M4, [spec](docs/specs/m4-struktur.md)): page "Analyse" per scenario and output.
   Dependency graph on the same canvas as the model page (M9; read only, each node shows
   |Spearman ρ|, criticality or missing reason as a coloured value, edge kind as line style), criticality index and path constellations (decisive path
-  through `max`/`min` winners and the chosen `where` branch), tornado (each uncertain input fixed
+  through `max`/`min` winners and the chosen `where` branch; table and bar chart), tornado (each uncertain input fixed
   at its P10 and P90, same seed), sweep of one literal parameter over k values, Spearman rank
   correlation (descriptive) and a risk matrix per event (p̂ with Wilson, conditional difference
   with Welch interval).

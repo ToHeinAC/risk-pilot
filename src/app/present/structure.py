@@ -111,6 +111,25 @@ def criticality_figure(crit: Criticality, names: Mapping[str, str]) -> go.Figure
     return layout(fig, t("analysis.crit_axis"), "")
 
 
+def constellation_figure(crit: Criticality, names: Mapping[str, str]) -> go.Figure:
+    """Share of the iterations per path constellation, the most frequent on top, the share
+    written at each bar (the interval stands in the table above)."""
+    rows = list(reversed(crit.constellations))
+    fig = go.Figure(
+        go.Bar(
+            x=[c.share.p for c in rows],
+            y=[_constellation_label(c, names) for c in rows],
+            orientation="h",
+            text=[percent(c.share.p) for c in rows],
+            textposition="outside",
+            cliponaxis=False,
+        )
+    )
+    fig.update_xaxes(range=[0, 1.1], tickformat=".0%")
+    fig.update_yaxes(ticksuffix="  ")
+    return layout(fig, t("analysis.constellation_axis"), "")
+
+
 def tornado_rows(tornado: Tornado, names: Mapping[str, str]) -> list[tuple[str, ...]]:
     return [
         (

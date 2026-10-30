@@ -54,3 +54,18 @@ def test_risk_figure_marks_undefined_difference() -> None:
     (trace,) = data(structure.risk_figure(rows, {"nacharbeit": "Nacharbeit"}, "d"))
     assert trace.text[0] == "Nacharbeit (y nicht bestimmbar)"
     assert list(trace.y) == [0.0]
+
+
+def test_constellation_figure_shows_each_share_largest_on_top() -> None:
+    model = model_from_yaml(T2.read_text("utf-8"))
+    c = compile_model(effective_model(model, "nacharbeit"))
+    crit = criticality(c, simulate(c, n=5000, seed=0, keep="all").samples, "ende")
+    names = {"a": "Vorgang A", "b": "Vorgang B", "c": "Vorgang C", "nacharbeit": "Nacharbeit an B"}
+    (bar,) = data(structure.constellation_figure(crit, names))
+    labels = [
+        structure.constellation_rows(crit, names)[i][0] for i in range(len(crit.constellations))
+    ]
+    assert list(bar.y) == list(reversed(labels))  # plotly draws bottom-up: largest on top
+    assert list(bar.x) == [k.share.p for k in reversed(crit.constellations)]
+    assert bar.orientation == "h"
+    assert all(text.endswith("%") for text in bar.text)

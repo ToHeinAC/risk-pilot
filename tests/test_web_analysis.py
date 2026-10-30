@@ -42,6 +42,7 @@ def test_analysis_page_t2_all_tabs() -> None:
         assert "Deskriptiv: zeigt Gleichlauf im Modell" in page
         assert "keine kausale Wirkung" in page
         assert any(row[0] == "Nacharbeit an B" for row in cells(user, "ana_risk_table"))
+        await user.should_see(marker="ana_constellations")
         put(user, "graph_color", "why")
         put(user, "tornado_n", 2_000)
         await user.should_see("Der Tornado braucht 6 Läufe")
