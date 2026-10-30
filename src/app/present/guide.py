@@ -33,6 +33,7 @@ PAGES: dict[str, Page] = {
     "/vergleich": Page("guide.purpose_vergleich"),
     "/analyse": Page("analysis.intro"),
     "/laeufe": Page("guide.purpose_laeufe"),
+    "/glossar": Page("guide.purpose_glossar", needs_model=False),
 }
 
 SIMULATE = Step("guide.next_simulate", "/simulation")
@@ -43,6 +44,7 @@ FOLLOWS: dict[str, Step] = {
     "/szenarien": SIMULATE,
     "/vergleich": Step("guide.next_analyse", "/analyse"),
     "/analyse": Step("guide.next_scenarios", "/szenarien"),
+    "/glossar": Step("guide.next_glossar", None),
 }
 
 

@@ -293,6 +293,13 @@ UI: dict[str, dict[str, str]] = {
         "ui.page_laeufe": "Läufe",
         "web.no_model": "Kein Modell geöffnet",
         "guide.next_label": "Nächster Schritt:",
+        "guide.next_glossar": "zurück zur Arbeit; auf jeder Seite erklären Tooltips die Begriffe "
+        "kurz, wenn die Maus darauf ruht",
+        "guide.purpose_glossar": "Die Fachbegriffe der Oberfläche in einem Satz, einem Absatz und "
+        "einem Beispiel am Terminplan T2.",
+        "ui.page_glossar": "Glossar",
+        "glossary.filter": "Begriff suchen",
+        "glossary.example": "Beispiel:",
         "guide.next_open": "ein Tutorial oder eigenes Modell auf der Startseite öffnen",
         "guide.next_lernpfad": "mit dem Lernpfad beginnen oder ein Tutorial öffnen",
         "guide.next_model": "das offene Modell ansehen und bearbeiten",
@@ -577,9 +584,8 @@ UI: dict[str, dict[str, str]] = {
         "read.higher": "höher",
         "read.lower": "niedriger",
         "read.graph_complete": "Das Modell hat {n} Knoten; alle Eingaben tragen eine Begründung.",
-        "read.graph_missing": "Das Modell hat {n} Knoten; {k} Eingaben fehlt noch eine "
-        "Begründung (Einfärbung "
-        "„Begründung fehlt“).",
+        "read.graph_missing": "Das Modell hat {n} Knoten; bei {k} Eingaben fehlt noch die "
+        "Begründung (Einfärbung „Begründung fehlt“ zeigt, wo).",
         "read.crit": "Im Modell liegt {node} in {p} der Iterationen auf dem entscheidenden Pfad zu "
         "{name} – öfter als jede andere Eingabe.",
         "read.tornado": "Im Modell verschiebt {node} die Kennzahl „{metric}“ für {name} von "

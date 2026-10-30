@@ -7,7 +7,7 @@ from app.errors import SimulationError
 from app.messages import render, t
 from app.present.text import decimal, integer
 from app.present.validation import check_text, scenario_labels
-from app.web import running
+from app.web import explain, running
 from app.web.session import Session
 
 
@@ -26,10 +26,13 @@ def page(session: Session) -> None:
     with ui.row().classes("rp-panel p-4 items-end gap-4 w-full"):
         scenario = ui.select(labels, value=first, label=t("ui.scenario")).props("outlined dense")
         scenario.classes("min-w-64").mark("sim_scenario")
+        explain.hint(scenario, t("ui.scenario"))
         n = ui.number(t("ui.n"), value=defaults.n, min=1, max=N_MAX, step=1000, format="%d")
         n.props("outlined dense").mark("sim_n")
+        explain.hint(n, t("ui.n"))
         seed = ui.number(t("ui.seed"), value=defaults.seed, min=0, step=1, format="%d")
         seed.props("outlined dense").mark("sim_seed")
+        explain.hint(seed, t("ui.seed"))
         button = ui.button(t("ui.simulate"), icon="play_arrow").props("unelevated no-caps")
         button.mark("sim_run")
     status = ui.row().classes("items-center gap-2")

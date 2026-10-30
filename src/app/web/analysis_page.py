@@ -112,6 +112,8 @@ def _reading(name: str, base: Base) -> reading.Reading | None:
 def _tabs(base: Base, state: AnalysisState) -> None:
     with ui.tabs().props("dense no-caps align=left").classes("w-full").mark("ana_tabs") as tabs:
         heads = [ui.tab(t(f"analysis.tab_{name}")) for name in TABS]
+    for head, name in zip(heads, TABS, strict=True):
+        explain.hint(head, t(f"analysis.tab_{name}"))
     with ui.tab_panels(tabs, value=heads[0]).classes("w-full bg-transparent"):
         for head, name in zip(heads, TABS, strict=True):
             with ui.tab_panel(head).classes("p-0 gap-3"):
@@ -142,8 +144,10 @@ class AnalysisPage:
             self.output.props("outlined dense").classes("min-w-48").mark("ana_output")
             self.n = ui.number(t("ui.n"), value=n, min=100, max=N_MAX, step=1000)
             self.n.props("outlined dense").mark("ana_n")
+            explain.hint(self.n, t("ui.n"))
             self.seed = ui.number(t("ui.seed"), value=seed, min=0, step=1)
             self.seed.props("outlined dense").mark("ana_seed")
+            explain.hint(self.seed, t("ui.seed"))
             self.button = ui.button(t("analysis.run"), icon="troubleshoot", on_click=self.run)
             self.button.props("unelevated no-caps").mark("ana_run")
         self.hint = ui.label().classes("text-warning")

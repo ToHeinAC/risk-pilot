@@ -49,13 +49,13 @@ def horizon_hint(model: Model, output: str) -> None:
 def metrics(rows: list[tuple[str, str]]) -> None:
     with ui.grid(columns=2).classes("w-full gap-x-6 gap-y-1 text-sm"):
         for label, shown in rows:
-            ui.label(label).classes("rp-muted")
+            explain.hint(ui.label(label).classes("rp-muted"), label)
             ui.label(shown).classes("rp-num text-right")
 
 
 def card(kicker: str, value: str, caption: str = "") -> None:
     with ui.column().classes("rp-panel p-4 gap-1 flex-1 min-w-48"):
-        ui.label(kicker).classes("rp-kicker")
+        explain.hint(ui.label(kicker).classes("rp-kicker"), kicker)
         ui.label(value).classes("rp-big")
         if caption:
             ui.label(caption).classes("rp-muted text-sm")

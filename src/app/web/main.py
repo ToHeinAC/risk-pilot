@@ -16,6 +16,7 @@ from app.present import guide
 from app.web import (
     analysis_page,
     compare_page,
+    glossary_page,
     lesson_page,
     model_page,
     results_page,
@@ -38,6 +39,7 @@ PAGES = (
     ("/vergleich", "ui.page_vergleich", "compare_arrows"),
     ("/analyse", "ui.page_analyse", "troubleshoot"),
     ("/laeufe", "ui.page_laeufe", "history"),
+    ("/glossar", "ui.page_glossar", "menu_book"),
 )
 
 Builder = Callable[[Session], None]
@@ -53,6 +55,7 @@ BUILDERS: dict[str, Builder] = {
     "/vergleich": compare_page.page,
     "/analyse": analysis_page.page,
     "/laeufe": runs_page.page,
+    "/glossar": glossary_page.page,
 }
 
 

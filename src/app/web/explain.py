@@ -5,7 +5,15 @@ from collections.abc import Callable
 from nicegui import ui
 
 from app.messages import t
+from app.present import glossary
 from app.present.reading import Empty, Reading, Sentence
+
+
+def hint(element: ui.element, label: str) -> None:
+    """Tooltip with the glossary sentence, if ``label`` is a technical term."""
+    term = glossary.term_for(label)
+    if term is not None:
+        element.tooltip(term.short)
 
 
 def reading(key: str, found: Reading) -> bool:
