@@ -10,6 +10,7 @@ import re
 from typing import Any, cast
 
 from app.dists.base import ParamSpec
+from app.dists.families import QUANTILES
 from app.dists.registry import get_family
 from app.errors import InputError, Issue
 from app.model.graph import expression_names
@@ -238,14 +239,20 @@ def apply_header(data: Data, new: Values) -> Data:
     return out
 
 
+# A new uncertain node starts with the range P10/P50/P90 (M8 E14); other modes stay selectable.
+NEW_UNCERTAIN = {"dist": "normal", "input": QUANTILES}
+
+
 def add_node(data: Data, node_id: str, node_type: str) -> Data:
-    """A new node with only its type; required fields stay empty and are reported (E5)."""
+    """A new node with its type (an uncertain one with the range input); required fields stay
+    empty and are reported (E5)."""
     reason = id_problem(node_id)
     if reason:
         raise InputError(Issue("node.id_invalid", params={"id": node_id, "reason": reason}))
     if node_id in data.get("nodes", {}):
         raise InputError(Issue("form.exists", params={"id": node_id}))
-    return _with_node(data, node_id, {"type": node_type})
+    extra = NEW_UNCERTAIN if node_type == "uncertain" else {}
+    return _with_node(data, node_id, {"type": node_type, **extra})
 
 
 def _uses(node: Any, node_id: str) -> bool:

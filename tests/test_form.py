@@ -108,6 +108,12 @@ def test_add_node_leaves_required_fields_empty() -> None:
             form.add_node(d, bad, "constant")
 
 
+def test_new_uncertain_node_starts_with_the_range() -> None:
+    added = form.add_node(data("t2_terminplan.yaml"), "puffer", "uncertain")
+    assert added["nodes"]["puffer"] == {"type": "uncertain", "dist": "normal", "input": "quantiles"}
+    assert [s.name for s in form.param_fields(added, "puffer")] == ["p10", "p50", "p90"]
+
+
 def test_remove_node_only_without_references() -> None:
     d = data("t2_terminplan.yaml")
     with pytest.raises(InputError) as exc:

@@ -231,7 +231,8 @@ def test_delete_needs_confirmation_and_no_references() -> None:
 
 async def _uncertain(user: User, node: str, mean: str, sd: str, name: str) -> None:
     await _add(user, node, "uncertain")
-    put(user, f"form.{node}.dist", "normal")
+    await user.should_see(t("form.range_hint"))
+    put(user, f"form.{node}.input", "params")
     await user.should_see(marker=f"form.{node}.param.sd")
     for field, new in (("param.mean", mean), ("param.sd", sd), ("unit", "d"), ("name", name)):
         put(user, f"form.{node}.{field}", new)

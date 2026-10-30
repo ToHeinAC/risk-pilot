@@ -7,6 +7,7 @@ from typing import Any
 
 from nicegui import ui
 
+from app.dists.families import QUANTILES
 from app.dists.registry import families, get_family
 from app.messages import t
 from app.model import form
@@ -153,6 +154,8 @@ class NodeCard:
         with ui.row().classes("w-full gap-2"):
             for field in (*FIRST, *main):
                 self.field(field, values[field], values)
+        if values["type"] == "uncertain" and values.get("input") == QUANTILES:
+            ui.label(t("form.range_hint")).classes("rp-muted text-sm").mark("range_hint")
         with ui.expansion(t("web.more_fields")).classes("w-full").props("dense"):
             for field in LAST:
                 self.field(field, values[field], values)

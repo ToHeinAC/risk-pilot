@@ -230,7 +230,9 @@ Blöcke in Ergebnissen, Vergleich und allen Analyse-Reitern, Gründe leerer Ausw
 (`present/glossary.py`, Seite `/glossar`, Tooltips; `tests/test_present_glossary.py`,
 `tests/test_web_glossary.py`); AP4 erledigt (`guide.tour_step`, `Session.visited`, Banner in
 `web/main.py`, Start auf der Startseite; `tests/test_present_tour.py`, `tests/test_web_tour.py`);
-AP5 mit M7 geliefert.
+AP5 mit M7 geliefert; AP6 erledigt (`form.NEW_UNCERTAIN`: neuer unsicherer Knoten mit `normal`
+und `quantiles`, Satz zur Spanne in der Knotenkarte; `tests/test_form.py`,
+`tests/test_web_model.py`).
 
 | AP | Inhalt | Tests |
 |---|---|---|

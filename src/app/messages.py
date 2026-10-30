@@ -243,6 +243,8 @@ UI: dict[str, dict[str, str]] = {
         "form.new_type": "Typ",
         "form.add_button": "Anlegen",
         "form.preview": "Vorschau der Verteilung",
+        "form.range_hint": "Spanne: P10, P50 und P90 sind die Werte, unter denen 10 %, die Hälfte "
+        "und 90 % aller Fälle liegen. Andere Eingabearten stehen unter „Eingabe“.",
         "form.preview_needs_valid": "Die Vorschau erscheint, sobald das Modell fehlerfrei ist. "
         "Zuerst: {reason}",
         "form.preview_failed": "Keine Vorschau, weil das Modell nicht rechnet: {reason}",
