@@ -1,6 +1,7 @@
 """M9 AP4: the canvas on the model page: draw, move into the YAML, pick a node."""
 
 from pathlib import Path
+from typing import Any
 
 from nicegui.testing import User
 from web_util import drive, element, open_model, put, until, value
@@ -135,5 +136,69 @@ def test_a_node_from_the_palette_lands_at_the_drop_point_with_a_suggested_id() -
         text = str(value(user, "editor"))
         assert "lieferverzug_ae: [30, 500]" in text
         assert 'name: "Lieferverzug Ä"' in text or "name: Lieferverzug Ä" in text
+
+    drive(steps)
+
+
+def _node(user: User, node_id: str) -> dict[str, Any]:
+    return next(n for n in _canvas(user).props["nodes"] if n["id"] == node_id)
+
+
+def test_in_a_scenario_the_structure_is_locked_and_changed_nodes_are_marked() -> None:
+    _plan()
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        put(user, "canvas_scenario", "nacharbeit")
+        await until(lambda: _canvas(user).props["connectable"] is False)
+        assert _canvas(user).props["palette"] == []
+        assert _node(user, "nacharbeit")["data"]["badge"] == "1"
+        assert "rp-changed" not in _node(user, "c")["class"]
+        user.find(marker="canvas").trigger("connect", {"source": "a", "target": "ende"})
+        await user.should_see("ist die Struktur gesperrt")
+        put(user, "canvas_scenario", "basis")
+        await until(lambda: _canvas(user).props["connectable"] is True)
+
+    drive(steps)
+
+
+def test_a_click_in_a_scenario_opens_the_override_dialog() -> None:
+    _plan()
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        put(user, "canvas_scenario", "nacharbeit")
+        await until(lambda: _canvas(user).props["connectable"] is False)
+        user.find(marker="canvas").trigger("pick", "c")
+        await user.should_see(marker="ov_take")
+        put(user, "ov_field", "mean")
+        await user.should_see("Wert im Elternszenario: 24")
+        put(user, "ov_value", "20")
+        put(user, "ov_why", "Engpass")
+        user.find(marker="ov_take").click()
+        await until(lambda: _node(user, "c")["data"].get("badge") == "1")
+        assert "c: {mean: 20, why: Engpass}" in str(value(user, "editor"))
+        user.find(marker="canvas").trigger("pick", "nacharbeit")
+        await user.should_see(marker="ov_remove")
+        user.find(marker="ov_remove").click()
+        await until(lambda: "badge" not in _node(user, "nacharbeit")["data"])
+
+    drive(steps)
+
+
+def test_a_new_sub_scenario_starts_from_the_selected_one() -> None:
+    _plan()
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        put(user, "canvas_scenario", "nacharbeit")
+        user.find(marker="canvas_new_scenario").click()
+        await user.should_see(marker="scen_take")
+        put(user, "scen_name", "Schlimmer")
+        await until(lambda: value(user, "scen_id") == "schlimmer")
+        put(user, "scen_why", "Zweite Nacharbeit")
+        user.find(marker="scen_take").click()
+        await until(lambda: value(user, "canvas_scenario") == "schlimmer")
+        assert "parent: nacharbeit" in str(value(user, "editor"))
 
     drive(steps)

@@ -16,14 +16,18 @@ KINDS: tuple[EdgeKind, ...] = ("ausdruck", "parameter", "korrelation")
 
 
 def _node(
-    node_id: str, node: dict[str, Any], pos: tuple[float, float], selected: bool
+    node_id: str, node: dict[str, Any], pos: tuple[float, float], selected: bool, changed: int
 ) -> dict[str, Any]:
     kind = str(node.get("type", ""))
+    data = {"label": str(node.get("name") or node_id), "type": type_label(kind)}
+    if changed:
+        data["badge"] = str(changed)
+    classes = f"rp-node rp-{kind}" + (" rp-selected" if selected else "")
     return {
         "id": node_id,
         "position": {"x": pos[0], "y": pos[1]},
-        "data": {"label": str(node.get("name") or node_id), "type": type_label(kind)},
-        "class": f"rp-node rp-{kind}" + (" rp-selected" if selected else ""),
+        "data": data,
+        "class": classes + (" rp-changed" if changed else ""),
         "sourcePosition": "right",
         "targetPosition": "left",
     }
@@ -41,11 +45,15 @@ def _edge(link: canvas.Link) -> dict[str, Any]:
     return edge
 
 
-def view(data: Data, selected: str | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Nodes in the order of ``nodes`` and edges, as Vue Flow props."""
+def view(
+    data: Data, selected: str | None, marks: dict[str, int] | None = None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Nodes in the order of ``nodes`` and edges, as Vue Flow props; ``marks`` counts the
+    overrides per node in scenario mode."""
     nodes = cast(dict[str, dict[str, Any]], data.get("nodes") or {})
     pos = layout.placed(data, auto(data))
-    drawn = [_node(n, node, pos[n], n == selected) for n, node in nodes.items()]
+    counts = marks or {}
+    drawn = [_node(n, node, pos[n], n == selected, counts.get(n, 0)) for n, node in nodes.items()]
     return drawn, [_edge(k) for k in canvas.links(data)]
 
 

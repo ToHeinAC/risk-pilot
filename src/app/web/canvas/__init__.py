@@ -37,3 +37,8 @@ class FlowCanvas(ui.element, component="flow_canvas.js", esm={"vueflow": "lib"})
 
     def fit(self) -> None:
         self.run_method("fit")
+
+    def mode(self, connectable: bool, palette: list[dict[str, str]]) -> None:
+        """Structure edits on or off (scenario mode, M9 E3); sent with the next ``draw``."""
+        self._props["connectable"] = connectable
+        self._props["palette"] = palette

@@ -23,7 +23,8 @@ export default {
                  @node-drag-stop="onDragStop" @node-click="onClick" @edges-change="onEdgesChange">
           <template #node-default="p">
             <Handle type="target" :position="p.targetPosition" />
-            <div class="rp-node-type">{{ p.data.type }}</div>
+            <div class="rp-node-type">{{ p.data.type }}
+              <span v-if="p.data.badge" class="rp-node-badge">{{ p.data.badge }}</span></div>
             <div class="rp-node-label">{{ p.data.label }}</div>
             <Handle type="source" :position="p.sourcePosition" />
           </template>

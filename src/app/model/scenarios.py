@@ -14,12 +14,12 @@ from app.model.yaml_io import issues_from_validation
 META = ("why", "inactive")
 _LABEL_FIELDS = frozenset({"name", "unit", "description", "tags", "track"})
 _COMMON = ("type", "name", "unit", "description", "why", "tags", "bounds", "track")
-_FIELDS = {
-    "constant": {"value", "bounds"},
-    "event": {"p", "bounds"},
-    "choice": {"options"},
-    "derived": {"expr", "bounds"},
-    "output": {"expr", "target", "better", "bounds", "horizon", "loss_reference"},
+_FIELDS = {  # overridable fields per type, in the order the override dialog offers them
+    "constant": ("value", "bounds"),
+    "event": ("p", "bounds"),
+    "choice": ("options",),
+    "derived": ("expr", "bounds"),
+    "output": ("expr", "target", "better", "bounds", "horizon", "loss_reference"),
 }
 
 Data = dict[str, Any]
@@ -340,3 +340,33 @@ def tree(model: Model) -> list[tuple[str, int]]:
     walk(BASIS, 1)
     order += [(sid, 1) for sid in model.scenarios if all(sid != seen for seen, _ in order)]
     return order
+
+
+def changed_nodes(model: Model, sid: str) -> dict[str, int]:
+    """Node -> number of overridden fields in ``sid`` (the canvas marks; M9 E3)."""
+    if sid == BASIS:
+        return {}
+    counts: dict[str, int] = {}
+    for row in diff(model, sid):
+        if row.node in model.nodes:
+            counts[row.node] = counts.get(row.node, 0) + 1
+    return counts
+
+
+def _parent_nodes(model: Model, sid: str) -> dict[str, Data]:
+    return _nodes_data(effective_model(model, model.scenarios[sid].parent).nodes)
+
+
+def overridable(model: Model, sid: str, node: str) -> list[str]:
+    """Fields of ``node`` a scenario may override, in dialog order."""
+    data = _parent_nodes(model, sid)[node]
+    kind = str(data["type"])
+    if kind != "uncertain":
+        return list(_FIELDS[kind])
+    params = [k for k in data if k not in (*_COMMON, "dist", "input")]
+    return [*params, "dist", "bounds"]
+
+
+def parent_value(model: Model, sid: str, node: str, field: str) -> Any:
+    """The value ``field`` of ``node`` has in the parent of ``sid``; None if unset."""
+    return _parent_nodes(model, sid)[node].get(field)

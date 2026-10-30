@@ -378,6 +378,18 @@ UI: dict[str, dict[str, str]] = {
         "canvas.new_title": "Neuer Knoten: {type}",
         "canvas.new_id": "ID (im Ausdruck verwendet)",
         "canvas.palette_hint": "Auf die Fläche ziehen oder anklicken",
+        "canvas.basis": "Hauptszenario (basis)",
+        "canvas.scenario": "Szenario auf der Fläche",
+        "canvas.scenario_mode": "Szenario-Modus: Struktur gesperrt; Klick auf einen Knoten "
+        "überschreibt ihn in diesem Szenario.",
+        "canvas.new_scenario": "Unterszenario ableiten",
+        "canvas.new_scenario_title": "Neues Unterszenario von {parent}",
+        "canvas.locked": "Im Szenario ist die Struktur gesperrt; Knoten und Verknüpfungen "
+        "ändern sich nur im Hauptszenario.",
+        "canvas.detached": "Abgelöstes Szenario: eigene Knoten, nur Ansicht; Bearbeitung im YAML.",
+        "canvas.override_title": "{node} in Szenario {scenario} überschreiben",
+        "canvas.parent_value": "Wert im Elternszenario: {value}",
+        "canvas.override_remove": "Override entfernen",
         "canvas.says_join": "{target} = {op} aus {args}",
         "canvas.op_sum": "Summe",
         "canvas.op_max": "Maximum",

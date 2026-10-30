@@ -270,3 +270,37 @@ def test_set_override_rejects_unknown_node_or_field(node: str, field: str) -> No
 def test_empty_why_rejected_by_schema() -> None:
     with pytest.raises(ModelError):
         model_from_yaml(BASE + "scenarios:\n  s: {name: S, why: '', overrides: {}}\n")
+
+
+def _t2() -> Model:
+    from app.adapters import files, settings
+
+    return model_from_yaml(files.read_text(settings.examples_dir() / "t2_terminplan.yaml"))
+
+
+def test_changed_nodes_count_the_overrides_of_a_scenario() -> None:
+    model = _t2()
+    assert sc.changed_nodes(model, "nacharbeit") == {"nacharbeit": 1}
+    assert sc.changed_nodes(model, "b_schneller") == {"b": 1}
+    assert sc.changed_nodes(model, "basis") == {}
+
+
+def test_overridable_fields_follow_the_node_type() -> None:
+    model = _t2()
+    assert sc.overridable(model, "nacharbeit", "b") == ["mean", "sd", "dist", "bounds"]
+    assert sc.overridable(model, "nacharbeit", "nacharbeit") == ["p", "bounds"]
+    assert sc.overridable(model, "nacharbeit", "ende") == [
+        "expr",
+        "target",
+        "better",
+        "bounds",
+        "horizon",
+        "loss_reference",
+    ]
+
+
+def test_parent_value_is_the_effective_value_of_the_parent() -> None:
+    model = sc.add_scenario(_t2(), "tiefer", "Tiefer", "nacharbeit", "Test")
+    assert sc.parent_value(model, "tiefer", "nacharbeit", "p") == 0.2
+    assert sc.parent_value(model, "nacharbeit", "nacharbeit", "p") == 0
+    assert sc.parent_value(model, "nacharbeit", "ende", "horizon") is None

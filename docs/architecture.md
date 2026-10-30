@@ -28,9 +28,11 @@ Adapters added in M6: `export.py` writes the Parquet bytes (pyarrow). In the UI,
 and `node_card.py` render the form; all draft rewrites (form, YAML editor, CSV import, scenarios)
 go through `editing.ModelEdit` or `scenario_edit.apply`, which patch the YAML text instead of
 re-dumping it. M9: `web/canvas/` is the Vue Flow element (vendored bundle in `lib/`, see
-THIRD_PARTY_NOTICES.md); the workbench answers its events (`move`, `pick`, `connect`,
+THIRD_PARTY_NOTICES.md); the canvas panel answers its events (`move`, `pick`, `connect`,
 `disconnect`, `drop`) with `model/canvas.py` and `model/layout.py` actions, and
-`canvas_dialogs.py` holds the link and new-node dialogs. The canvas never changes the model
+`canvas_panel.py` holds the canvas part of the model page with the scenario mode,
+`canvas_dialogs.py` the link and new-node dialogs, `canvas_scenario.py` the override and
+new-scenario dialogs. The canvas never changes the model
 itself; Python writes the YAML and sends new props.
 
 UI notes: `main.py` builds every page inside one shell (navigation, exit, error boundary per

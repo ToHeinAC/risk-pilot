@@ -66,3 +66,11 @@ def test_the_link_dialog_says_the_result_in_plain_words() -> None:
     assert canvas_view.describe(after, "a", "c", "corr", "0.3") == (
         "Vorgang A und Vorgang C sind rangkorreliert mit ρ = 0.3"
     )
+
+
+def test_changed_nodes_are_marked_with_their_count() -> None:
+    nodes, _ = canvas_view.view(T2, selected=None, marks={"b": 2})
+    by_id = {n["id"]: n for n in nodes}
+    assert "rp-changed" in by_id["b"]["class"]
+    assert by_id["b"]["data"]["badge"] == "2"
+    assert "badge" not in by_id["a"]["data"]

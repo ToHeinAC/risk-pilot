@@ -60,6 +60,9 @@ body {{ background:{CANVAS}; color:{INK};
 .rp-palette-item.rp-event {{ border-left-color:{WARN}; }}
 .rp-palette-item.rp-choice {{ border-left-color:#8e5bd6; }}
 .rp-palette-item.rp-output {{ border-left-color:{GOOD}; }}
+.rp-canvas .vue-flow__node.rp-changed {{ outline:2px dashed {WARN}; outline-offset:2px; }}
+.rp-canvas .rp-node-badge {{ background:{WARN}; color:#fff; border-radius:8px; padding:0 6px;
+  margin-left:4px; font-size:.68rem; }}
 .rp-canvas .rp-edge-parameter path {{ stroke-dasharray:6 4; }}
 .rp-canvas .rp-edge-korrelation path {{ stroke-dasharray:2 4; stroke:#8e5bd6; }}
 """

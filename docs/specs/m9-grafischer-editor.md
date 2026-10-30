@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
 **Stand:** 30. Oktober 2026, Entwurf; E1–E6 und E10 bestätigt (30.10.2026), E8 und E9
-offen; E7 umgesetzt wie vorgeschlagen; AP1–AP5 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+offen; E7 umgesetzt wie vorgeschlagen; AP1–AP6 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -134,6 +134,14 @@ layout:
 - Neues Szenario direkt im Auswahlfeld („+ Szenario aus aktuellem ableiten“).
 - Abgelöste Szenarien (`nodes` eigenständig) zeigen ihre eigene Struktur, schreibgeschützt mit
   Hinweis; Bearbeitung weiter über YAML.
+
+**Umgesetzt (AP6, 30.10.2026):** `web/canvas_panel.py` (Fläche, Werkzeugleiste, Szenario-Auswahl,
+Ereignisse), `web/canvas_scenario.py` (Override-Dialog, „Unterszenario ableiten“ vom gewählten
+Szenario), in `model/scenarios.py` `changed_nodes`, `overridable` (Parameter zuerst, dann `dist`
+und `bounds`) und `parent_value`. Im Szenario sind Palette, Verbinden und Kante löschen aus;
+Versuche melden „Struktur gesperrt“. Verschieben bleibt erlaubt, die Positionen gelten für alle
+Szenarien. Die Karte rechts zeigt weiter die Werte des Hauptszenarios. Änderungen laufen über
+`scenario_edit.apply` (nur gültige Modelle).
 
 ## 8. Phase 1 — Spike (E6)
 

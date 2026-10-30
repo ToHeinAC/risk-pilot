@@ -7,21 +7,19 @@ and P10/P50/P90 from the trial run, which reruns on every change.
 from collections.abc import Callable
 from typing import Any
 
-from nicegui import events, ui
+from nicegui import ui
 
-from app.errors import InputError
-from app.messages import render, t
-from app.model import canvas, form, layout
+from app.messages import t
+from app.model import form
 from app.model.schema import Model
 from app.model.yaml_patch import Data
-from app.present import canvas_view, structure
+from app.present import structure
 from app.present.brief import brief, spark_svg
 from app.present.text import number, percent
-from app.web import canvas_dialogs, node_card
-from app.web.canvas import FlowCanvas
+from app.web import node_card
+from app.web.canvas_panel import TYPES, CanvasPanel
 from app.web.editing import ModelEdit
 
-TYPES = ("uncertain", "constant", "event", "choice", "derived", "output")
 COLUMNS: list[dict[str, Any]] = [
     {"name": "name", "label": t("web.col_node"), "field": "name", "align": "left"},
     {"name": "type", "label": t("ui.col_type"), "field": "type", "align": "left"},
@@ -77,7 +75,7 @@ class Workbench:
     def __init__(self, edit: ModelEdit, changed: Callable[[bool], None]) -> None:
         self.edit = edit
         self.changed = changed  # argument: redraw the node card too
-        self.canvas: FlowCanvas | None = None
+        self.panel = CanvasPanel(edit, changed, self.select)
 
     @ui.refreshable_method
     def notes(self) -> None:
@@ -85,97 +83,6 @@ class Workbench:
             ui.label(self.edit.error).classes("text-negative").mark("form_error")
         elif self.edit.written:
             ui.label(t("form.written")).classes("rp-muted text-sm")
-
-    def graph(self, data: Data) -> None:
-        """The canvas (M9): drawn from the raw draft, so an invalid model is drawn too."""
-        readonly = self.edit.model.readonly
-        with ui.row().classes("w-full items-center gap-1 px-1"):
-            ui.label(t("canvas.caption")).classes("rp-muted text-xs")
-            ui.space()
-            if not readonly:
-                ui.button(t("canvas.arrange"), icon="account_tree", on_click=self.arrange).props(
-                    "flat dense no-caps"
-                ).mark("canvas_arrange")
-            ui.button(t("canvas.fit"), icon="fit_screen", on_click=self.fit).props(
-                "flat dense no-caps"
-            ).mark("canvas_fit")
-        palette = [
-            {"type": k, "label": t(f"type.{k}"), "hint": t("canvas.palette_hint")} for k in TYPES
-        ]
-        canvas = FlowCanvas(*canvas_view.view(data, self.edit.selected), readonly, palette)
-        canvas.classes("w-full h-[460px] rp-canvas").mark("canvas")
-        canvas.on("move", self.on_move)
-        canvas.on("pick", lambda e: self.select(str(e.args)))
-        if not readonly:
-            canvas.on("connect", self.on_connect)
-            canvas.on("disconnect", self.on_disconnect)
-            canvas.on("drop", self.on_drop)
-        self.canvas = canvas
-
-    def redraw(self) -> None:
-        data = self.edit.data()
-        if self.canvas is not None and data is not None:
-            self.canvas.draw(*canvas_view.view(data, self.edit.selected))
-
-    def fit(self) -> None:
-        if self.canvas is not None:
-            self.canvas.fit()
-
-    def on_move(self, e: events.GenericEventArguments) -> None:
-        if self.edit.model.readonly:
-            return
-        node_id, x, y = str(e.args["id"]), float(e.args["x"]), float(e.args["y"])
-        self.edit.change(lambda d: layout.move(d, node_id, x, y))
-        self.changed(False)
-
-    def done(self, node_id: str) -> None:
-        """A canvas change was written: open the node and redraw everything."""
-        self.edit.selected = node_id
-        self.changed(True)
-
-    def on_connect(self, e: events.GenericEventArguments) -> None:
-        source, target = str(e.args["source"]), str(e.args["target"])
-        data = self.edit.data()
-        if data is None:
-            return
-        try:
-            offered = canvas.presets(data, source, target)
-        except InputError as exc:
-            ui.notify(render(exc.issue), type="warning")
-            self.redraw()  # drop the line Vue Flow drew
-            return
-        if offered == ["edit"]:
-            names = {
-                "source": canvas_view.name(data, source),
-                "target": canvas_view.name(data, target),
-            }
-            ui.notify(t("canvas.says_edit", **names))
-            self.done(target)
-            return
-        self.redraw()
-        canvas_dialogs.link(self.edit, source, target, offered, self.done)
-
-    def on_disconnect(self, e: events.GenericEventArguments) -> None:
-        edge = canvas_view.edge_of(str(e.args))
-        if edge is None:
-            return
-        source, target, kind = edge
-        action = canvas.uncorrelate if kind == "korrelation" else canvas.disconnect
-        if self.edit.change(lambda d: action(d, source, target)):
-            self.done(target)
-            return
-        ui.notify(self.edit.error or "", type="warning", multi_line=True)
-        self.edit.error = None
-        self.done(target)  # the edge stays; its expression opens
-
-    def on_drop(self, e: events.GenericEventArguments) -> None:
-        kind, x, y = str(e.args["type"]), float(e.args["x"]), float(e.args["y"])
-        canvas_dialogs.new_node(self.edit, kind, x, y, self.done)
-
-    def arrange(self) -> None:
-        self.edit.change(lambda d: layout.arrange(d, canvas_view.auto(d)))
-        self.changed(False)
-        self.fit()
 
     @ui.refreshable_method
     def table(self) -> None:
@@ -237,7 +144,7 @@ class Workbench:
 
     def select(self, node_id: str) -> None:
         self.edit.selected = node_id
-        self.redraw()
+        self.panel.redraw()
         for part in (self.table, self.card):
             part.refresh()
 
@@ -256,7 +163,7 @@ class Workbench:
             node_card.preview(self.edit, self.edit.selected)
 
     def refresh(self, card: bool) -> None:
-        self.redraw()
+        self.panel.refresh()
         for part in (self.notes, self.table, self.preview):
             part.refresh()
         if card:
@@ -270,7 +177,7 @@ class Workbench:
         self.header(data)
         with ui.row().classes("w-full gap-4 no-wrap max-lg:flex-wrap items-start"):
             with ui.column().classes("rp-panel p-2 flex-[3] min-w-0 w-full gap-1"):
-                self.graph(data)
+                self.panel.build(data)
             with ui.column().classes("rp-panel p-4 flex-[2] min-w-80 w-full gap-3"):
                 self.card()
         with ui.column().classes("rp-panel p-2 w-full gap-1 min-w-0 overflow-hidden"):

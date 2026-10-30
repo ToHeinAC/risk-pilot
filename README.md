@@ -75,6 +75,9 @@ works too.
   maximum, minimum, product, delay on an event, parameter depends on, probability from, rank
   correlation) and shows the result in plain words before it is taken; deleting an edge removes
   the argument or opens a free expression, which is never rewritten. A palette places new nodes.
+  In a sub-scenario the structure is locked: changed nodes carry the number of their overrides,
+  a click opens the override dialog with the parent's value, and "Unterszenario ableiten" adds a
+  scenario below the selected one.
 - **Reference:** model format and semantics in [docs/model-semantics.md](docs/model-semantics.md),
   statistics and extension points in [docs/statistical-methods.md](docs/statistical-methods.md).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.
