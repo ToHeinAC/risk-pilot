@@ -6,6 +6,7 @@ from web_util import cells, drive, element, open_model, put, texts
 
 from app.adapters import files, settings
 from app.messages import t
+from app.web.canvas import FlowCanvas
 
 QUESTIONS = (
     "Wie hängen die Knoten zusammen?",
@@ -71,9 +72,17 @@ def test_analysis_colourings_and_undefined_risk_marked() -> None:
     async def steps(user: User) -> None:
         await analyse(user, "t2_terminplan")  # main scenario: the rework never occurs
         assert any("y nicht bestimmbar" in " ".join(r) for r in cells(user, "ana_risk_table"))
+        graph = element(user, "ana_graph")
+        assert isinstance(graph, FlowCanvas)  # the canvas of the model page, read only (M9)
+        assert graph.props["readonly"] is True
+        badges = {}
         for mode in ("sensitivity", "criticality", "why"):
             put(user, "graph_color", mode)
             await user.should_see(marker="ana_graph")
+            assert element(user, "ana_graph") is graph  # redrawn in place
+            badges[mode] = {n["id"]: n["data"].get("badge") for n in graph.props["nodes"]}
+        assert badges["sensitivity"]["c"] is not None
+        assert badges["why"]["a"] == "1"  # no reason given for Vorgang A
 
     drive(steps)
 

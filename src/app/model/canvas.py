@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import Any, cast
 
+from app.dists.families import QUANTILES
 from app.errors import InputError, Issue
 from app.model import layout
 from app.model.form import COMMON, add_node, number, param_fields
@@ -137,6 +138,10 @@ def presets(data: Data, source: str, target: str) -> list[str]:
         raise InputError(Issue("canvas.cycle", params={"source": source, "target": target}))
     node, kind = _nodes(data)[target], _nodes(data)[source].get("type")
     corr = ["corr"] if kind in RANDOM else []
+    if node.get("type") == "uncertain" and node.get("input") == QUANTILES:
+        if not corr:  # a range takes literal numbers only
+            raise InputError(Issue("canvas.quantiles", target))
+        return corr
     if node.get("type") == "uncertain":
         return ["param", *corr]
     if node.get("type") == "event":
@@ -173,6 +178,8 @@ def connect(
     out = copy.deepcopy(data)
     node = _nodes(out)[target]
     if preset == "param":
+        if node.get("input") == QUANTILES:
+            raise InputError(Issue("canvas.quantiles", target))
         if field not in {s.name for s in param_fields(data, target)}:
             raise InputError(Issue("canvas.field", target, field=field, params={"field": field}))
         node[field] = _scaled(source, value)

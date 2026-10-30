@@ -4,7 +4,6 @@
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
 # pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 import math
-import textwrap
 from collections.abc import Mapping, Sequence
 
 import networkx as nx
@@ -22,23 +21,9 @@ from app.model.graph import Edge
 from app.model.schema import ConstantNode, EventNode, Model, UncertainNode
 from app.present.figures import layout
 from app.present.text import number, percent
-from app.present.validation import node_table
 
-SYMBOLS = {
-    "uncertain": "circle",
-    "event": "diamond",
-    "constant": "square",
-    "choice": "triangle-up",
-    "derived": "circle-dot",
-    "output": "star",
-}
-DASHES = {"ausdruck": "solid", "parameter": "dash", "korrelation": "dot"}
 SCALE = "YlOrRd"
 NO_VALUE = "#c8c8c8"
-FADED = 0.25
-LABEL_WIDTH = 18  # characters per label line; longer names wrap
-X_PAD = 0.6  # layers of room left and right so outer labels are not clipped
-ROW_HEIGHT = 60  # pixels per node in the fullest layer
 
 
 def type_label(node_type: str) -> str:
@@ -70,114 +55,11 @@ def positions(model: Model, edges: Sequence[Edge]) -> dict[str, tuple[float, flo
     return pos
 
 
-def _label(name: str) -> str:
-    return "<br>".join(textwrap.wrap(name, LABEL_WIDTH, break_long_words=True)) or name
-
-
-def _frame(fig: go.Figure, pos: Mapping[str, tuple[float, float]]) -> None:
-    """Room for the outer labels and enough height for the fullest layer."""
-    xs = [x for x, _ in pos.values()] or [0.0]
-    ys = [y for _, y in pos.values()] or [0.0]
-    rows = max(ys) - min(ys) + 1
-    fig.update_xaxes(visible=False, range=[min(xs) - X_PAD, max(xs) + X_PAD])
-    fig.update_yaxes(visible=False, range=[min(ys) - 0.5, max(ys) + 0.7])
-    fig.update_layout(
-        height=max(450, int(ROW_HEIGHT * rows) + 150),
-        legend={"orientation": "h", "y": -0.02, "yanchor": "top"},
-    )
-
-
-def _edge_traces(edges: Sequence[Edge], pos: Mapping[str, tuple[float, float]]) -> list[go.Scatter]:
-    traces: list[go.Scatter] = []
-    for kind, dash in DASHES.items():
-        xs: list[float | None] = []
-        ys: list[float | None] = []
-        for e in (e for e in edges if e.kind == kind):
-            xs += [pos[e.source][0], pos[e.target][0], None]
-            ys += [pos[e.source][1], pos[e.target][1], None]
-        if xs:
-            traces.append(
-                go.Scatter(
-                    x=xs,
-                    y=ys,
-                    mode="lines",
-                    name=t(f"analysis.edge_{kind}"),
-                    line={"dash": dash, "color": "#888", "width": 1},
-                    hoverinfo="skip",
-                )
-            )
-    return traces
-
-
-def _color(value: float | None) -> str:
+def color(value: float | None) -> str:
+    """Colour of a value in [0, 1] on the graph scale; grey without a value."""
     if value is None or not math.isfinite(value):
         return NO_VALUE
     return str(sample_colorscale(SCALE, [min(max(value, 0.0), 1.0)])[0])
-
-
-def graph_figure(
-    model: Model,
-    edges: Sequence[Edge],
-    colors: Mapping[str, float],
-    color_title: str,
-    output: str,
-) -> go.Figure:
-    """Dependency graph: symbol per node type, line style per edge kind, colour from ``colors``
-    (values in [0, 1]); nodes without a path to ``output`` are drawn pale."""
-    pos = positions(model, edges)
-    on_path = nx.ancestors(_digraph(model, edges), output) | {output}
-    fig = go.Figure(_edge_traces(edges, pos))
-    rows = {row.node: row for row in node_table(model)}
-    for node_type, symbol in SYMBOLS.items():
-        ids = [i for i, node in model.nodes.items() if node.type == node_type]
-        if not ids:
-            continue
-        hover = [
-            f"{rows[i].name} ({i})<br>{rows[i].unit}<br>{rows[i].detail}<br>"
-            f"{color_title}: {number(colors[i]) if i in colors else '–'}"
-            for i in ids
-        ]
-        fig.add_trace(
-            go.Scatter(
-                x=[pos[i][0] for i in ids],
-                y=[pos[i][1] for i in ids],
-                mode="markers+text",
-                name=type_label(node_type),
-                text=[_label(rows[i].name) for i in ids],
-                textposition="top center",
-                customdata=ids,
-                hovertext=hover,
-                hoverinfo="text",
-                marker={
-                    "symbol": symbol,
-                    "size": 18,
-                    "color": [_color(colors.get(i)) for i in ids],
-                    "opacity": [1.0 if i in on_path else FADED for i in ids],
-                    "line": {"width": 1, "color": "#444"},
-                },
-            )
-        )
-    fig.add_trace(_colorbar(color_title))
-    _frame(fig, pos)
-    return layout(fig, "", "")
-
-
-def _colorbar(title: str) -> go.Scatter:
-    """An invisible trace that only carries the colour scale's legend."""
-    return go.Scatter(
-        x=[None],
-        y=[None],
-        mode="markers",
-        showlegend=False,
-        marker={
-            "colorscale": SCALE,
-            "cmin": 0,
-            "cmax": 1,
-            "color": [0],
-            "showscale": True,
-            "colorbar": {"title": {"text": title}},
-        },
-    )
 
 
 def _pct_interval(p: Proportion) -> str:

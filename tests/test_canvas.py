@@ -295,3 +295,15 @@ def test_t2_can_be_rebuilt_on_the_canvas_with_the_same_numbers() -> None:
     original = compile_model(effective_model(t2, BASIS))
     mine, theirs = simulate(rebuilt, n=2000), simulate(original, n=2000)
     assert (mine.samples["ende"] == theirs.samples["ende"]).all()
+
+
+def test_a_range_input_takes_no_parameter_link() -> None:
+    q = {"type": "uncertain", "dist": "normal", "input": "quantiles", "p10": 5, "p50": 6, "p90": 8}
+    data = _data(a=U, k={"type": "constant", "value": 1}, q=q)
+    assert canvas.presets(data, "a", "q") == ["corr"]
+    with pytest.raises(InputError) as exc:
+        canvas.presets(data, "k", "q")
+    assert _code(exc) == "canvas.quantiles"
+    with pytest.raises(InputError) as exc:
+        canvas.connect(data, "a", "q", "param", field="p50")
+    assert _code(exc) == "canvas.quantiles"

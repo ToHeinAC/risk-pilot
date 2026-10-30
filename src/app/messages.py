@@ -54,6 +54,9 @@ _DE: dict[str, str] = {
     "canvas.not_random": "{node} ist weder unsicher noch ein Ereignis und lässt sich nicht "
     "korrelieren.",
     "canvas.rho": "ρ = „{value}“ ist keine Zahl; erwartet ist eine Zahl zwischen −1 und 1.",
+    "canvas.quantiles": "{node} ist als Spanne (P10/P50/P90) eingegeben; eine Spanne nimmt nur "
+    "Zahlen. Damit ein Parameter von einem anderen Knoten abhängt, in der Karte den "
+    "Eingabemodus „params“ wählen.",
     "canvas.other_group": "{a} steht in Korrelationsgruppe „{ga}“, {b} in „{gb}“; ein Knoten "
     "gehört zu höchstens einer Gruppe.",
     "layout.unknown_node": "{node} steht im Block „layout“, existiert aber nicht; die "
@@ -694,9 +697,10 @@ UI: dict[str, dict[str, str]] = {
         "analysis.color_sensitivity": "Sensitivität (|ρ| nach Spearman)",
         "analysis.color_criticality": "Kritikalitätsindex",
         "analysis.color_why": "Begründung fehlt",
-        "analysis.graph_caption": "Symbole: Kreis unsicher, Raute Ereignis, Quadrat Konstante, "
-        "Dreieck Auswahl, Punkt berechnet, Stern Ausgabe. Linien: durchgezogen Ausdruck, "
-        "gestrichelt Parameter, gepunktet Korrelation. Blass: kein Pfad zur Ausgabe.",
+        "analysis.graph_caption": "Die Zahl am Knoten ist der gewählte Wert (0 bis 1), ihre Farbe "
+        "dieselbe Skala: dunkler = höher. Linien: durchgezogen Ausdruck, gestrichelt Parameter, "
+        "gepunktet Korrelation. Blass: kein Pfad zur Ausgabe. Die Anordnung ist die der Fläche "
+        "auf der Modellseite.",
         "analysis.edge_ausdruck": "Ausdruck",
         "analysis.edge_parameter": "Parameter",
         "analysis.edge_korrelation": "Korrelation",

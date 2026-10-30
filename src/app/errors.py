@@ -74,6 +74,7 @@ CODES: dict[str, tuple[str, ...]] = {
     "canvas.not_random": (),
     "canvas.other_group": ("a", "b", "ga", "gb"),
     "canvas.rho": ("value",),
+    "canvas.quantiles": (),
     "scenario.same_value": (),
     "files.changed": ("name",),
     "csv.encoding": (),

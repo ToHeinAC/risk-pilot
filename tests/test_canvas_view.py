@@ -74,3 +74,15 @@ def test_changed_nodes_are_marked_with_their_count() -> None:
     assert "rp-changed" in by_id["b"]["class"]
     assert by_id["b"]["data"]["badge"] == "2"
     assert "badge" not in by_id["a"]["data"]
+
+
+def test_the_analysis_graph_shows_each_value_and_fades_nodes_off_the_path() -> None:
+    data = {**T2, "nodes": {**T2["nodes"], "extra": {"type": "constant", "value": 1}}}
+    nodes, edges = canvas_view.analysis_view(data, {"a": 0.62, "b": 0.0}, "ende")
+    by_id = {n["id"]: n for n in nodes}
+    assert by_id["a"]["data"]["badge"] == "0,62"
+    assert by_id["a"]["data"]["tint"].startswith("rgb")
+    assert "badge" not in by_id["c"]["data"]
+    assert "rp-faded" in by_id["extra"]["class"]
+    assert "rp-faded" not in by_id["a"]["class"]
+    assert edges

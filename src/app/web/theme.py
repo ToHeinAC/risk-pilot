@@ -61,6 +61,7 @@ body {{ background:{CANVAS}; color:{INK};
 .rp-palette-item.rp-choice {{ border-left-color:#8e5bd6; }}
 .rp-palette-item.rp-output {{ border-left-color:{GOOD}; }}
 .rp-canvas .vue-flow__node.rp-changed {{ outline:2px dashed {WARN}; outline-offset:2px; }}
+.rp-canvas .vue-flow__node.rp-faded {{ opacity:.4; }}
 .rp-canvas .rp-node-badge {{ background:{WARN}; color:#fff; border-radius:8px; padding:0 6px;
   margin-left:4px; font-size:.68rem; }}
 .rp-canvas .rp-edge-parameter path {{ stroke-dasharray:6 4; }}

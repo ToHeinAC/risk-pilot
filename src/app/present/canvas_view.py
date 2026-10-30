@@ -4,13 +4,17 @@ Pure. Node positions come from the ``layout`` block, else from the layered layou
 derived (``canvas.links``) and carry their kind in the ID, so an event on an edge reads back.
 """
 
+import math
+from collections.abc import Mapping
 from typing import Any, cast
 
 from app.messages import t
 from app.model import canvas, layout
 from app.model.graph import EdgeKind
 from app.model.yaml_patch import Data
+from app.present import structure
 from app.present.structure import type_label
+from app.present.text import number
 
 KINDS: tuple[EdgeKind, ...] = ("ausdruck", "parameter", "korrelation")
 
@@ -95,3 +99,34 @@ def describe(data: Data, source: str, target: str, preset: str, value: str, fiel
     factor = "" if value.strip() in ("", "1", "1.0") else f" × {value.strip()}"
     params = {"source": s, "target": tg, "value": value.strip(), "field": field, "factor": factor}
     return t(f"canvas.says_{preset}", **params)
+
+
+def _upstream(data: Data, output: str) -> set[str]:
+    """``output`` and every node it depends on (expressions and parameters)."""
+    inputs: dict[str, set[str]] = {}
+    for link in canvas.links(data):
+        if link.kind != "korrelation":
+            inputs.setdefault(link.target, set()).add(link.source)
+    found, todo = {output}, [output]
+    while todo:
+        for source in inputs.get(todo.pop(), set()) - found:
+            found.add(source)
+            todo.append(source)
+    return found
+
+
+def analysis_view(
+    data: Data, values: Mapping[str, float], output: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """The read-only canvas of the analysis page: each node's value (in [0, 1]) as a coloured
+    badge; nodes without a path to ``output`` are faded."""
+    nodes, edges = view(data, None)
+    on_path = _upstream(data, output)
+    for node in nodes:
+        value = values.get(node["id"])
+        if value is not None and math.isfinite(value):
+            node["data"]["badge"] = number(value)
+            node["data"]["tint"] = structure.color(value)
+        if node["id"] not in on_path:
+            node["class"] += " rp-faded"
+    return nodes, edges

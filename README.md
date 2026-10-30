@@ -48,8 +48,8 @@ works too.
   (same seed, paired differences B − A with intervals, P(B better than A)). T2 ships with
   "B −3 Tage" and "mit Nacharbeit".
 - **Analysis** (M4, [spec](docs/specs/m4-struktur.md)): page "Analyse" per scenario and output.
-  Dependency graph (node type as symbol, edge kind as line style, coloured by |Spearman ρ|,
-  criticality or missing reason), criticality index and path constellations (decisive path
+  Dependency graph on the same canvas as the model page (M9; read only, each node shows
+  |Spearman ρ|, criticality or missing reason as a coloured value, edge kind as line style), criticality index and path constellations (decisive path
   through `max`/`min` winners and the chosen `where` branch), tornado (each uncertain input fixed
   at its P10 and P90, same seed), sweep of one literal parameter over k values, Spearman rank
   correlation (descriptive) and a risk matrix per event (p̂ with Wilson, conditional difference

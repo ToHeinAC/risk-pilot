@@ -195,6 +195,16 @@ bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
   einen Hinweis (stützt E9).
 - Positionen hält der Spike nur im Speicher; Speichern im YAML ist AP2.
 
+### 8.2 Nachträge nach dem Abschluss (30.10.2026)
+
+- Analyse-Seite, Reiter „Graph“: dieselbe Fläche wie auf der Modellseite, nur Ansicht
+  (`canvas_view.analysis_view`); der gewählte Wert (Sensitivität, Kritikalität, Begründung fehlt)
+  steht als farbige Zahl am Knoten, Knoten ohne Pfad zur Ausgabe sind blass. Der Plotly-Graph
+  (`structure.graph_figure`) ist entfernt.
+- Befund aus der Prüfung: Ein unsicherer Knoten mit Eingabe als Spanne bekam beim Verbinden
+  `p50: a`, was die Spanne nicht erlaubt. Jetzt bietet der Dialog dort nur die Korrelation an;
+  sonst meldet `canvas.quantiles`, dass der Eingabemodus „params“ nötig ist.
+
 ## 9. Tests
 
 - `tests/test_canvas.py` (Kern, offline): jede Aktion `Data → Data` – Vorauswahlen erzeugen

@@ -9,13 +9,13 @@ from app.engine.simulate import N_MAX
 from app.errors import SimulationError
 from app.messages import render, t
 from app.model.compile import CompiledModel
-from app.model.graph import edges
-from app.present import reading, structure
+from app.present import canvas_view, reading, structure
 from app.present.text import integer
 from app.present.validation import CheckResult, check_text, scenario_labels
 from app.web import analysing, explain, results_view, theme
 from app.web.analysing import MEMORY_HINT_MB, AnalysisState, Base, Key
 from app.web.analysis_tools import SweepTab, TornadoTab
+from app.web.canvas import FlowCanvas
 from app.web.session import OpenModel, Session
 
 TABS = ("graph", "crit", "tornado", "sweep", "rho", "risk")
@@ -33,22 +33,18 @@ def _graph_tab(base: Base, _state: AnalysisState) -> None:
         "criticality": {node: p.p for node, p in base.crit.indices},
         "why": structure.missing_why(model),
     }
-    select = ui.select(
-        choices, value="sensitivity", label=t("analysis.color"), on_change=lambda: draw()
-    )
+    data = model.model_dump(mode="json", exclude_unset=True)
+    select = ui.select(choices, value="sensitivity", label=t("analysis.color"))
     select.props("outlined dense").classes("min-w-64").mark("graph_color")
-    area = ui.column().classes("w-full")
-
-    def draw() -> None:
-        mode = str(select.value)
-        area.clear()
-        with area:
-            figure = structure.graph_figure(
-                model, edges(model), colourings[mode], choices[mode], base.output
-            )
-            theme.plot(figure, 440).mark("ana_graph")
-
-    draw()
+    graph = FlowCanvas(
+        *canvas_view.analysis_view(data, colourings["sensitivity"], base.output), True
+    )
+    graph.classes("w-full h-[440px] rp-canvas").mark("ana_graph")
+    select.on_value_change(
+        lambda e: graph.draw(
+            *canvas_view.analysis_view(data, colourings[str(e.value)], base.output)
+        )
+    )
     ui.label(t("analysis.graph_caption")).classes("rp-muted text-sm")
 
 
