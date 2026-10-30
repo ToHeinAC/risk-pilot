@@ -15,6 +15,8 @@ REQUIRED = (
     "kritischer_pfad",
     "tornado",
     "spearman",
+    "flaeche",
+    "vorauswahl",
 )
 # Labels people meet on screen: each one must lead to a glossary entry (no unexplained term).
 LABELS = (
@@ -35,6 +37,8 @@ LABELS = (
     "analysis.tab_rho",
     "analysis.tab_risk",
     "analysis.col_rho",
+    "canvas.preset",
+    "canvas.scenario",
 )
 
 

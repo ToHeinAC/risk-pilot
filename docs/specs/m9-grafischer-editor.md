@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
-**Stand:** 30. Oktober 2026, Entwurf; E1–E6 und E10 bestätigt (30.10.2026), E8 und E9
-offen; E7 umgesetzt wie vorgeschlagen; AP1–AP6 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+**Stand:** 30. Oktober 2026, umgesetzt; E1–E10 bestätigt (30.10.2026); AP1–AP7 erledigt ·
+**Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -216,8 +216,8 @@ bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
 | E5 | Palette | **bestätigt (30.10.2026):** Abschnitt 5, umgesetzt in AP5 |
 | E6 | Canvas-Komponente | **bestätigt (30.10.2026):** Vue Flow (Abschnitt 8.1) |
 | E7 | Ort auf der Modellseite | **umgesetzt (AP4, 30.10.2026):** Fläche ersetzt den Plotly-Graphen im Reiter „Formular“; Tabelle darunter bleibt |
-| E8 | Szenarienseite | Vorschlag: bleibt für Baum, Diff, Duplizieren und Ablösen; Overrides auch dort weiter möglich |
-| E9 | Kante löschen bei freiem Ausdruck | Vorschlag: Ausdruck öffnen, nie automatisch umschreiben |
+| E8 | Szenarienseite | **bestätigt (30.10.2026):** bleibt für Baum, Diff, Duplizieren und Ablösen; Overrides auch dort weiter möglich |
+| E9 | Kante löschen bei freiem Ausdruck | **bestätigt (30.10.2026):** Ausdruck öffnen, nie automatisch umschreiben |
 | E10 | Schlüssel `layout` | **bestätigt (30.10.2026):** oberste Ebene statt je Knoten, damit Knotendefinitionen kurz bleiben |
 
 ## 11. Arbeitspakete

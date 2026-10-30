@@ -305,7 +305,9 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
   [docs/specs/m8-ux-selbsterklaerung.md](docs/specs/m8-ux-selbsterklaerung.md).
 
 ### M9 — Grafischer Editor
-- **Status:** in progress (AP1 spike done 2026-10-30: canvas Vue Flow; AP2 `layout` block, AP3 canvas actions, AP4 canvas on the model page, AP5 link dialog and palette, AP6 scenario mode done 2026-10-30, criteria 1–6 met; next AP7 docs)
+- **Status:** done (verified by: tests/test_layout.py, test_canvas.py, test_canvas_view.py,
+  test_web_canvas.py, test_scenarios.py, test_present_glossary.py; 2026-10-30; canvas Vue Flow
+  after the spike)
 - **Deliverable:** Modelle und Szenarien lassen sich auf einer Zeichenfläche nach dem Leitbild
   n8n zusammenstellen: Knoten aus einer Palette platzieren, verbinden und die Art der
   Verknüpfung in einem Dialog mit Vorauswahlen festlegen. Anlass: Rückmeldung vom 30.10.2026,

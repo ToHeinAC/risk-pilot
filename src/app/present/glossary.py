@@ -214,6 +214,26 @@ TERMS: tuple[Term, ...] = (
         "geht es um Verluste.",
         ("VaR",),
     ),
+    Term(
+        "flaeche",
+        "Fläche",
+        "Das Modell als Knoten und Kanten zum Verschieben, Verbinden und Anklicken.",
+        "Die Fläche zeigt dasselbe Modell wie Formular und YAML. Kanten werden aus den "
+        "Ausdrücken abgeleitet; wer zwei Knoten verbindet, schreibt einen Ausdruck. Positionen "
+        "stehen im Block „layout“ und ändern keine Zahl.",
+        "In T2 führt eine Kante von Pfad 1 zum Projektende, weil dort max(pfad1, c) steht.",
+        ("Zeichenfläche", "Szenario auf der Fläche"),
+    ),
+    Term(
+        "vorauswahl",
+        "Vorauswahl",
+        "Eine fertige Art der Verknüpfung, etwa Summe, Maximum oder Verzögerung bei Eintritt.",
+        "Beim Verbinden bietet der Dialog nur Vorauswahlen an, die zum Ziel passen, und zeigt "
+        "das Ergebnis in Klartext. Frei formulierte Ausdrücke schreibt die Fläche nie um.",
+        "Verbindet man in T2 Vorgang A mit dem Projektende unter „Parallel – alle fertig“, "
+        "wird aus max(pfad1, c) der Ausdruck max(pfad1, c, a).",
+        ("Art der Verknüpfung",),
+    ),
 )
 
 BY_KEY = {term.key: term for term in TERMS}
@@ -236,6 +256,8 @@ LABELS = {
     "analysis.tab_rho": "spearman",
     "analysis.tab_risk": "risikomatrix",
     "analysis.col_rho": "spearman",
+    "canvas.preset": "vorauswahl",
+    "canvas.scenario": "flaeche",
 }
 PATTERNS = (
     (re.compile(r"^P\d+ \(\d+-%-Quantil\)$"), "quantil"),

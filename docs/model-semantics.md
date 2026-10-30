@@ -251,6 +251,17 @@ shown as „> Horizont“; mean and standard deviation are not shown as numbers 
 beyond („nicht bestimmbar: x % jenseits des Horizonts“). P(target) is unaffected. Comparison and
 analysis pages use the raw values.
 
+## Canvas and layout
+
+The canvas on the model page (M9) is a view with editing, not a second model. Its edges are
+derived exactly like the dependency graph: a reference in `expr` (expression), in a distribution
+parameter or `p` (parameter), and every pair of a correlation group (correlation). Connecting two
+nodes writes a preset expression (`a + b`, `max(a, b)`, `min(a, b)`, `a * b`,
+`… + where(e, x, 0)`, a parameter `a` or `a * f`, `p: a`) or a correlation entry; deleting an
+edge removes one argument of such an expression. A free expression is never rewritten: the
+canvas opens it instead. Positions live in `layout` (see the file format above) and are shared
+by all scenarios; a scenario changes values only, never the structure.
+
 ## Validation behaviour
 
 - **No silent repair.** Invalid input is rejected with a code, node, field and parameters; it is
