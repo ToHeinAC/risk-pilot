@@ -307,3 +307,29 @@ def test_a_range_input_takes_no_parameter_link() -> None:
     with pytest.raises(InputError) as exc:
         canvas.connect(data, "a", "q", "param", field="p50")
     assert _code(exc) == "canvas.quantiles"
+
+
+@pytest.mark.parametrize(
+    ("expr", "preset", "expected"),
+    [
+        ("max(pfad1, c, n)", "sum", "pfad1 + c + n"),
+        ("a + b", "min", "min(a, b)"),
+        ("a * b", "max", "max(a, b)"),
+        ("a", "product", "a"),
+    ],
+)
+def test_retype_changes_the_kind_for_every_argument(expr: str, preset: str, expected: str) -> None:
+    data = _data(z={"type": "output", "expr": expr})
+    assert canvas.retype(data, "z", preset)["nodes"]["z"]["expr"] == expected
+
+
+def test_retype_refuses_a_free_expression() -> None:
+    with pytest.raises(InputError) as exc:
+        canvas.retype(T2, "pfad1", "max")
+    assert _code(exc) == "canvas.free_expression"
+
+
+def test_rho_reads_the_entry_of_a_pair() -> None:
+    data = canvas.correlate(_data(a=U, b=U, c=U), "a", "b", 0.4)
+    assert canvas.rho(data, "b", "a") == 0.4
+    assert canvas.rho(data, "a", "c") is None

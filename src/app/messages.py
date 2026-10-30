@@ -393,6 +393,10 @@ UI: dict[str, dict[str, str]] = {
         "canvas.override_title": "{node} in Szenario {scenario} überschreiben",
         "canvas.parent_value": "Wert im Elternszenario: {value}",
         "canvas.override_remove": "Override entfernen",
+        "canvas.edge_title": "Verknüpfung {source} → {target}",
+        "canvas.edge_remove": "Verknüpfung entfernen",
+        "canvas.edge_param": "{target}: ein Parameter hängt von {source} ab; in der Karte ändern – "
+        "eine Zahl statt des Ausdrucks löst die Abhängigkeit.",
         "canvas.says_join": "{target} = {op} aus {args}",
         "canvas.op_sum": "Summe",
         "canvas.op_max": "Maximum",
@@ -406,8 +410,8 @@ UI: dict[str, dict[str, str]] = {
         "Ausdruck selbst einfügen.",
         "canvas.caption": "Knoten anklicken öffnet ihn rechts; verschieben speichert die Position "
         "im YAML; vom rechten Punkt eines Knotens zum linken eines anderen ziehen verknüpft; "
-        "Kante anklicken und Entf löscht. Linie: Ausdruck, gestrichelt: Parameter, gepunktet: "
-        "Korrelation.",
+        "Kante anklicken ändert ihre Art, Entf löscht sie. Linie: Ausdruck, gestrichelt: "
+        "Parameter, gepunktet: Korrelation.",
         "canvas.arrange": "Neu anordnen",
         "canvas.fit": "Ansicht einpassen",
         "web.pick_node": "Einen Knoten auf der Fläche oder in der Tabelle anklicken.",

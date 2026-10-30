@@ -204,6 +204,11 @@ bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
 - Befund aus der Prüfung: Ein unsicherer Knoten mit Eingabe als Spanne bekam beim Verbinden
   `p50: a`, was die Spanne nicht erlaubt. Jetzt bietet der Dialog dort nur die Korrelation an;
   sonst meldet `canvas.quantiles`, dass der Eingabemodus „params“ nötig ist.
+- Kanten-Dialog (Wunsch des Nutzers): Klick auf eine Kante öffnet „Verknüpfung A → B“. Bei einem
+  Vorauswahl-Ausdruck wechselt „Art der Verknüpfung“ die Art für alle Argumente
+  (`canvas.retype`: `max(pfad1, c)` → `pfad1 + c`), bei einer Korrelation lässt sich ρ ändern
+  (`canvas.rho`); beides mit Klartext vor dem Übernehmen, dazu „Verknüpfung entfernen“. Freie
+  Ausdrücke und Parameter-Kanten öffnen die Karte des Ziels; im Szenario-Modus gesperrt.
 
 ## 9. Tests
 

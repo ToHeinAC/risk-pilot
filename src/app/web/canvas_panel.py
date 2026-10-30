@@ -122,6 +122,7 @@ class CanvasPanel:
         canvas.on("connect", self.on_connect)
         canvas.on("disconnect", self.on_disconnect)
         canvas.on("drop", self.on_drop)
+        canvas.on("edge", self.on_edge)
         self.canvas = canvas
 
     def redraw(self) -> None:
@@ -202,6 +203,29 @@ class CanvasPanel:
         ui.notify(self.edit.error or "", type="warning", multi_line=True)
         self.edit.error = None
         self.done(target)  # the edge stays; its expression opens
+
+    def on_edge(self, e: events.GenericEventArguments) -> None:
+        """A clicked edge: its dialog, or the target's card for what the dialog cannot change."""
+        edge = canvas_view.edge_of(str(e.args))
+        data = self.edit.data()
+        if edge is None or data is None or self.refuse():
+            return
+        source, target, kind = edge
+        if kind == "ausdruck":
+            expr = str(data["nodes"][target].get("expr", ""))
+            if canvas.shape(expr).preset not in (*canvas.JOINS, "single"):
+                ui.notify(render(canvas.free_issue(target, "expr", expr)), multi_line=True)
+                self.done(target)
+                return
+        if kind == "parameter":
+            names = {
+                "source": canvas_view.name(data, source),
+                "target": canvas_view.name(data, target),
+            }
+            ui.notify(t("canvas.edge_param", **names))
+            self.done(target)
+            return
+        canvas_dialogs.edge(self.edit, source, target, kind, self.done)
 
     def on_drop(self, e: events.GenericEventArguments) -> None:
         if self.refuse():

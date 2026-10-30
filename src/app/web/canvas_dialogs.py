@@ -100,6 +100,90 @@ def link(edit: ModelEdit, source: str, target: str, offered: list[str], done: Do
     Link(edit, source, target, done).open(offered)
 
 
+class Edge:
+    """A clicked edge: another kind for a preset expression, another ρ for a correlation, or
+    remove it. Free expressions and parameters are not offered here (the card opens)."""
+
+    def __init__(self, edit: ModelEdit, source: str, target: str, kind: str, done: Done) -> None:
+        self.edit, self.source, self.target, self.kind, self.done = edit, source, target, kind, done
+        self.data = edit.data() or {}
+        self.names = (canvas_view.name(self.data, source), canvas_view.name(self.data, target))
+
+    def open(self) -> None:
+        with ui.dialog() as self.dialog, ui.card().classes("min-w-[28rem] gap-3"):
+            title = t("canvas.edge_title", source=self.names[0], target=self.names[1])
+            ui.label(title).classes("text-lg font-semibold")
+            self.preset = self.value = None
+            if self.kind == "korrelation":
+                rho = canvas.rho(self.data, self.source, self.target)
+                self.value = ui.input(
+                    t("canvas.rho_label"), value=f"{rho:g}" if rho is not None else ""
+                )
+                self.value.props("outlined dense").mark("edge_value")
+            else:
+                expr = str(self.data["nodes"][self.target].get("expr", ""))
+                current = canvas.shape(expr).preset
+                order = sorted(canvas.JOINS, key=lambda p: p != current)
+                options = {p: t(f"canvas.preset_{p}") for p in order}
+                self.preset = ui.select(options, value=order[0], label=t("canvas.preset"))
+                self.preset.props("outlined dense").mark("edge_preset")
+            self.says = ui.label().classes("font-medium")
+            self.code = ui.label().classes("font-mono text-sm rp-muted")
+            with ui.row().classes("w-full justify-end gap-2"):
+                ui.button(t("canvas.edge_remove"), on_click=self.remove).props(
+                    "flat no-caps color=negative"
+                ).mark("edge_remove")
+                ui.button(t("canvas.cancel"), on_click=self.dialog.close).props("flat no-caps")
+                self.take = ui.button(t("canvas.take"), on_click=self.apply)
+                self.take.props("unelevated no-caps").mark("edge_take")
+            for part in (self.preset, self.value):
+                if part is not None:
+                    part.on_value_change(self.show)
+            self.show()
+        self.dialog.open()
+
+    def change(self, data: Data) -> Data:
+        if self.value is not None:
+            return canvas.connect(
+                data, self.source, self.target, "corr", value=str(self.value.value or "")
+            )
+        return canvas.retype(data, self.target, str(self.preset.value if self.preset else ""))
+
+    def show(self) -> None:
+        try:
+            after = self.change(self.data)
+        except InputError as exc:
+            self.says.text, self.code.text = render(exc.issue), ""
+            self.take.disable()
+            return
+        self.take.enable()
+        preset = "corr" if self.value is not None else str(self.preset.value if self.preset else "")
+        amount = str(self.value.value or "") if self.value is not None else ""
+        self.says.text = canvas_view.describe(after, self.source, self.target, preset, amount)
+        self.code.text = (
+            "  ".join(_changed(self.data, after, self.target)) if self.value is None else ""
+        )
+
+    def finish(self, change: Callable[[Data], Data]) -> None:
+        if self.edit.change(change):
+            self.dialog.close()
+            self.done(self.target)
+        else:
+            self.says.text = self.edit.error or ""
+
+    def apply(self) -> None:
+        self.finish(self.change)
+
+    def remove(self) -> None:
+        source, target = self.source, self.target
+        action = canvas.uncorrelate if self.kind == "korrelation" else canvas.disconnect
+        self.finish(lambda d: action(d, source, target))
+
+
+def edge(edit: ModelEdit, source: str, target: str, kind: str, done: Done) -> None:
+    Edge(edit, source, target, kind, done).open()
+
+
 def new_node(edit: ModelEdit, node_type: str, x: float, y: float, done: Done) -> None:
     """A palette item placed: name, ID (suggested from the name), unit."""
     taken = edit.node_ids()

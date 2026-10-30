@@ -74,7 +74,8 @@ works too.
   Dragging from one node to another opens a dialog with the presets that fit the target (sum,
   maximum, minimum, product, delay on an event, parameter depends on, probability from, rank
   correlation) and shows the result in plain words before it is taken; deleting an edge removes
-  the argument or opens a free expression, which is never rewritten. A palette places new nodes.
+  the argument or opens a free expression, which is never rewritten. A click on an edge changes
+  its kind (e.g. maximum to sum) or ρ, or removes it. A palette places new nodes.
   In a sub-scenario the structure is locked: changed nodes carry the number of their overrides,
   a click opens the override dialog with the parent's value, and "Unterszenario ableiten" adds a
   scenario below the selected one.

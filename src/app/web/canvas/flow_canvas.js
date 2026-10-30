@@ -20,7 +20,8 @@ export default {
                  :edges-updatable="false"
                  :delete-key-code="connectable && !readonly ? ['Backspace', 'Delete'] : null"
                  @pane-ready="onReady" @nodes-initialized="onInitialized" @connect="onConnect"
-                 @node-drag-stop="onDragStop" @node-click="onClick" @edges-change="onEdgesChange">
+                 @node-drag-stop="onDragStop" @node-click="onClick" @edge-click="onEdgeClick"
+                 @edges-change="onEdgesChange">
           <template #node-default="p">
             <Handle type="target" :position="p.targetPosition" />
             <div class="rp-node-type">{{ p.data.type }}
@@ -53,6 +54,9 @@ export default {
     },
     onClick(e) {
       this.$emit("pick", e.node.id);
+    },
+    onEdgeClick(e) {
+      this.$emit("edge", e.edge.id);
     },
     onEdgesChange(changes) {
       for (const c of changes) {

@@ -126,8 +126,12 @@ def links(data: Data) -> list[Link]:
     return sorted(found)
 
 
+def free_issue(node_id: str, field: str, text: str) -> Issue:
+    return Issue("canvas.free_expression", node_id, field=field, params={"expr": text})
+
+
 def _free(node_id: str, field: str, text: str) -> InputError:
-    return InputError(Issue("canvas.free_expression", node_id, field=field, params={"expr": text}))
+    return InputError(free_issue(node_id, field, text))
 
 
 def presets(data: Data, source: str, target: str) -> list[str]:
@@ -208,6 +212,29 @@ def disconnect(data: Data, source: str, target: str) -> Data:
     fields = [k for k, v in node.items() if isinstance(v, str) and k not in COMMON]
     field = next((k for k in fields if source in expression_names(node[k])), "expr")
     raise _free(target, field, str(node.get(field, "")))
+
+
+def retype(data: Data, target: str, preset: str) -> Data:
+    """The preset expression of ``target`` under another join preset, every argument kept:
+    ``max(a, b)`` -> ``a + b``. A free expression raises."""
+    out = copy.deepcopy(data)
+    node = _nodes(out)[target]
+    text = str(node.get("expr", ""))
+    found = shape(text)
+    if found.preset not in (*JOINS, "single") or preset not in JOINS:
+        raise _free(target, "expr", text)
+    node["expr"] = render(preset, found.args)
+    return out
+
+
+def rho(data: Data, a: str, b: str) -> float | None:
+    """The rank correlation of a pair in its group; None if they share no group."""
+    gid = _group_of(data, a)
+    if gid is None or gid != _group_of(data, b):
+        return None
+    group = _groups(data)[gid]
+    nodes: list[str] = group["nodes"]
+    return float(group["spearman"][nodes.index(a)][nodes.index(b)])
 
 
 def _groups(data: Data) -> dict[str, dict[str, Any]]:

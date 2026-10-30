@@ -202,3 +202,77 @@ def test_a_new_sub_scenario_starts_from_the_selected_one() -> None:
         assert "parent: nacharbeit" in str(value(user, "editor"))
 
     drive(steps)
+
+
+def test_a_click_on_an_edge_changes_the_kind_or_removes_it() -> None:
+    _plan()
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        user.find(marker="canvas").trigger("edge", "ausdruck:c->ende")
+        await user.should_see(marker="edge_take")
+        assert value(user, "edge_preset") == "max"
+        put(user, "edge_preset", "sum")
+        await user.should_see("Projektende = Summe aus Pfad 1 und Vorgang C")
+        user.find(marker="edge_take").click()
+        await user.should_see(marker="form.ende.expr")
+        assert 'expr: "pfad1 + c"' in str(value(user, "editor"))
+        user.find(marker="canvas").trigger("edge", "ausdruck:c->ende")
+        await user.should_see(marker="edge_remove")
+        user.find(marker="edge_remove").click()
+        await until(lambda: 'expr: "pfad1"' in str(value(user, "editor")))
+
+    drive(steps)
+
+
+def test_a_free_expression_edge_opens_the_card() -> None:
+    _plan()
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        user.find(marker="canvas").trigger("edge", "ausdruck:nacharbeit->pfad1")
+        await user.should_see("frei formuliert")
+        await user.should_see(marker="form.pfad1.expr")
+
+    drive(steps)
+
+
+CORR = """schema_version: 1
+model: eigen
+nodes:
+  a: {type: uncertain, dist: normal, mean: 10, sd: 2}
+  b: {type: uncertain, dist: normal, mean: 5, sd: 1}
+  y: {type: output, expr: "a + b"}
+correlations:
+  a_b:
+    nodes: [a, b]
+    spearman: [[1.0, 0.3], [0.3, 1.0]]
+"""
+
+
+def test_a_correlation_edge_changes_rho() -> None:
+    files.create_model_text(settings.models_dir(), "eigen", CORR)
+
+    async def steps(user: User) -> None:
+        await open_model(user, "eigen")
+        user.find(marker="canvas").trigger("edge", "korrelation:a->b")
+        await user.should_see(marker="edge_take")
+        assert value(user, "edge_value") == "0.3"
+        put(user, "edge_value", "0.6")
+        await user.should_see("rangkorreliert mit ρ = 0.6")
+        user.find(marker="edge_take").click()
+        await until(lambda: "0.6" in str(value(user, "editor")))
+
+    drive(steps)
+
+
+def test_a_parameter_edge_opens_the_card_of_its_target() -> None:
+    files.create_model_text(settings.models_dir(), "eigen", CORR.replace("mean: 5", 'mean: "a"'))
+
+    async def steps(user: User) -> None:
+        await open_model(user, "eigen")
+        user.find(marker="canvas").trigger("edge", "parameter:a->b")
+        await user.should_see("ein Parameter hängt von a ab")
+        await user.should_see(marker="form.b.param.mean")
+
+    drive(steps)
