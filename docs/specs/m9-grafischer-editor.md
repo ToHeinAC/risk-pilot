@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
-**Stand:** 30. Oktober 2026, Entwurf; E1–E3 bestätigt (30.10.2026), E4–E10 offen bis nach
-dem Spike · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+**Stand:** 30. Oktober 2026, Entwurf; E1–E3 und E6 bestätigt (30.10.2026), E4, E5 und
+E7–E10 offen · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -122,6 +122,39 @@ Fläche mit 100 Knoten flüssig.
 jeder Änderung; Oberflächentests ohne Browser möglich (die Fläche sendet Ereignisse, die Tests
 lösen dieselben Ereignisse aus); Lizenz und Bündelgröße; Darstellung hell/dunkel.
 
+### 8.1 Ergebnis des Spikes (30.10.2026)
+
+Branch `spike/canvas`, Worktree `../risk-pilot-spike-m9`, Seite `/spike` auf Port 8643. Beide
+Kandidaten hinter denselben Props (`nodes`, `edges`) und Ereignissen (`connect`, `disconnect`,
+`move`, `pick`). Code: `src/app/model/canvas.py` (Vorauswahlen verbinden/lösen, reine
+Funktionen), `src/app/web/canvas/` (zwei Komponenten, gebündelte Bibliotheken),
+`src/app/web/spike_canvas.py`; Tests `tests/test_canvas_spike.py` (13 Tests, offline).
+
+| Kriterium | Vue Flow 1.48.2 | Drawflow 0.0.60 |
+|---|---|---|
+| Lizenz, Bündel | MIT, ESM 161 KB (esbuild, `vue` extern) | MIT, UMD 46 KB |
+| Einbindung | als Vue-Komponente über die Importmap (`esm=`) | klassisches `<script>`, über `window` |
+| Ereignisse in Python | Verbinden → Dialog, Verschieben, Kante löschen im Browser geprüft | ebenso |
+| Ohne Neuladen | Props werden aktualisiert, Zoom und Ausschnitt bleiben | jede Änderung zeichnet neu, Zoom geht verloren |
+| 100 Knoten | 25 ms Server, sichtbar nach 375 ms | gezeichnet |
+| Tests ohne Browser | `trigger(event, args)` auf der Fläche | ebenso |
+| Wartung | aktiv; Grundlage des n8n-Canvas | letzte Version 2022 |
+
+**Entscheid E6:** Vue Flow, Urteil des Nutzers am laufenden Spike (30.10.2026). Der Spike-Code
+bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
+
+**Befunde für die Umsetzung:**
+
+- Ansicht nach jedem Neuzeichnen einpassen (`fit-view-on-init` wirkt nur beim ersten Laden);
+  Minimap und Zoom-Knöpfe als Zusatzpakete (MIT) prüfen.
+- Gebündelte Dateien in THIRD_PARTY_NOTICES.md aufnehmen und von den Format-Hooks ausnehmen
+  (`exclude` in `.pre-commit-config.yaml`), damit sie byte-gleich bleiben.
+- Das Wurzelelement der Komponente darf keine Inline-Höhe setzen; sonst überschreibt sie die
+  Klasse und die Fläche hat die Höhe 0.
+- Freie Ausdrücke werden nie umgeschrieben: Kante `nacharbeit → pfad1` in T2 löschen ergibt
+  einen Hinweis (stützt E9).
+- Positionen hält der Spike nur im Speicher; Speichern im YAML ist AP2.
+
 ## 9. Tests
 
 - `tests/test_canvas.py` (Kern, offline): jede Aktion `Data → Data` – Vorauswahlen erzeugen
@@ -141,7 +174,7 @@ lösen dieselben Ereignisse aus); Lizenz und Bündelgröße; Darstellung hell/du
 | E3 | Szenarien | **bestätigt (30.10.2026):** Szenario-Modus auf derselben Fläche, Override-Dialog je Knoten |
 | E4 | Vorauswahlen | Vorschlag Abschnitt 4; zu bestätigen |
 | E5 | Palette | Vorschlag Abschnitt 5; zu bestätigen |
-| E6 | Canvas-Komponente | nach dem Spike (Vue Flow oder Drawflow) |
+| E6 | Canvas-Komponente | **bestätigt (30.10.2026):** Vue Flow (Abschnitt 8.1) |
 | E7 | Ort auf der Modellseite | Vorschlag: Fläche ersetzt den Plotly-Graphen im Reiter „Formular“; Tabelle darunter bleibt |
 | E8 | Szenarienseite | Vorschlag: bleibt für Baum, Diff, Duplizieren und Ablösen; Overrides auch dort weiter möglich |
 | E9 | Kante löschen bei freiem Ausdruck | Vorschlag: Ausdruck öffnen, nie automatisch umschreiben |
