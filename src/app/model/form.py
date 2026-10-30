@@ -13,6 +13,7 @@ from app.dists.base import ParamSpec
 from app.dists.families import QUANTILES
 from app.dists.registry import get_family
 from app.errors import InputError, Issue
+from app.model import layout
 from app.model.graph import expression_names
 from app.model.schema import id_problem
 from app.model.yaml_patch import Data
@@ -288,4 +289,4 @@ def remove_node(data: Data, node_id: str) -> Data:
     if refs:
         raise InputError(Issue("form.referenced", node_id, params={"refs": refs}))
     nodes = {k: v for k, v in data["nodes"].items() if k != node_id}
-    return {**data, "nodes": nodes}
+    return layout.without({**data, "nodes": nodes}, node_id)

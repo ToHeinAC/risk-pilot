@@ -88,8 +88,9 @@ class CompiledModel:
 
 
 def model_hash(model: Model) -> str:
-    """SHA-256 over the canonical JSON of the validated model."""
-    text = json.dumps(model.model_dump(mode="json"), sort_keys=True, ensure_ascii=False)
+    """SHA-256 over the canonical JSON of the validated model, without the canvas layout."""
+    data = model.model_dump(mode="json", exclude={"layout"})
+    text = json.dumps(data, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
@@ -98,12 +99,21 @@ _LABELS = ("name", "description", "why", "tags")
 
 def content_hash(model: Model) -> str:
     """SHA-256 over what determines the numbers: without model ID, title and display labels."""
-    data = model.model_dump(mode="json", exclude={"model", "title", "description"})
+    data = model.model_dump(mode="json", exclude={"model", "title", "description", "layout"})
     for node in data["nodes"].values():
         for key in _LABELS:
             node.pop(key, None)
     text = json.dumps(data, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _layout_notices(model: Model) -> list[Notice]:
+    """Positions of nodes the model does not have: a hint, removed only on request (M9 E2)."""
+    return [
+        Notice("layout.unknown_node", node_id)
+        for node_id in model.layout
+        if node_id not in model.nodes
+    ]
 
 
 class _Fail(Exception):
@@ -368,7 +378,7 @@ def compile_model(model: Model) -> CompiledModel:
         nodes,
         model_hash(model),
         compiler.canonical,
-        tuple(compiler.notices + group_notices),
+        tuple(compiler.notices + group_notices + _layout_notices(model)),
         {k: frozenset(v) for k, v in refs.items()},
         tuple(groups),
     )

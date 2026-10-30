@@ -8,6 +8,7 @@ from nicegui import events, ui
 from app.adapters import files
 from app.errors import InputError
 from app.messages import render, t
+from app.model import layout
 from app.model.edits import to_empirical, to_piecewise
 from app.model.scenarios import mark_unknown_inactive
 from app.web.editing import ModelEdit
@@ -35,6 +36,7 @@ class Hints:
             ui.button(t("scen.mark_inactive"), on_click=self.mark_inactive).props(
                 "flat no-caps"
             ).mark("mark_inactive")
+        self.prune_offer()
         self.csv_import()
 
     def fit_offers(self, readonly: bool) -> None:
@@ -66,6 +68,20 @@ class Hints:
             # the user sets the bounds, the app does not
             button.bind_enabled_from(p0, "value", lambda _v: None not in (p0.value, p100.value))
             button.bind_enabled_from(p100, "value", lambda _v: None not in (p0.value, p100.value))
+
+    def prune_offer(self) -> None:
+        """Positions of unknown nodes stay until the user removes them (M9 E2)."""
+        compiled = self.edit.checked().compiled
+        if compiled is None or not any(n.code == "layout.unknown_node" for n in compiled.notices):
+            return
+
+        def prune() -> None:
+            self.edit.change(layout.prune)
+            self.changed(False)
+
+        ui.button(t("model.prune_layout"), on_click=prune).props("flat no-caps").mark(
+            "prune_layout"
+        )
 
     def mark_inactive(self) -> None:
         self.edit.edit_model(mark_unknown_inactive)

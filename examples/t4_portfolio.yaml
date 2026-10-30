@@ -46,3 +46,14 @@ scenarios:
     why: "Aktien schwanken anderthalbmal so stark."
     overrides:
       l_aktien: {sd: "sqrt(jahre) * 0.27", why: "Stresstest (illustrativ)"}
+# Positionen auf der Zeichenfläche (M9); sie ändern keine Zahl und keinen Hash.
+layout:
+  w0: [0, 110]
+  jahre: [0, 0]
+  w_aktien: [0, 220]
+  w_anleihen: [0, 330]
+  w_gold: [0, 440]
+  l_aktien: [220, 110]
+  l_anleihen: [220, 220]
+  l_gold: [220, 330]
+  vermoegen: [440, 220]

@@ -8,3 +8,8 @@ nodes:
   x1: {type: uncertain, dist: uniform, low: 0, high: 1, name: "Unsicherheit 1"}
   x2: {type: uncertain, dist: uniform, low: 0, high: 1, name: "Unsicherheit 2"}
   s:  {type: output, expr: "x1 + x2", name: "Summe"}
+# Positionen auf der Zeichenfläche (M9); sie ändern keine Zahl und keinen Hash.
+layout:
+  x1: [0, 0]
+  x2: [0, 110]
+  s: [220, 55]

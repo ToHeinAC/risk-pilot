@@ -50,3 +50,19 @@ scenarios:
     overrides:
       material: {values: [2038, 2045, 2055, 2070, 2095], why: "Annahme (illustrativ)"}
       f_material: {p: 0.4, why: "Annahme (illustrativ)"}
+# Positionen auf der Zeichenfläche (M9); sie ändern keine Zahl und keinen Hash.
+layout:
+  magnete: [0, 550]
+  durchbruch: [0, 0]
+  plasma_basis: [0, 770]
+  plasma: [220, 550]
+  material: [0, 660]
+  tritium: [0, 880]
+  f_plasma: [0, 220]
+  f_material: [0, 110]
+  f_tritium: [0, 330]
+  gescheitert: [220, 440]
+  foerderung: [0, 440]
+  bauzeit: [220, 330]
+  demo: [440, 440]
+  kommerziell: [660, 440]

@@ -195,3 +195,4 @@ class Model(_Strict):
     nodes: dict[str, Node] = {}
     correlations: dict[str, CorrelationGroup] = {}
     scenarios: dict[str, Scenario] = {}
+    layout: dict[str, tuple[float, float]] = {}  # node ID -> canvas position, no number

@@ -364,3 +364,17 @@ def test_quantile_conflict_offers_piecewise_in_own_model() -> None:
         assert "2090" in editor(user)
 
     drive(steps)
+
+
+def test_positions_of_unknown_nodes_are_a_hint_that_offers_removal() -> None:
+    own(ONE + "layout:\n  y: [0, 0]\n  weg: [5, 5]\n")
+
+    async def steps(user: User) -> None:
+        await open_model(user, "eigen")
+        await user.should_see("„weg“ steht im Block „layout“")
+        user.find(marker="prune_layout").click()
+        await user.should_not_see("„weg“ steht im Block „layout“")
+        assert "weg" not in editor(user)
+        assert "y: [0, 0]" in editor(user)
+
+    drive(steps)

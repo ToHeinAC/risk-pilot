@@ -20,3 +20,13 @@ scenarios:
     why: "Ein früherer Zug 1 verlängert die Umstiegszeit auf 22 Minuten."
     overrides:
       puffer: {value: 20, why: "Umstiegszeit 22 − Mindestumstieg 2 (illustrativ)"}
+# Positionen auf der Zeichenfläche (M9); sie ändern keine Zahl und keinen Hash.
+layout:
+  puenktlich: [0, 110]
+  verspaetung: [0, 330]
+  zug1: [220, 220]
+  puffer: [0, 220]
+  anschluss: [440, 220]
+  zug2: [0, 440]
+  bus: [0, 0]
+  ankunft: [660, 220]

@@ -111,11 +111,14 @@ def load_data(text: str) -> Data:
 
 
 def _new(value: Any, flow: bool) -> Any:
-    """A fresh container for ``value``; inside a flow-style parent it is flow style too."""
+    """A fresh container for ``value``; inside a flow-style parent it is flow style too, and so
+    is a list of plain values (``[220, 0]``)."""
     if isinstance(value, dict):
         made = CommentedMap((k, _new(v, flow)) for k, v in cast(Data, value).items())
     elif isinstance(value, list):
-        made = CommentedSeq(_new(v, flow) for v in cast(list[Any], value))
+        items = cast(list[Any], value)
+        made = CommentedSeq(_new(v, flow) for v in items)
+        flow = flow or not any(isinstance(v, dict | list) for v in items)
     else:
         return _quoted_if_needed(value)
     if flow:

@@ -44,6 +44,8 @@ _DE: dict[str, str] = {
     "der Iterationen.",
     "range.violation": "{node}: {below} der Werte liegen unter dem zulässigen Minimum, "
     "{above} über dem Maximum. Die Werte wurden nicht verändert.",
+    "layout.unknown_node": "{node} steht im Block „layout“, existiert aber nicht; die "
+    "Position wird nicht verwendet.",
     "uniform.degenerate": "{node}: Gleichverteilung mit gleichen Grenzen, wird als Konstante "
     "{value} ausgewertet.",
     "fit.deviation": "{node}: Quantil-Fit {dist} trifft P10/P50/P90 = {given} mit {fitted}; "
@@ -504,6 +506,7 @@ UI: dict[str, dict[str, str]] = {
         "ui.page_analyse": "Analyse",
         "model.p0": "P0 (kleinster möglicher Wert)",
         "model.p100": "P100 (größter möglicher Wert)",
+        "model.prune_layout": "Positionen unbekannter Knoten entfernen",
         "model.to_piecewise": "Als Stützstellen-Verteilung übernehmen",
         "model.csv_title": "Werte aus CSV übernehmen (empirische Verteilung)",
         "model.csv_file": "CSV-Datei",

@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
-**Stand:** 30. Oktober 2026, Entwurf; E1–E3 und E6 bestätigt (30.10.2026), E4, E5 und
-E7–E10 offen · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+**Stand:** 30. Oktober 2026, Entwurf; E1–E3, E6 und E10 bestätigt (30.10.2026), E4, E5 und
+E7–E9 offen; AP1 und AP2 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -89,6 +89,11 @@ layout:
 - Positionen unbekannter Knoten sind ein Hinweis (`Notice`), kein Fehler; „Speichern“ entfernt
   sie nicht still, der Hinweis bietet das Entfernen an.
 - Tutorials in `examples/` erhalten ein Layout, damit sie beim Öffnen aufgeräumt aussehen.
+- Umgesetzt (AP2, 30.10.2026): `model/layout.py` (`move`, `arrange`, `placed`, `prune`,
+  `without`), Hinweis `layout.unknown_node` mit Knopf „Positionen unbekannter Knoten
+  entfernen“ auf der Modellseite; Löschen eines Knotens entfernt seine Position mit. Neue
+  Listen aus reinen Werten schreibt `yaml_patch` im Flow-Stil (`a: [0, 120]`). Positionen sind
+  ganze Pixel, ein Schichtabstand 220, ein Zeilenabstand 110.
 
 ## 7. Szenario-Modus (E3)
 
@@ -178,7 +183,7 @@ bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
 | E7 | Ort auf der Modellseite | Vorschlag: Fläche ersetzt den Plotly-Graphen im Reiter „Formular“; Tabelle darunter bleibt |
 | E8 | Szenarienseite | Vorschlag: bleibt für Baum, Diff, Duplizieren und Ablösen; Overrides auch dort weiter möglich |
 | E9 | Kante löschen bei freiem Ausdruck | Vorschlag: Ausdruck öffnen, nie automatisch umschreiben |
-| E10 | Schlüssel `layout` | Vorschlag: oberste Ebene statt je Knoten, damit Knotendefinitionen kurz bleiben |
+| E10 | Schlüssel `layout` | **bestätigt (30.10.2026):** oberste Ebene statt je Knoten, damit Knotendefinitionen kurz bleiben |
 
 ## 11. Arbeitspakete
 

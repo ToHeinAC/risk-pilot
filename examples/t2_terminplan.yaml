@@ -23,3 +23,11 @@ scenarios:
     why: "Mit 20 % Wahrscheinlichkeit muss B nachgearbeitet werden (+5 Tage)."
     overrides:
       nacharbeit: {p: 0.2, why: "Erfahrungswert (illustrativ)"}
+# Positionen auf der Zeichenfläche (M9); sie ändern keine Zahl und keinen Hash.
+layout:
+  a: [0, 0]
+  b: [0, 110]
+  c: [0, 220]
+  nacharbeit: [0, 330]
+  pfad1: [220, 165]
+  ende: [440, 165]

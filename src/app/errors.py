@@ -65,6 +65,7 @@ CODES: dict[str, tuple[str, ...]] = {
     "corr.latent_not_psd": ("group", "eig"),
     "corr.discrete_ties": ("group", "nodes"),
     "scenario.inactive": (),
+    "layout.unknown_node": (),
     "scenario.same_value": (),
     "files.changed": ("name",),
     "csv.encoding": (),

@@ -33,6 +33,7 @@ scenarios: {}
 | `nodes` | map ID → node | `{}` | The model; at least one node and at least one `output` (`model.empty`, `model.no_output`). |
 | `correlations` | map ID → group | `{}` | Rank correlation groups. |
 | `scenarios` | map ID → scenario | `{}` | Sub-scenarios of the main scenario `basis`. |
+| `layout` | map ID → `[x, y]` | `{}` | Canvas positions in pixels (M9). Change no number and no hash; nodes without one are laid out automatically; a position of an unknown node is a notice (`layout.unknown_node`). |
 
 General rules:
 
