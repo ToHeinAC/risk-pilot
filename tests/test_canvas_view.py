@@ -44,3 +44,25 @@ def test_edges_carry_their_kind_and_correlations_have_no_arrow() -> None:
 def test_an_edge_id_reads_back() -> None:
     assert canvas_view.edge_of("parameter:a->b") == ("a", "b", "parameter")
     assert canvas_view.edge_of("nonsense") is None
+
+
+def test_the_link_dialog_says_the_result_in_plain_words() -> None:
+    from app.model import canvas
+
+    data = {**T2, "nodes": {**T2["nodes"], "ende": {**T2["nodes"]["ende"], "expr": "pfad1"}}}
+    after = canvas.connect(data, "c", "ende", "max")
+    assert canvas_view.describe(after, "c", "ende", "max", "") == (
+        "Projektende = Maximum aus Pfad 1 und Vorgang C"
+    )
+    assert canvas_view.describe(after, "nacharbeit", "pfad1", "delay", "5") == (
+        "Pfad 1 wird um 5 größer, wenn Nacharbeit an B eintritt"
+    )
+    assert canvas_view.describe(after, "a", "b", "param", "0.5", field="sd") == (
+        "sd von Vorgang B = Vorgang A × 0.5"
+    )
+    assert canvas_view.describe(after, "a", "nacharbeit", "p", "") == (
+        "Nacharbeit an B tritt mit Wahrscheinlichkeit Vorgang A ein"
+    )
+    assert canvas_view.describe(after, "a", "c", "corr", "0.3") == (
+        "Vorgang A und Vorgang C sind rangkorreliert mit ρ = 0.3"
+    )

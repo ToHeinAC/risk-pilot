@@ -71,6 +71,10 @@ works too.
   draws the model on a canvas (Vue Flow) instead of the static graph, also while the draft is
   invalid. Moving a node writes its position to the optional `layout` block of the YAML, which
   changes no number and no hash; "Neu anordnen" lays out every node, a click opens the node card.
+  Dragging from one node to another opens a dialog with the presets that fit the target (sum,
+  maximum, minimum, product, delay on an event, parameter depends on, probability from, rank
+  correlation) and shows the result in plain words before it is taken; deleting an edge removes
+  the argument or opens a free expression, which is never rewritten. A palette places new nodes.
 - **Reference:** model format and semantics in [docs/model-semantics.md](docs/model-semantics.md),
   statistics and extension points in [docs/statistical-methods.md](docs/statistical-methods.md).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.

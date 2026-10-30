@@ -1,7 +1,7 @@
 # Pflichtenheft M9 — Grafischer Editor
 
-**Stand:** 30. Oktober 2026, Entwurf; E1–E3, E6 und E10 bestätigt (30.10.2026), E4, E5 und
-E8 und E9 offen; E7 umgesetzt wie vorgeschlagen; AP1–AP4 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
+**Stand:** 30. Oktober 2026, Entwurf; E1–E6 und E10 bestätigt (30.10.2026), E8 und E9
+offen; E7 umgesetzt wie vorgeschlagen; AP1–AP5 erledigt · **Bezug:** [PRD.md](../../PRD.md), Meilenstein M9 · **Voraussetzung:** M1–M8
 
 Dieses Pflichtenheft legt fest, **wie** M9 umgesetzt wird. Das PRD bleibt der Vertrag für das
 **Was**; bei Widerspruch gilt das PRD, und der Widerspruch wird hier korrigiert.
@@ -82,12 +82,23 @@ Zeichnen eingepasst, spätere Änderungen behalten Zoom und Ausschnitt. Tutorial
 Ansicht. Verbinden und Kante löschen sind bis AP5 abgeschaltet. Die Farbe nach relativer
 Streuung des alten Graphen entfällt; die Tabelle darunter zeigt P10/P50/P90.
 
+**Dialog (AP5, 30.10.2026):** `web/canvas_dialogs.py`. Vorauswahl, Parameter, Faktor,
+Verzögerung oder ρ; davor der Satz in Klartext (`canvas_view.describe`) und das geänderte Feld
+in Modellsprache. Abweichungen vom Entwurf: Korrelation wird im selben Dialog angeboten, wenn
+Quelle und Ziel zufällig sind (unsicher oder Ereignis), nicht über einen eigenen Griff; „Ausdruck
+bearbeiten“ öffnet die Karte des Ziels, die Quelle wird nicht an der Schreibmarke eingefügt.
+Abgelehnte Verbindungen (Kreis, A = B, Ziel ohne Vorauswahl) melden sich mit einem Hinweis.
+
 ## 5. Palette und neue Knoten (E5)
 
 Palette am linken Rand mit den sechs Knotentypen. Ziehen auf die Fläche öffnet einen kurzen
 Dialog: ID (Vorschlag aus dem Namen), Name, Einheit; ein unsicherer Knoten startet mit der
 Spanne P10/P50/P90 (E14 aus M8). Der Knoten erscheint an der Ablagestelle; seine Karte öffnet
 sich rechts wie heute nach einem Graph-Klick.
+
+**Umgesetzt (AP5, 30.10.2026):** Palette in der Fläche (`flow_canvas.js`), Ziehen oder Klick
+(Mitte der sichtbaren Fläche); `canvas.suggest_id` (Umlaute als ae/oe/ue/ss, freie und gültige
+ID), `canvas.place`. Pflichtfelder bleiben leer und werden gemeldet, bis die Karte sie füllt.
 
 ## 6. Layout im YAML (E2)
 
@@ -193,8 +204,8 @@ bleibt auf seinem Branch und dient als Vorlage, nicht als Merge-Basis.
 | E1 | Quelle der Wahrheit | **bestätigt:** YAML; Kanten abgeleitet, Aktionen als reine Funktionen |
 | E2 | Layout | **bestätigt (30.10.2026):** optionaler Block `layout` im Modell-YAML, nicht im Inhalts-Hash |
 | E3 | Szenarien | **bestätigt (30.10.2026):** Szenario-Modus auf derselben Fläche, Override-Dialog je Knoten |
-| E4 | Vorauswahlen | Vorschlag Abschnitt 4; zu bestätigen |
-| E5 | Palette | Vorschlag Abschnitt 5; zu bestätigen |
+| E4 | Vorauswahlen | **bestätigt (30.10.2026):** wie in AP3 gebaut, ohne „Wahl zwischen zwei Werten“ und „Übernehmen“ |
+| E5 | Palette | **bestätigt (30.10.2026):** Abschnitt 5, umgesetzt in AP5 |
 | E6 | Canvas-Komponente | **bestätigt (30.10.2026):** Vue Flow (Abschnitt 8.1) |
 | E7 | Ort auf der Modellseite | **umgesetzt (AP4, 30.10.2026):** Fläche ersetzt den Plotly-Graphen im Reiter „Formular“; Tabelle darunter bleibt |
 | E8 | Szenarienseite | Vorschlag: bleibt für Baum, Diff, Duplizieren und Ablösen; Overrides auch dort weiter möglich |

@@ -9,14 +9,15 @@ from typing import Any
 
 from nicegui import events, ui
 
-from app.messages import t
-from app.model import form, layout
+from app.errors import InputError
+from app.messages import render, t
+from app.model import canvas, form, layout
 from app.model.schema import Model
 from app.model.yaml_patch import Data
 from app.present import canvas_view, structure
 from app.present.brief import brief, spark_svg
 from app.present.text import number, percent
-from app.web import node_card
+from app.web import canvas_dialogs, node_card
 from app.web.canvas import FlowCanvas
 from app.web.editing import ModelEdit
 
@@ -98,10 +99,17 @@ class Workbench:
             ui.button(t("canvas.fit"), icon="fit_screen", on_click=self.fit).props(
                 "flat dense no-caps"
             ).mark("canvas_fit")
-        canvas = FlowCanvas(*canvas_view.view(data, self.edit.selected), readonly)
-        canvas.classes("w-full h-[420px] rp-canvas").mark("canvas")
+        palette = [
+            {"type": k, "label": t(f"type.{k}"), "hint": t("canvas.palette_hint")} for k in TYPES
+        ]
+        canvas = FlowCanvas(*canvas_view.view(data, self.edit.selected), readonly, palette)
+        canvas.classes("w-full h-[460px] rp-canvas").mark("canvas")
         canvas.on("move", self.on_move)
         canvas.on("pick", lambda e: self.select(str(e.args)))
+        if not readonly:
+            canvas.on("connect", self.on_connect)
+            canvas.on("disconnect", self.on_disconnect)
+            canvas.on("drop", self.on_drop)
         self.canvas = canvas
 
     def redraw(self) -> None:
@@ -119,6 +127,50 @@ class Workbench:
         node_id, x, y = str(e.args["id"]), float(e.args["x"]), float(e.args["y"])
         self.edit.change(lambda d: layout.move(d, node_id, x, y))
         self.changed(False)
+
+    def done(self, node_id: str) -> None:
+        """A canvas change was written: open the node and redraw everything."""
+        self.edit.selected = node_id
+        self.changed(True)
+
+    def on_connect(self, e: events.GenericEventArguments) -> None:
+        source, target = str(e.args["source"]), str(e.args["target"])
+        data = self.edit.data()
+        if data is None:
+            return
+        try:
+            offered = canvas.presets(data, source, target)
+        except InputError as exc:
+            ui.notify(render(exc.issue), type="warning")
+            self.redraw()  # drop the line Vue Flow drew
+            return
+        if offered == ["edit"]:
+            names = {
+                "source": canvas_view.name(data, source),
+                "target": canvas_view.name(data, target),
+            }
+            ui.notify(t("canvas.says_edit", **names))
+            self.done(target)
+            return
+        self.redraw()
+        canvas_dialogs.link(self.edit, source, target, offered, self.done)
+
+    def on_disconnect(self, e: events.GenericEventArguments) -> None:
+        edge = canvas_view.edge_of(str(e.args))
+        if edge is None:
+            return
+        source, target, kind = edge
+        action = canvas.uncorrelate if kind == "korrelation" else canvas.disconnect
+        if self.edit.change(lambda d: action(d, source, target)):
+            self.done(target)
+            return
+        ui.notify(self.edit.error or "", type="warning", multi_line=True)
+        self.edit.error = None
+        self.done(target)  # the edge stays; its expression opens
+
+    def on_drop(self, e: events.GenericEventArguments) -> None:
+        kind, x, y = str(e.args["type"]), float(e.args["x"]), float(e.args["y"])
+        canvas_dialogs.new_node(self.edit, kind, x, y, self.done)
 
     def arrange(self) -> None:
         self.edit.change(lambda d: layout.arrange(d, canvas_view.auto(d)))

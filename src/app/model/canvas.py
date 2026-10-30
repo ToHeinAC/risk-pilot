@@ -8,13 +8,17 @@ with ``yaml_patch.patch``.
 
 import ast
 import copy
+import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import combinations
 from typing import Any, cast
 
 from app.errors import InputError, Issue
-from app.model.form import COMMON, param_fields
+from app.model import layout
+from app.model.form import COMMON, add_node, number, param_fields
 from app.model.graph import EdgeKind, expression_names
+from app.model.schema import id_problem
 from app.model.yaml_patch import Data
 
 FUNCTIONS = ("max", "min")
@@ -132,10 +136,11 @@ def presets(data: Data, source: str, target: str) -> list[str]:
     if _depends(data, source, target):
         raise InputError(Issue("canvas.cycle", params={"source": source, "target": target}))
     node, kind = _nodes(data)[target], _nodes(data)[source].get("type")
+    corr = ["corr"] if kind in RANDOM else []
     if node.get("type") == "uncertain":
-        return ["param"]
+        return ["param", *corr]
     if node.get("type") == "event":
-        return ["p"]
+        return ["p", *corr]
     if node.get("type") not in ("derived", "output"):
         raise InputError(Issue("canvas.no_preset", target, params={"type": node.get("type")}))
     current = shape(str(node.get("expr", ""))).preset
@@ -160,6 +165,11 @@ def connect(
 ) -> Data:
     """Make ``target`` depend on ``source`` under ``preset``; ``value`` is the parameter factor or
     the delay. Raises ``InputError`` for a free expression or an unknown parameter."""
+    if preset == "corr":
+        rho = number(value)
+        if rho is None:
+            raise InputError(Issue("canvas.rho", params={"value": value}))
+        return correlate(data, source, target, float(rho))
     out = copy.deepcopy(data)
     node = _nodes(out)[target]
     if preset == "param":
@@ -262,3 +272,31 @@ def uncorrelate(data: Data, a: str, b: str) -> Data:
     if len(group["nodes"]) < 2:
         del out["correlations"][gid]
     return out
+
+
+_UMLAUTS = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})
+
+
+def suggest_id(name: str, taken: Iterable[str]) -> str:
+    """A free, valid node ID from a display name: ``Vorgang Ä`` -> ``vorgang_ae``."""
+    base = re.sub(r"[^a-z0-9]+", "_", name.lower().translate(_UMLAUTS)).strip("_")[:56]
+    base = base or "knoten"
+    if not base[0].isalpha():
+        base = f"k_{base}"
+    used, candidate, i = set(taken), base, 1
+    while candidate in used or id_problem(candidate):
+        i += 1
+        candidate = f"{base}_{i}"
+    return candidate
+
+
+def place(
+    data: Data, node_id: str, node_type: str, name: str, unit: str, x: float, y: float
+) -> Data:
+    """A new node from the palette at the drop point (``form.add_node`` checks the ID)."""
+    out = add_node(data, node_id, node_type)
+    node = _nodes(out)[node_id]
+    for key, value in (("name", name.strip()), ("unit", unit.strip())):
+        if value:
+            node[key] = value
+    return layout.move(out, node_id, x, y)

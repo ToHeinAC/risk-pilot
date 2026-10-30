@@ -50,6 +50,16 @@ body {{ background:{CANVAS}; color:{INK};
   border-color:{ACCENT}; }}
 .rp-canvas .rp-node-type {{ font-size:.68rem; color:{MUTED}; text-transform:uppercase;
   letter-spacing:.05em; font-weight:500; }}
+.rp-flow {{ display:flex; }}  /* size from the element classes (h-[460px]) */
+.rp-flow-pane {{ flex:1; min-width:0; position:relative; }}
+.rp-palette {{ display:flex; flex-direction:column; gap:6px; padding:8px; width:120px;
+  border-right:1px solid {LINE}; }}
+.rp-palette-item {{ border:1px solid {LINE}; border-left:4px solid {MUTED}; border-radius:8px;
+  background:{SURFACE}; padding:4px 8px; font-size:.8rem; cursor:grab; user-select:none; }}
+.rp-palette-item.rp-uncertain {{ border-left-color:{ACCENT}; }}
+.rp-palette-item.rp-event {{ border-left-color:{WARN}; }}
+.rp-palette-item.rp-choice {{ border-left-color:#8e5bd6; }}
+.rp-palette-item.rp-output {{ border-left-color:{GOOD}; }}
 .rp-canvas .rp-edge-parameter path {{ stroke-dasharray:6 4; }}
 .rp-canvas .rp-edge-korrelation path {{ stroke-dasharray:2 4; stroke:#8e5bd6; }}
 """

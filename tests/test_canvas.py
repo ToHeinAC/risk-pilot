@@ -80,8 +80,8 @@ def test_presets_follow_the_target_and_put_the_current_one_first() -> None:
     assert canvas.presets(data, "s", "z") == ["max", "sum", "min", "product"]
     assert canvas.presets(data, "e", "z") == ["max", "sum", "min", "product", "delay"]
     assert canvas.presets(data, "s", "w") == ["edit"]
-    assert canvas.presets(data, "s", "u") == ["param"]
-    assert canvas.presets(data, "s", "v") == ["p"]
+    assert canvas.presets(data, "s", "u") == ["param", "corr"]
+    assert canvas.presets(data, "s", "v") == ["p", "corr"]
     with pytest.raises(InputError) as exc:
         canvas.presets(data, "s", "k")
     assert _code(exc) == "canvas.no_preset"
@@ -209,3 +209,89 @@ def test_links_match_the_model_graph_on_every_tutorial() -> None:
         text = files.read_text(settings.examples_dir() / f"{name}.yaml")
         found = [(e.source, e.target, e.kind) for e in edges(model_from_yaml(text))]
         assert [(k.source, k.target, k.kind) for k in canvas.links(load_data(text))] == found
+
+
+def test_two_random_nodes_can_be_correlated_from_the_link_dialog() -> None:
+    data = _data(a=U, b=U, e={"type": "event", "p": 0.1}, z={"type": "output", "expr": ""})
+    assert canvas.presets(data, "a", "b") == ["param", "corr"]
+    assert canvas.presets(data, "a", "e") == ["p", "corr"]
+    assert "corr" not in canvas.presets(data, "a", "z")
+    out = canvas.connect(data, "a", "b", "corr", value="0,4")
+    assert out["correlations"]["a_b"]["spearman"][0][1] == 0.4
+    with pytest.raises(InputError) as exc:
+        canvas.connect(data, "a", "b", "corr", value="viel")
+    assert _code(exc) == "canvas.rho"
+
+
+@pytest.mark.parametrize(
+    ("name", "taken", "expected"),
+    [
+        ("Vorgang Ä", [], "vorgang_ae"),
+        ("Projektende", ["projektende"], "projektende_2"),
+        ("3 Tage", [], "k_3_tage"),
+        ("max", [], "max_2"),
+        ("", ["knoten"], "knoten_2"),
+    ],
+)
+def test_an_id_is_suggested_from_the_name(name: str, taken: list[str], expected: str) -> None:
+    assert canvas.suggest_id(name, taken) == expected
+
+
+def test_place_adds_a_named_node_at_the_drop_point() -> None:
+    data = canvas.place(_data(), "dauer", "uncertain", "Dauer", "d", 40.4, 80)
+    node = data["nodes"]["dauer"]
+    assert (node["type"], node["name"], node["unit"], node["input"]) == (
+        "uncertain",
+        "Dauer",
+        "d",
+        "quantiles",
+    )
+    assert data["layout"]["dauer"] == [40, 80]
+    bare = canvas.place(_data(), "k", "constant", "", "", 0, 0)["nodes"]["k"]
+    assert "name" not in bare
+    assert "unit" not in bare
+
+
+def test_t2_can_be_rebuilt_on_the_canvas_with_the_same_numbers() -> None:
+    from app.engine.simulate import simulate
+    from app.model.compile import compile_model
+    from app.model.scenarios import effective_model
+    from app.model.schema import BASIS
+    from app.model.yaml_io import model_from_yaml
+    from app.model.yaml_patch import patch
+
+    data: Data = {"schema_version": 1, "model": "t2_terminplan", "settings": T2["settings"]}
+    nodes = [
+        ("a", "uncertain", "Vorgang A"),
+        ("b", "uncertain", "Vorgang B"),
+        ("c", "uncertain", "Vorgang C"),
+        ("nacharbeit", "event", "Nacharbeit an B"),
+        ("pfad1", "derived", "Pfad 1"),
+        ("ende", "output", "Projektende"),
+    ]
+    for i, (node_id, kind, name) in enumerate(nodes):
+        data = canvas.place(data, node_id, kind, name, "", 0, 100 * i)
+    for node_id, fields in {  # numbers come from the node card
+        "a": {"input": "params", "mean": 10, "sd": 2},
+        "b": {"input": "params", "mean": 15, "sd": 3},
+        "c": {"input": "params", "mean": 24, "sd": 4},
+        "nacharbeit": {"p": 0},
+        "pfad1": {"track": True},
+        "ende": {"target": {"le": 30}},
+    }.items():
+        data["nodes"][node_id].update(fields)
+    for source, target, preset, value in [
+        ("a", "pfad1", "sum", ""),
+        ("b", "pfad1", "sum", ""),
+        ("nacharbeit", "pfad1", "delay", "5"),
+        ("pfad1", "ende", "max", ""),
+        ("c", "ende", "max", ""),
+    ]:
+        data = canvas.connect(data, source, target, preset, value=value)
+    assert data["nodes"]["pfad1"]["expr"] == T2["nodes"]["pfad1"]["expr"]
+    assert data["nodes"]["ende"]["expr"] == T2["nodes"]["ende"]["expr"]
+    rebuilt = compile_model(model_from_yaml(patch("schema_version: 1\n", data)))
+    t2 = model_from_yaml(files.read_text(settings.examples_dir() / "t2_terminplan.yaml"))
+    original = compile_model(effective_model(t2, BASIS))
+    mine, theirs = simulate(rebuilt, n=2000), simulate(original, n=2000)
+    assert (mine.samples["ende"] == theirs.samples["ende"]).all()

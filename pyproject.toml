@@ -49,7 +49,7 @@ select = ["E", "W", "F", "I", "B", "UP", "SIM", "C90", "PT", "RUF", "PLR0915"]
 
 # German UI texts use the en dash, the minus sign, the narrow no-break space (thousands) and
 # Greek letters of statistical notation on purpose.
-allowed-confusables = ["–", "−", "\u202f", "α", "σ", "μ", "ρ", "λ"]
+allowed-confusables = ["–", "−", "\u202f", "α", "σ", "μ", "ρ", "λ", "×"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

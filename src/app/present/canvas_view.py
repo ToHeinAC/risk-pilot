@@ -6,6 +6,7 @@ derived (``canvas.links``) and carry their kind in the ID, so an event on an edg
 
 from typing import Any, cast
 
+from app.messages import t
 from app.model import canvas, layout
 from app.model.graph import EdgeKind
 from app.model.yaml_patch import Data
@@ -62,3 +63,27 @@ def edge_of(edge_id: str) -> tuple[str, str, EdgeKind] | None:
     if kind not in KINDS or not source or not target:
         return None
     return source, target, kind
+
+
+def name(data: Data, node_id: str) -> str:
+    nodes = cast(dict[str, dict[str, Any]], data.get("nodes") or {})
+    return str(nodes.get(node_id, {}).get("name") or node_id)
+
+
+def _listed(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} und {names[-1]}"
+
+
+def describe(data: Data, source: str, target: str, preset: str, value: str, field: str = "") -> str:
+    """The link in plain words, read from ``data`` after the change."""
+    s, tg = name(data, source), name(data, target)
+    if preset in canvas.JOINS:
+        nodes = cast(dict[str, dict[str, Any]], data.get("nodes") or {})
+        args = canvas.shape(str(nodes[target].get("expr", ""))).args
+        names = [name(data, a) for a in args]
+        if len(names) == 1:
+            return f"{tg} = {names[0]}"
+        return t("canvas.says_join", target=tg, op=t(f"canvas.op_{preset}"), args=_listed(names))
+    factor = "" if value.strip() in ("", "1", "1.0") else f" × {value.strip()}"
+    params = {"source": s, "target": tg, "value": value.strip(), "field": field, "factor": factor}
+    return t(f"canvas.says_{preset}", **params)
