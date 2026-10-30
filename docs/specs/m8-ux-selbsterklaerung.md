@@ -232,7 +232,8 @@ Blöcke in Ergebnissen, Vergleich und allen Analyse-Reitern, Gründe leerer Ausw
 `web/main.py`, Start auf der Startseite; `tests/test_present_tour.py`, `tests/test_web_tour.py`);
 AP5 mit M7 geliefert; AP6 erledigt (`form.NEW_UNCERTAIN`: neuer unsicherer Knoten mit `normal`
 und `quantiles`, Satz zur Spanne in der Knotenkarte; `tests/test_form.py`,
-`tests/test_web_model.py`).
+`tests/test_web_model.py`); AP7 erledigt (README, `docs/architecture.md`, PRD-Status;
+Links prüft `tests/test_docs.py`). Offen: AP8.
 
 | AP | Inhalt | Tests |
 |---|---|---|

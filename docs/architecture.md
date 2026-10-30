@@ -18,7 +18,7 @@ Core packages (M1, [spec](specs/m1-rechenkern.md)):
 | `dists/` | Distribution families (inversion sampling), registry; M5: `piecewise`, `empirical`, input mode `quantiles` with `fit.py` (least squares, deviation relative to P90 − P10) |
 | `engine/` | One random stream per node, `simulate` (`keep="all"` holds every node's array for the M4 analyses); `copula.py` (M5): correlated uniforms from the members' own streams, achieved ρ |
 | `analysis/` | Summary statistics with intervals (M5: horizon, VaR/ES, multimodality), analytic references for T1–T4; `compare.py` (M3): paired differences, batch means, P(B better); M4 ([spec](specs/m4-struktur.md)): `criticality.py` (decisive path, index, constellations), `tornado.py`, `sweep.py`, `sensitivity.py` (Spearman), `riskmatrix.py` (Wilson, Welch) |
-| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); M6: `preview.py` (node preview from a small run), `export.py` (metrics CSV, HTML report); no UI import |
+| `present/` (M2) | German texts in model language, plotly figures, T1/T2 overlays, editor validation (incl. scenarios), before/after rows, comparison texts, structure figures and tables (M4, graph layout via NetworkX); M6: `preview.py` (node preview from a small run), `export.py` (metrics CSV, HTML report); M8 ([spec](specs/m8-ux-selbsterklaerung.md)): `guide.py` (page directory, next step, guided tour `tour_step`), `reading.py` (reading examples and empty reasons per evaluation), `glossary.py` (terms as data); no UI import |
 | `lessons/` (M2) | Learning path: manifest schema, knob (`with_value`), analytic checks per lesson, reading list |
 
 Dependency direction: `web` -> `present`, `lessons`, `adapters` -> `analysis`, `engine` -> `model`
@@ -30,7 +30,8 @@ go through `editing.ModelEdit` or `scenario_edit.apply`, which patch the YAML te
 re-dumping it.
 
 UI notes: `main.py` builds every page inside one shell (navigation, exit, error boundary per
-page); one `Session` per browser tab. Long runs go through `run.io_bound`, so the page stays
+page, M8: page head and tour banner); one `Session` per browser tab, which also records the
+visited pages and whether the tour runs, so the tour's progress is read from the state. Long runs go through `run.io_bound`, so the page stays
 usable. Click handlers run as tasks: tests wait with `should_see` or `web_util.until`. All visible texts come from `messages.UI` via
 `t()`; `tests/test_messages_ui.py` checks that every key used in the code exists. Numeric
 modules switch off pyright's `reportUnknownMemberType` per file, because the NumPy stubs mark

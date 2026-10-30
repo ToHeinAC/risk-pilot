@@ -60,6 +60,13 @@ works too.
   uncertain node (density, CDF, mean, median, P5/P95, share outside `bounds`). Form edits patch
   the YAML text in place, so comments and layout stay. "Neues leeres Modell" on the start page.
   The results page exports metrics as CSV, raw samples as Parquet and a standalone HTML report.
+- **Self-explaining UI** (M8, [spec](docs/specs/m8-ux-selbsterklaerung.md)): every page starts
+  with its purpose and the next step for the current state; every evaluation (results,
+  comparison, each analysis tab) explains its question, a reading example from the open model,
+  how to read it and its limit, and why it stays empty. Page "Glossar" explains the UI terms
+  (also as tooltips). "Rundgang an T2 starten" on the start page guides through open, simulate,
+  scenario, comparison and analysis with a banner on every page; progress is read from the
+  state. A new uncertain node starts with the range input P10/P50/P90.
 - **Reference:** model format and semantics in [docs/model-semantics.md](docs/model-semantics.md),
   statistics and extension points in [docs/statistical-methods.md](docs/statistical-methods.md).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.

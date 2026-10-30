@@ -278,7 +278,10 @@ mit Parametern aus meiner eigenen, externen Recherche und nachgewiesen korrekter
 - **Dependencies:** M6.
 
 ### M8 — UX und Selbsterklärung
-- **Status:** in progress (spec carried over to NiceGUI, E12–E14 approved 2026-10-29)
+- **Status:** in progress (AP1–AP7 done 2026-10-30: page head, evaluation blocks, glossary,
+  guided tour, range input, docs; verified by tests/test_web_guide.py, test_web_explain.py,
+  test_web_glossary.py, test_web_tour.py, test_form.py. Open: criterion 5, the walkthrough
+  with a domain expert, AP8)
 - **Deliverable:** Eine App, die sich Fachleuten ohne Monte-Carlo-Vorwissen selbst erklärt:
   geführter Einstieg, Hilfetexte je Seite und Auswertung, Begriffsglossar, Beispiele zur Lesart.
   Anlass: Rückmeldung nach M4, die Seite „Analyse“ erschließt sich zunächst nicht (erste
