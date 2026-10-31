@@ -164,3 +164,24 @@ def test_tornado_and_sweep_results_survive_a_page_change() -> None:
         assert len(cells(user, "ana_sweep_table")) == 3
 
     drive(steps)
+
+
+def _ticks(user: User, marker: str) -> list[str]:
+    chart = element(user, marker)
+    assert isinstance(chart, ui.plotly)
+    figure = chart.figure
+    assert isinstance(figure, dict)
+    return list(figure["layout"]["yaxis"]["ticktext"])
+
+
+def test_the_graph_tab_switches_to_the_schedule_of_the_scenario() -> None:
+    async def steps(user: User) -> None:
+        await analyse(user, "t2_terminplan", "nacharbeit")
+        put(user, "graph_view", "gantt")
+        await user.should_see(marker="ana_gantt")
+        ticks = _ticks(user, "ana_gantt")
+        assert ticks[-1] == "Projektende"
+        assert "Pfad 1: where(nacharbeit, 5, 0)" in ticks
+        await user.should_not_see(marker="ana_graph")
+
+    drive(steps)

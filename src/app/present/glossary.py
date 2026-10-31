@@ -225,6 +225,17 @@ TERMS: tuple[Term, ...] = (
         ("Zeichenfläche", "Szenario auf der Fläche"),
     ),
     Term(
+        "zeitplan",
+        "Zeitplan",
+        "Das Modell als Gantt: wann jeder Vorgang beginnen kann und wann er endet.",
+        "Der Zeitplan liest den Ausdruck der Ausgabe als Netzplan: bei a + b beginnt b, wenn a "
+        "endet; bei max(a, b) laufen beide parallel und es geht weiter, wenn beide fertig sind; "
+        "bei min(a, b), sobald einer fertig ist. Balken zeigen den Median, der Strich die "
+        "Spanne P10–P90 des Endes, Pfeile die Voraussetzung für einen Start.",
+        "In T2 beginnt Vorgang B, wenn A fertig ist; das Projektende wartet auf Pfad 1 und C.",
+        ("Gantt", "Netzplan"),
+    ),
+    Term(
         "vorauswahl",
         "Vorauswahl",
         "Eine fertige Art der Verknüpfung, etwa Summe, Maximum oder Verzögerung bei Eintritt.",
@@ -258,6 +269,7 @@ LABELS = {
     "analysis.col_rho": "spearman",
     "canvas.preset": "vorauswahl",
     "canvas.scenario": "flaeche",
+    "gantt.view_gantt": "zeitplan",
 }
 PATTERNS = (
     (re.compile(r"^P\d+ \(\d+-%-Quantil\)$"), "quantil"),

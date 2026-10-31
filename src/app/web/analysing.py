@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 
 from app.analysis.criticality import Criticality, criticality
 from app.analysis.riskmatrix import RiskRow, risk_matrix
+from app.analysis.schedule import Bar, bars, schedule
 from app.analysis.sensitivity import RankCorrelation, spearman
 from app.analysis.sweep import Sweep
 from app.analysis.tornado import Tornado
@@ -29,6 +30,7 @@ class Base:
     crit: Criticality
     rho: list[RankCorrelation]
     risks: list[RiskRow]
+    plan: list[Bar]  # the schedule up to the output (Gantt)
 
 
 @dataclass
@@ -58,12 +60,14 @@ def compute(key: Key, compiled: CompiledModel, output: str) -> Base:
     samples: Mapping[str, NDArray[Any]] = simulate(
         compiled, n=key[3], seed=key[4], keep="all"
     ).samples
+    labels = names(compiled)
     return Base(
         key,
         compiled,
         output,
-        names(compiled),
+        labels,
         criticality(compiled, samples, output),
         spearman(compiled, samples, output),
         risk_matrix(compiled, samples, output),
+        bars(schedule(compiled, samples, output), labels),
     )

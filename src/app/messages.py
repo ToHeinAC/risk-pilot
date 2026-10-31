@@ -430,6 +430,21 @@ UI: dict[str, dict[str, str]] = {
         "Kante anklicken ändert ihre Art, Entf löscht sie. Linie: Ausdruck, gestrichelt: "
         "Parameter, gepunktet: Korrelation. Blass: fließt in keine Ausgabe ein.",
         "canvas.unused": "Fließt in keine Ausgabe ein: ändert hier kein Ergebnis.",
+        "gantt.activity": "Vorgang",
+        "gantt.block": "Zuschlag (Teilausdruck)",
+        "gantt.milestone": "Meilenstein",
+        "gantt.hover_bar": "Start {start} {unit}, Ende {finish} {unit} (Median)<br>"
+        "Ende P10–P90: {lo} bis {hi} {unit}",
+        "gantt.hover_point": "erreicht bei {finish} {unit} (Median)<br>"
+        "P10–P90: {lo} bis {hi} {unit}",
+        "gantt.caption": "Zeitplan aus den Ausdrücken: bei a + b beginnt b, wenn a endet; bei "
+        "max(a, b) laufen beide parallel und es geht erst weiter, wenn beide fertig sind, bei "
+        "min(a, b) sobald einer fertig ist. Pfeile: Voraussetzung → Start. Balken: Median, "
+        "Strich: Spanne P10–P90 des Endes. Andere Ausdrücke sind ein Balken so lang wie ihr Wert.",
+        "gantt.view_graph": "Graph",
+        "gantt.view_gantt": "Zeitplan",
+        "gantt.unavailable": "Der Zeitplan braucht ein gültiges Modell und einen Probelauf: "
+        "{reason}",
         "canvas.arrange": "Neu anordnen",
         "canvas.fit": "Ansicht einpassen",
         "web.pick_node": "Einen Knoten auf der Fläche oder in der Tabelle anklicken.",

@@ -12,7 +12,7 @@ from app.model.compile import CompiledModel
 from app.present import canvas_view, reading, structure
 from app.present.text import integer
 from app.present.validation import CheckResult, check_text, scenario_labels
-from app.web import analysing, explain, results_view, theme
+from app.web import analysing, explain, gantt_view, results_view, theme
 from app.web.analysing import MEMORY_HINT_MB, AnalysisState, Base, Key
 from app.web.analysis_tools import SweepTab, TornadoTab
 from app.web.canvas import FlowCanvas
@@ -34,8 +34,11 @@ def _graph_tab(base: Base, _state: AnalysisState) -> None:
         "why": structure.missing_why(model),
     }
     data = model.model_dump(mode="json", exclude_unset=True)
-    select = ui.select(choices, value="sensitivity", label=t("analysis.color"))
-    select.props("outlined dense").classes("min-w-64").mark("graph_color")
+    with ui.row().classes("w-full items-center gap-3"):
+        select = ui.select(choices, value="sensitivity", label=t("analysis.color"))
+        select.props("outlined dense").classes("min-w-64").mark("graph_color")
+        ui.space()
+        view = gantt_view.switch("graph_view")
     graph = FlowCanvas(
         *canvas_view.analysis_view(data, colourings["sensitivity"], base.output), True
     )
@@ -45,7 +48,12 @@ def _graph_tab(base: Base, _state: AnalysisState) -> None:
             *canvas_view.analysis_view(data, colourings[str(e.value)], base.output)
         )
     )
-    ui.label(t("analysis.graph_caption")).classes("rp-muted text-sm")
+    caption = ui.label(t("analysis.graph_caption")).classes("rp-muted text-sm")
+    for part in (select, graph, caption):
+        part.bind_visibility_from(view, "value", value="graph")
+    with ui.column().classes("w-full gap-2") as schedule:
+        gantt_view.chart(base.plan, model.nodes[base.output].unit, "ana_gantt")
+    schedule.bind_visibility_from(view, "value", value="gantt")
 
 
 def _criticality_tab(base: Base, _state: AnalysisState) -> None:

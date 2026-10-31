@@ -78,7 +78,14 @@ works too.
   its kind (e.g. maximum to sum) or ρ, or removes it. A palette places new nodes.
   In a sub-scenario the structure is locked: changed nodes carry the number of their overrides,
   a click opens the override dialog with the parent's value, and "Unterszenario ableiten" adds a
-  scenario below the selected one.
+  scenario below the selected one. The canvas draws the selected scenario's own expressions,
+  names it in a banner and fades nodes that feed no output. The node card leads with the
+  description and keeps a long Markdown `comment`.
+- **Schedule (Gantt):** the switch "Graph | Zeitplan" on the model canvas (selected scenario,
+  trial run) and in the analysis graph tab (analysis run) reads the output's expression as a
+  network plan: in `a + b` b starts when a ends, `max` waits for all, `min` for the first;
+  any other term is a bar as long as its value. Bars at the median, P10–P90 of each finish
+  as a whisker, arrows from each precondition to the start it allows.
 - **Reference:** model format and semantics in [docs/model-semantics.md](docs/model-semantics.md),
   statistics and extension points in [docs/statistical-methods.md](docs/statistical-methods.md).
 - **Runs** are saved on request to `data/runs/` and reload with the same numbers.

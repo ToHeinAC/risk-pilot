@@ -18,7 +18,7 @@ from app.model import scenarios as sc
 from app.model.schema import BASIS
 from app.model.yaml_patch import Data
 from app.present import canvas_view
-from app.web import canvas_dialogs, canvas_scenario
+from app.web import canvas_dialogs, canvas_scenario, gantt_view
 from app.web.canvas import FlowCanvas
 from app.web.editing import ModelEdit
 
@@ -35,6 +35,7 @@ class CanvasPanel:
         self.select = select
         self.canvas: FlowCanvas | None = None
         self.scenario = BASIS
+        self.view = "graph"  # or "gantt": the schedule read from the expressions
 
     # --- scenario mode -------------------------------------------------------------------
 
@@ -126,6 +127,9 @@ class CanvasPanel:
         with ui.row().classes("w-full items-center gap-1 px-1"):
             ui.label(t("canvas.caption")).classes("rp-muted text-xs")
             ui.space()
+            view = gantt_view.switch("canvas_view")
+            view.value = self.view
+            view.on_value_change(lambda e: self.pick_view(str(e.value)))
             if not readonly:
                 ui.button(t("canvas.arrange"), icon="account_tree", on_click=self.arrange).props(
                     "flat dense no-caps"
@@ -146,6 +150,19 @@ class CanvasPanel:
         self.canvas = canvas
         self.frame()
         canvas.update()
+        self.gantt()
+
+    def pick_view(self, view: str) -> None:
+        self.view = view
+        if self.canvas is not None:
+            self.canvas.set_visibility(view == "graph")
+        self.gantt.refresh()
+
+    @ui.refreshable_method
+    def gantt(self) -> None:
+        """The schedule of the scenario shown, in place of the canvas."""
+        if self.view == "gantt":
+            gantt_view.draft_chart(self.edit, self.scenario, "canvas_gantt")
 
     def frame(self) -> None:
         """Structure edits and the scenario frame follow the scenario shown."""
@@ -163,6 +180,8 @@ class CanvasPanel:
             return
         self.frame()
         self.canvas.draw(*canvas_view.view(self.shown(data), self.edit.selected, self.marks()))
+        if self.view == "gantt":
+            self.gantt.refresh()
 
     def refresh(self) -> None:
         self.scenario_bar.refresh()

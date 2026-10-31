@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+from nicegui import ui
 from nicegui.testing import User
 from web_util import drive, element, open_model, put, texts, until, value
 
@@ -308,5 +309,32 @@ def test_a_scenario_is_drawn_with_its_own_links_named_and_shown_in_the_card() ->
         put(user, "canvas_scenario", "basis")
         await until(lambda: "ausdruck:pfad1->ende" in _edges(user))
         assert "rp-scenario" not in _canvas(user).classes
+
+    drive(steps)
+
+
+def _ticks(user: User) -> list[str]:
+    chart = element(user, "canvas_gantt")
+    assert isinstance(chart, ui.plotly)
+    figure = chart.figure
+    assert isinstance(figure, dict)
+    return list(figure["layout"]["yaxis"]["ticktext"])
+
+
+def test_the_canvas_switches_to_a_schedule_that_follows_the_scenario() -> None:
+    text = T2.read_text("utf-8").replace("# Positionen", NUR_C + "# Positionen")
+    files.create_model_text(settings.models_dir(), "plan", text)
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        put(user, "canvas_view", "gantt")
+        await user.should_see(marker="canvas_gantt")
+        await user.should_not_see(marker="canvas")
+        assert "Vorgang A" in _ticks(user)
+        put(user, "canvas_scenario", "nur_c")
+        await until(lambda: "Vorgang A" not in _ticks(user))
+        assert _ticks(user) == ["Vorgang C", "Projektende"]
+        put(user, "canvas_view", "graph")
+        await user.should_see(marker="canvas")
 
     drive(steps)
