@@ -378,3 +378,25 @@ def test_positions_of_unknown_nodes_are_a_hint_that_offers_removal() -> None:
         assert "y: [0, 0]" in editor(user)
 
     drive(steps)
+
+
+def test_the_card_leads_with_the_description_and_keeps_a_long_comment() -> None:
+    own_t2()
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        pick(user, "pfad1")
+        await user.should_see(marker="form.pfad1.description")
+        assert "Rechnung: a + b + where(nacharbeit, 5, 0)" in texts(user)
+        put(user, "form.pfad1.description", "Rohbau bis Decke EG")
+        await until(lambda: "description: Rohbau bis Decke EG" in editor(user))
+        assert value(user, "form.pfad1.comment_mode") == "edit"  # nothing to read yet
+        put(user, "form.pfad1.comment", "Warum so?\n\nQuelle: Workshop.")
+        await until(lambda: "comment:" in editor(user))
+        put(user, "form.pfad1.comment_mode", "view")
+        await until(lambda: "Quelle: Workshop." in texts(user))
+        pick(user, "a")
+        pick(user, "pfad1")
+        await until(lambda: value(user, "form.pfad1.comment_mode") == "view")
+
+    drive(steps)

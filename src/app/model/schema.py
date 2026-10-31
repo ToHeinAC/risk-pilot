@@ -69,6 +69,7 @@ class _NodeBase(_Strict):
     name: str | None = None
     unit: str | None = None
     description: str | None = None
+    comment: str | None = None  # long free text: thoughts, sources, intent; display only
     why: str | Why | None = None
     tags: list[str] = []
     bounds: Bounds | None = None

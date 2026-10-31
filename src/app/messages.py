@@ -269,7 +269,21 @@ UI: dict[str, dict[str, str]] = {
         "form.col_value": "Wert",
         "form.f_name": "Name",
         "form.f_unit": "Einheit",
-        "form.f_why": "Begründung (Quelle, Annahme)",
+        "form.f_why": "Begründung kurz (Quelle, Annahme)",
+        "form.f_comment": "Kommentar",
+        "form.about": "Beschreibung: was dieser Knoten darstellt und tut",
+        "form.does": "Rechnung: {what}",
+        "form.comment_hint": "Ausführliche Gedanken zu diesem Knoten: warum es ihn gibt, woher die "
+        "Parameter stammen, was er genau modellieren soll, offene Fragen. Markdown möglich "
+        "(**fett**, Listen mit -, Links).",
+        "form.comment_edit": "Schreiben",
+        "form.comment_view": "Lesen",
+        "form.comment_empty": "Noch kein Kommentar.",
+        "form.in_scenario": "Im Szenario »{scenario}«",
+        "form.scenario_same": "Hier nicht überschrieben: gilt wie im Elternszenario.",
+        "form.scenario_basis": "Die Felder unten zeigen das Hauptszenario; Änderungen dort gelten "
+        "für alle Szenarien, die sie nicht überschreiben.",
+        "form.scenario_override": "Im Szenario überschreiben",
         "form.f_tags": "Schlagworte (mit Komma getrennt)",
         "form.f_bounds_min": "Untergrenze (zulässig ab)",
         "form.f_bounds_max": "Obergrenze (zulässig bis)",
@@ -385,6 +399,9 @@ UI: dict[str, dict[str, str]] = {
         "canvas.scenario": "Szenario auf der Fläche",
         "canvas.scenario_mode": "Szenario-Modus: Struktur gesperrt; Klick auf einen Knoten "
         "überschreibt ihn in diesem Szenario.",
+        "canvas.showing": "Die Fläche zeigt Szenario »{name}«",
+        "canvas.showing_changed": "{n} Knoten überschrieben (gestrichelt, mit Zahl); Kanten und "
+        "blasse Knoten folgen den Ausdrücken dieses Szenarios.",
         "canvas.new_scenario": "Unterszenario ableiten",
         "canvas.new_scenario_title": "Neues Unterszenario von {parent}",
         "canvas.locked": "Im Szenario ist die Struktur gesperrt; Knoten und Verknüpfungen "
@@ -411,11 +428,12 @@ UI: dict[str, dict[str, str]] = {
         "canvas.caption": "Knoten anklicken öffnet ihn rechts; verschieben speichert die Position "
         "im YAML; vom rechten Punkt eines Knotens zum linken eines anderen ziehen verknüpft; "
         "Kante anklicken ändert ihre Art, Entf löscht sie. Linie: Ausdruck, gestrichelt: "
-        "Parameter, gepunktet: Korrelation.",
+        "Parameter, gepunktet: Korrelation. Blass: fließt in keine Ausgabe ein.",
+        "canvas.unused": "Fließt in keine Ausgabe ein: ändert hier kein Ergebnis.",
         "canvas.arrange": "Neu anordnen",
         "canvas.fit": "Ansicht einpassen",
         "web.pick_node": "Einen Knoten auf der Fläche oder in der Tabelle anklicken.",
-        "web.more_fields": "Beschreibung, Begründung, Grenzen",
+        "web.more_fields": "Begründung kurz, Schlagworte, Grenzen",
         "web.trial": "Probelauf in {ms} ms",
         "web.reading": "So liest man das",
         "web.all_metrics": "Alle Kennzahlen",

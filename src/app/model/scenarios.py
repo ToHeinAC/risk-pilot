@@ -12,8 +12,8 @@ from app.model.schema import BASIS, Model, Scenario, id_problem
 from app.model.yaml_io import issues_from_validation
 
 META = ("why", "inactive")
-_LABEL_FIELDS = frozenset({"name", "unit", "description", "tags", "track"})
-_COMMON = ("type", "name", "unit", "description", "why", "tags", "bounds", "track")
+_LABEL_FIELDS = frozenset({"name", "unit", "description", "comment", "tags", "track"})
+_COMMON = ("type", "name", "unit", "description", "comment", "why", "tags", "bounds", "track")
 _FIELDS = {  # overridable fields per type, in the order the override dialog offers them
     "constant": ("value", "bounds"),
     "event": ("p", "bounds"),
@@ -91,6 +91,13 @@ def effective_model(model: Model, scenario_id: str) -> Model:
         return Model.model_validate({**top, "nodes": data})
     except ValidationError as exc:
         raise ModelError(issues_from_validation(exc)) from exc
+
+
+def effective_data(model: Model, scenario_id: str) -> Data:
+    """Nodes and correlations of a scenario as raw data, as the canvas draws them."""
+    effective = effective_model(model, scenario_id)
+    dumped = effective.model_dump(mode="json", exclude_unset=True, include={"correlations"})
+    return {"nodes": _nodes_data(effective.nodes), "correlations": dumped.get("correlations", {})}
 
 
 def _root_nodes(model: Model, sid: str) -> Mapping[str, Any]:

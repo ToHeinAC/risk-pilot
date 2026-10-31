@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from nicegui.testing import User
-from web_util import drive, element, open_model, put, until, value
+from web_util import drive, element, open_model, put, texts, until, value
 
 from app.adapters import files, settings
 from app.web.canvas import FlowCanvas
@@ -274,5 +274,39 @@ def test_a_parameter_edge_opens_the_card_of_its_target() -> None:
         user.find(marker="canvas").trigger("edge", "parameter:a->b")
         await user.should_see("ein Parameter hängt von a ab")
         await user.should_see(marker="form.b.param.mean")
+
+    drive(steps)
+
+
+NUR_C = (
+    '  nur_c:\n    name: "Nur Pfad 2"\n    why: "Pfad 1 entfällt im Test."\n'
+    '    overrides:\n      ende: {expr: "c", why: "nur C"}\n'
+)
+
+
+def _edges(user: User) -> set[str]:
+    return {e["id"] for e in _canvas(user).props["edges"]}
+
+
+def test_a_scenario_is_drawn_with_its_own_links_named_and_shown_in_the_card() -> None:
+    text = T2.read_text("utf-8").replace("# Positionen", NUR_C + "# Positionen")
+    files.create_model_text(settings.models_dir(), "plan", text)
+
+    async def steps(user: User) -> None:
+        await open_model(user, "plan")
+        assert "ausdruck:pfad1->ende" in _edges(user)
+        assert "rp-scenario" not in _canvas(user).classes
+        put(user, "canvas_scenario", "nur_c")
+        await until(lambda: "ausdruck:c->ende" in _edges(user))
+        assert "ausdruck:pfad1->ende" not in _edges(user)
+        assert "rp-faded" in _node(user, "pfad1")["class"]
+        assert "rp-scenario" in _canvas(user).classes
+        await user.should_see("Pfad 1 entfällt im Test.")
+        user.find(marker="nodes").trigger("pick", "ende")  # the table opens the card only
+        await user.should_see(marker="card_scenario")
+        assert "max(pfad1, c) → c" in texts(user)
+        put(user, "canvas_scenario", "basis")
+        await until(lambda: "ausdruck:pfad1->ende" in _edges(user))
+        assert "rp-scenario" not in _canvas(user).classes
 
     drive(steps)

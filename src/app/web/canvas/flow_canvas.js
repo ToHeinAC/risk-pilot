@@ -24,10 +24,12 @@ export default {
                  @edges-change="onEdgesChange">
           <template #node-default="p">
             <Handle type="target" :position="p.targetPosition" />
-            <div class="rp-node-type">{{ p.data.type }}
-              <span v-if="p.data.badge" class="rp-node-badge"
-                    :style="p.data.tint ? { background: p.data.tint } : null">{{ p.data.badge }}</span></div>
-            <div class="rp-node-label">{{ p.data.label }}</div>
+            <div :title="p.data.hint || null">
+              <div class="rp-node-type">{{ p.data.type }}
+                <span v-if="p.data.badge" class="rp-node-badge"
+                      :style="p.data.tint ? { background: p.data.tint } : null">{{ p.data.badge }}</span></div>
+              <div class="rp-node-label">{{ p.data.label }}</div>
+            </div>
             <Handle type="source" :position="p.sourcePosition" />
           </template>
         </VueFlow>

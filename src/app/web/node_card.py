@@ -1,4 +1,5 @@
-"""The card of one node (M6 form fields, M7 look): fields by type, delete, preview."""
+"""The card of one node (M6 form fields, M7 look): description first, what the node computes
+(in the scenario on the canvas), fields by type, a long comment, delete, preview."""
 
 # plotly ships without type stubs; its members are untyped for pyright.
 # pyright: reportUnknownMemberType=false, reportUnknownArgumentType=false
@@ -9,21 +10,25 @@ from nicegui import ui
 
 from app.dists.families import QUANTILES
 from app.dists.registry import families, get_family
-from app.messages import t
+from app.messages import UI, t
 from app.model import form
+from app.model import scenarios as sc
+from app.model.schema import BASIS
 from app.model.yaml_patch import Data
 from app.present import preview as previews
 from app.present import structure
-from app.web import theme
+from app.present.brief import brief
+from app.web import canvas_scenario, theme
 from app.web.editing import ModelEdit
 
 SELECTS: dict[str, tuple[str, ...]] = {
     "target_op": ("", *form.TARGET_OPS),
     "better": ("", "lower", "higher"),
 }
-AREAS = ("description", "why", "expr", "options")
+AREAS = ("why", "expr", "options")
 FIRST = ("name", "unit")
-LAST = ("description", "why", "tags", "bounds_min", "bounds_max", "track")
+LAST = ("why", "tags", "bounds_min", "bounds_max", "track")
+OWN = ("description", "comment")  # each in its own place on the card
 DEBOUNCE = "debounce=400"
 
 
@@ -55,15 +60,19 @@ def mode_choices(dist: str) -> list[str]:
 
 
 def _label(field: str) -> str:
-    return field.removeprefix("param.") if field.startswith("param.") else t(f"form.f_{field}")
+    key = f"form.f_{field.removeprefix('param.')}"
+    return t(key) if key in UI["de"] else field.removeprefix("param.")
 
 
 class NodeCard:
-    def __init__(self, edit: ModelEdit, node_id: str, changed: Callable[[bool], None]) -> None:
+    def __init__(
+        self, edit: ModelEdit, node_id: str, changed: Callable[[bool], None], scenario: str = BASIS
+    ) -> None:
         self.edit = edit
         self.node_id = node_id
         self.changed = changed
         self.readonly = edit.model.readonly
+        self.scenario = scenario  # the one on the canvas
 
     def put(self, field: str) -> Callable[[Any], None]:
         def set_value(value: Any) -> None:
@@ -131,6 +140,83 @@ class NodeCard:
                 not self.readonly
             )
 
+    def about(self, description: str) -> None:
+        """What the node is (its description) and what it computes in the canvas scenario."""
+        put = self.put("description")
+        area = ui.textarea(
+            t("form.about"), value=description, on_change=lambda e: put(str(e.value or ""))
+        )
+        area.props(f"{DEBOUNCE} dense filled autogrow").classes("w-full")
+        area.mark(f"form.{self.node_id}.description").set_enabled(not self.readonly)
+        model = self.edit.checked().model
+        if model is None:
+            return
+        sid = self.scenario if self.scenario in model.scenarios else BASIS
+        nodes = model.nodes if sid == BASIS else sc.effective_model(model, sid).nodes
+        if self.node_id in nodes and (what := brief(nodes[self.node_id])):
+            does = ui.label(t("form.does", what=what)).classes("rp-muted text-sm font-mono")
+            does.mark("card_does")
+
+    def scenario_note(self) -> None:
+        """In a sub-scenario: what it overrides here, and that the fields show the main one."""
+        model = self.edit.checked().model
+        if self.scenario == BASIS or model is None or self.scenario not in model.scenarios:
+            return
+        rows = [r for r in sc.diff(model, self.scenario) if r.node == self.node_id]
+        name = model.scenarios[self.scenario].name
+        with ui.column().classes("rp-scenario-note w-full gap-1").mark("card_scenario"):
+            ui.label(t("form.in_scenario", scenario=name)).classes("font-semibold")
+            for r in rows:
+                why = f" – {r.why}" if r.why else ""
+                before, after = canvas_scenario.shown(r.before), canvas_scenario.shown(r.after)
+                ui.label(f"{_label(r.field)}: {before} → {after}{why}").classes("text-sm")
+            if not rows:
+                ui.label(t("form.scenario_same")).classes("text-sm")
+            ui.label(t("form.scenario_basis")).classes("rp-muted text-xs")
+            if not self.readonly and model.scenarios[self.scenario].nodes is None:
+                ui.button(
+                    t("form.scenario_override"), icon="edit_note", on_click=self.override
+                ).props("flat dense no-caps").mark("card_override")
+
+    def override(self) -> None:
+        canvas_scenario.override(self.edit, self.scenario, self.node_id, self.overridden)
+
+    def overridden(self, node_id: str) -> None:
+        self.edit.selected = node_id
+        self.changed(True)
+
+    def comment(self, text: str) -> None:
+        """The long comment: written as Markdown, read rendered; reading first once it exists."""
+        node_id = self.node_id
+        with ui.row().classes("w-full items-center"):
+            ui.label(t("form.f_comment")).classes("rp-kicker")
+            ui.space()
+            modes = {"edit": t("form.comment_edit"), "view": t("form.comment_view")}
+            first = "view" if text.strip() or self.readonly else "edit"
+            mode = ui.toggle(modes, value=first).props("dense no-caps unelevated size=sm")
+            mode.mark(f"form.{node_id}.comment_mode")
+        put = self.put("comment")
+        area = ui.textarea(
+            placeholder=t("form.comment_hint"),
+            value=text,
+            on_change=lambda e: put(str(e.value or "")),
+        )
+        area.props(f"{DEBOUNCE} outlined autogrow input-style='min-height:7rem'")
+        area.classes("w-full").mark(f"form.{node_id}.comment").set_enabled(not self.readonly)
+        view = ui.markdown(text).classes("rp-comment w-full").mark(f"form.{node_id}.comment_view")
+
+        def show() -> None:
+            reading = mode.value == "view"
+            if reading:
+                data = self.edit.data()
+                current = form.values(data, node_id)["comment"] if data else text
+                view.content = current or t("form.comment_empty")
+            area.set_visibility(not reading)
+            view.set_visibility(reading)
+
+        mode.on_value_change(show)
+        show()
+
     def delete(self) -> None:
         node_id = self.node_id
         sure = ui.checkbox(t("form.delete_confirm")).mark(f"form.{node_id}.delete_confirm")
@@ -146,16 +232,20 @@ class NodeCard:
 
     def build(self, data: Data, preview: Callable[[], None]) -> None:
         values = form.values(data, self.node_id)
-        main = [f for f in values if f not in ("type", *FIRST, *LAST)]
+        main = [f for f in values if f not in ("type", *FIRST, *LAST, *OWN)]
         ui.label(values["name"] or self.node_id).classes("text-xl font-semibold")
         with ui.row().classes("items-center gap-2"):
             ui.badge(structure.type_label(str(values["type"])), color="grey-7").props("outline")
             ui.label(self.node_id).classes("rp-muted text-xs font-mono")
+        self.about(str(values["description"]))
+        self.scenario_note()
         with ui.row().classes("w-full gap-2"):
             for field in (*FIRST, *main):
                 self.field(field, values[field], values)
         if values["type"] == "uncertain" and values.get("input") == QUANTILES:
             ui.label(t("form.range_hint")).classes("rp-muted text-sm").mark("range_hint")
+        ui.separator()
+        self.comment(str(values["comment"]))
         with ui.expansion(t("web.more_fields")).classes("w-full").props("dense"):
             for field in LAST:
                 self.field(field, values[field], values)

@@ -20,7 +20,7 @@ from app.model.yaml_patch import Data
 
 Values = dict[str, Any]
 
-TEXT = ("name", "unit", "description", "expr", "better", "dist", "input")
+TEXT = ("name", "unit", "description", "comment", "expr", "better", "dist", "input")
 NUMBERS = ("value", "p", "horizon", "loss_reference")  # number or expression text
 TYPE_FIELDS = {
     "constant": ("value",),
@@ -30,7 +30,19 @@ TYPE_FIELDS = {
     "uncertain": ("dist", "input"),
     "choice": ("options",),
 }
-COMMON = ("type", "dist", "input", "name", "unit", "description", "why", "tags", "bounds", "track")
+COMMON = (
+    "type",
+    "dist",
+    "input",
+    "name",
+    "unit",
+    "description",
+    "comment",
+    "why",
+    "tags",
+    "bounds",
+    "track",
+)
 TARGET_OPS = ("le", "lt", "ge", "gt")
 _NUMBER = re.compile(r"^[+-]?(\d+([.,]\d*)?|[.,]\d+)([eE][+-]?\d+)?$")
 _LIST_SPLIT = re.compile(r"[;\s]+")
@@ -100,6 +112,7 @@ def _common_values(node: dict[str, Any]) -> Values:
         "name": _fmt(node.get("name")),
         "unit": _fmt(node.get("unit")),
         "description": _fmt(node.get("description")),
+        "comment": _fmt(node.get("comment")),
         "why": _why_text(node),
         "tags": ", ".join(str(t) for t in node.get("tags", [])),
         "bounds_min": _fmt(bounds.get("min")),

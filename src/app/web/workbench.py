@@ -155,7 +155,8 @@ class Workbench:
         if data is None or node_id is None or node_id not in form.node_ids(data):
             ui.label(t("web.pick_node")).classes("rp-muted")
             return
-        node_card.NodeCard(self.edit, node_id, self.changed).build(data, self.preview)
+        card = node_card.NodeCard(self.edit, node_id, self.changed, self.panel.scenario)
+        card.build(data, self.preview)
 
     @ui.refreshable_method
     def preview(self) -> None:

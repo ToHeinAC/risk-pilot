@@ -1,7 +1,13 @@
 """M9 AP4: what the canvas draws, built from the raw draft (pure)."""
 
+from typing import Any
+
+import yaml
+
 from app.adapters import files, settings
-from app.model import layout
+from app.messages import t
+from app.model import layout, scenarios
+from app.model.yaml_io import model_from_yaml
 from app.model.yaml_patch import load_data
 from app.present import canvas_view
 
@@ -86,3 +92,32 @@ def test_the_analysis_graph_shows_each_value_and_fades_nodes_off_the_path() -> N
     assert "rp-faded" in by_id["extra"]["class"]
     assert "rp-faded" not in by_id["a"]["class"]
     assert edges
+
+
+def _with_scenario(overrides: dict[str, Any]) -> dict[str, Any]:
+    scenario = {"name": "Nur Pfad 2", "why": "Test", "overrides": overrides}
+    return {**T2, "scenarios": {**T2["scenarios"], "nur_c": scenario}}
+
+
+def test_a_scenario_is_drawn_with_its_own_expressions_and_unused_nodes_fade() -> None:
+    data = _with_scenario({"ende": {"expr": "c"}})
+    model = model_from_yaml(yaml.safe_dump(data, allow_unicode=True))
+    nodes, edges = canvas_view.view({**data, **scenarios.effective_data(model, "nur_c")}, None)
+    ids = {e["id"] for e in edges}
+    assert "ausdruck:c->ende" in ids
+    assert "ausdruck:pfad1->ende" not in ids
+    by_id = {n["id"]: n for n in nodes}
+    assert "rp-faded" in by_id["pfad1"]["class"]
+    assert "rp-faded" in by_id["a"]["class"]
+    assert "rp-faded" not in by_id["c"]["class"]
+    base, _ = canvas_view.view(T2, None)
+    assert not any("rp-faded" in n["class"] for n in base)
+
+
+def test_a_node_hint_says_what_it_is_or_that_it_counts_nowhere() -> None:
+    a = {**T2["nodes"]["a"], "description": "Rohbau bis Decke EG"}
+    data = {**T2, "nodes": {**T2["nodes"], "a": a, "extra": {"type": "constant", "value": 1}}}
+    by_id = {n["id"]: n for n in canvas_view.view(data, None)[0]}
+    assert by_id["a"]["data"]["hint"] == "Rohbau bis Decke EG"
+    assert by_id["extra"]["data"]["hint"] == t("canvas.unused")
+    assert "hint" not in by_id["b"]["data"]

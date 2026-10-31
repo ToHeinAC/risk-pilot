@@ -7,7 +7,7 @@ from app.errors import InputError, Issue
 from app.model.schema import Model, UncertainNode
 
 MAX_VALUES = 100_000  # CSV import into a value list
-_KEEP = ("type", "name", "unit", "description", "why", "tags", "bounds", "track")
+_KEEP = ("type", "name", "unit", "description", "comment", "why", "tags", "bounds", "track")
 
 
 def replace_distribution(model: Model, node_id: str, dist: str, params: Mapping[str, Any]) -> Model:

@@ -28,7 +28,7 @@ def _write(edit: ModelEdit, change: Callable[[Model], Model]) -> str | None:
     return refused
 
 
-def _shown(value: Any) -> str:
+def shown(value: Any) -> str:
     if value is None:
         return "–"
     return (
@@ -76,8 +76,8 @@ class Override:
     def show(self) -> None:
         name = str(self.field.value)
         before = sc.parent_value(self.model, self.sid, self.node, name)
-        self.parent.text = t("canvas.parent_value", value=_shown(before))
-        self.value.value = _shown(self.own[name]) if name in self.own else ""
+        self.parent.text = t("canvas.parent_value", value=shown(before))
+        self.value.value = shown(self.own[name]) if name in self.own else ""
         self.remove.set_visibility(name in self.own)
 
     def finish(self, refused: str | None) -> None:

@@ -1,12 +1,13 @@
 """The canvas part of the model page (M9): toolbar, scenario mode and the canvas events.
 
 In the main scenario the canvas edits the structure (link dialog, edge delete, palette). In a
-sub-scenario the structure is locked; changed nodes are marked and a click opens the override
-dialog (E3). A detached scenario shows its own nodes, read only.
+sub-scenario the structure is locked; the canvas draws the scenario's own expressions (its
+edges, faded nodes), changed nodes are marked and a click opens the override dialog (E3). A
+detached scenario shows its own nodes, read only. A banner and a framed canvas say which
+scenario is shown.
 """
 
 from collections.abc import Callable
-from typing import Any, cast
 
 from nicegui import events, ui
 
@@ -63,17 +64,21 @@ class CanvasPanel:
         return sc.changed_nodes(model, self.scenario)
 
     def shown(self, data: Data) -> Data:
-        """The draft as drawn: a detached scenario shows its own nodes."""
-        if not self.detached():
+        """The draft as drawn: in a sub-scenario its effective nodes, so edges follow its
+        expressions; a detached one shows its own nodes."""
+        model = self.edit.checked().model
+        if model is None or self.scenario not in model.scenarios:
             return data
-        own = cast(dict[str, Any], data["scenarios"][self.scenario])
-        return {**data, "nodes": own["nodes"], "correlations": {}}
+        return {**data, **sc.effective_data(model, self.scenario)}
 
     def pick_scenario(self, sid: str) -> None:
         self.scenario = sid if sid in self.scenarios() else BASIS
         if self.detached():
             ui.notify(t("canvas.detached"))
+        self.scenario_bar.refresh()
         self.redraw()
+        if self.edit.selected is not None:
+            self.select(self.edit.selected)  # the card shows the scenario's values
 
     @ui.refreshable_method
     def scenario_bar(self) -> None:
@@ -88,8 +93,23 @@ class CanvasPanel:
                 ui.button(t("canvas.new_scenario"), icon="add", on_click=self.new_scenario).props(
                     "flat dense no-caps"
                 ).mark("canvas_new_scenario")
-            if self.scenario != BASIS:
-                ui.label(t("canvas.scenario_mode")).classes("rp-muted text-xs")
+        self.banner()
+
+    def banner(self) -> None:
+        """Which scenario the canvas shows, why it exists and how to read the drawing."""
+        model = self.edit.checked().model
+        if model is None or self.scenario not in model.scenarios:
+            return
+        scenario = model.scenarios[self.scenario]
+        box = ui.row().classes("rp-scenario-banner w-full items-start gap-3 no-wrap")
+        with box.mark("canvas_scenario_banner"):
+            ui.icon("alt_route", size="sm").classes("mt-1")
+            with ui.column().classes("gap-0 min-w-0"):
+                ui.label(t("canvas.showing", name=scenario.name)).classes("font-semibold")
+                ui.label(scenario.why).classes("text-sm")
+                changed = t("canvas.showing_changed", n=len(self.marks()))
+                mode = t("canvas.detached") if self.detached() else t("canvas.scenario_mode")
+                ui.label(f"{changed} {mode}").classes("rp-muted text-xs")
 
     def new_scenario(self) -> None:
         canvas_scenario.new_scenario(self.edit, self.scenario, self.scenario_written)
@@ -124,12 +144,24 @@ class CanvasPanel:
         canvas.on("drop", self.on_drop)
         canvas.on("edge", self.on_edge)
         self.canvas = canvas
+        self.frame()
+        canvas.update()
+
+    def frame(self) -> None:
+        """Structure edits and the scenario frame follow the scenario shown."""
+        if self.canvas is None:
+            return
+        self.canvas.mode(not self.locked(), [] if self.locked() else PALETTE)
+        if self.scenario == BASIS:
+            self.canvas.classes(remove="rp-scenario")
+        else:
+            self.canvas.classes(add="rp-scenario")
 
     def redraw(self) -> None:
         data = self.edit.data()
         if self.canvas is None or data is None:
             return
-        self.canvas.mode(not self.locked(), [] if self.locked() else PALETTE)
+        self.frame()
         self.canvas.draw(*canvas_view.view(self.shown(data), self.edit.selected, self.marks()))
 
     def refresh(self) -> None:

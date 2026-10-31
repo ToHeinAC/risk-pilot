@@ -20,13 +20,23 @@ KINDS: tuple[EdgeKind, ...] = ("ausdruck", "parameter", "korrelation")
 
 
 def _node(
-    node_id: str, node: dict[str, Any], pos: tuple[float, float], selected: bool, changed: int
+    node_id: str,
+    node: dict[str, Any],
+    pos: tuple[float, float],
+    selected: bool,
+    changed: int,
+    used: bool,
 ) -> dict[str, Any]:
+    """One node; its hover hint is the description, or why it is faded (on no output's path)."""
     kind = str(node.get("type", ""))
     data = {"label": str(node.get("name") or node_id), "type": type_label(kind)}
     if changed:
         data["badge"] = str(changed)
+    hint = str(node.get("description") or "") if used else t("canvas.unused")
+    if hint:
+        data["hint"] = hint
     classes = f"rp-node rp-{kind}" + (" rp-selected" if selected else "")
+    classes += "" if used else " rp-faded"
     return {
         "id": node_id,
         "position": {"x": pos[0], "y": pos[1]},
@@ -53,11 +63,16 @@ def view(
     data: Data, selected: str | None, marks: dict[str, int] | None = None
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Nodes in the order of ``nodes`` and edges, as Vue Flow props; ``marks`` counts the
-    overrides per node in scenario mode."""
+    overrides per node in scenario mode. Nodes no output depends on are faded."""
     nodes = cast(dict[str, dict[str, Any]], data.get("nodes") or {})
     pos = layout.placed(data, auto(data))
     counts = marks or {}
-    drawn = [_node(n, node, pos[n], n == selected, counts.get(n, 0)) for n, node in nodes.items()]
+    outputs = [n for n, node in nodes.items() if node.get("type") == "output"]
+    used = _upstream(data, *outputs) if outputs else set(nodes)
+    drawn = [
+        _node(n, node, pos[n], n == selected, counts.get(n, 0), n in used)
+        for n, node in nodes.items()
+    ]
     return drawn, [_edge(k) for k in canvas.links(data)]
 
 
@@ -101,13 +116,13 @@ def describe(data: Data, source: str, target: str, preset: str, value: str, fiel
     return t(f"canvas.says_{preset}", **params)
 
 
-def _upstream(data: Data, output: str) -> set[str]:
-    """``output`` and every node it depends on (expressions and parameters)."""
+def _upstream(data: Data, *outputs: str) -> set[str]:
+    """``outputs`` and every node they depend on (expressions and parameters)."""
     inputs: dict[str, set[str]] = {}
     for link in canvas.links(data):
         if link.kind != "korrelation":
             inputs.setdefault(link.target, set()).add(link.source)
-    found, todo = {output}, [output]
+    found, todo = set(outputs), list(outputs)
     while todo:
         for source in inputs.get(todo.pop(), set()) - found:
             found.add(source)
@@ -127,6 +142,6 @@ def analysis_view(
         if value is not None and math.isfinite(value):
             node["data"]["badge"] = number(value)
             node["data"]["tint"] = structure.color(value)
-        if node["id"] not in on_path:
+        if node["id"] not in on_path and "rp-faded" not in node["class"]:
             node["class"] += " rp-faded"
     return nodes, edges

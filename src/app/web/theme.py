@@ -62,6 +62,13 @@ body {{ background:{CANVAS}; color:{INK};
 .rp-palette-item.rp-output {{ border-left-color:{GOOD}; }}
 .rp-canvas .vue-flow__node.rp-changed {{ outline:2px dashed {WARN}; outline-offset:2px; }}
 .rp-canvas .vue-flow__node.rp-faded {{ opacity:.4; }}
+.rp-canvas.rp-scenario {{ box-shadow:inset 0 0 0 3px {WARN}; }}
+.rp-scenario-banner {{ background:#fdf6e9; border:1px solid {WARN}; border-left:4px solid {WARN};
+  border-radius:8px; padding:8px 12px; color:{INK}; }}
+.rp-scenario-note {{ background:#fdf6e9; border-left:4px solid {WARN}; border-radius:6px;
+  padding:6px 10px; }}
+.rp-comment {{ font-size:.92rem; line-height:1.5; }}
+.rp-comment p {{ margin:0 0 .5em; }}
 .rp-canvas .rp-node-badge {{ background:{WARN}; color:#fff; border-radius:8px; padding:0 6px;
   margin-left:4px; font-size:.68rem; }}
 .rp-canvas .rp-edge-parameter path {{ stroke-dasharray:6 4; }}

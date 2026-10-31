@@ -57,13 +57,14 @@ General rules:
 | `type` | `constant`, `uncertain`, `event`, `choice`, `derived`, `output` | Required. |
 | `name` | text | Display name; default is the ID. |
 | `unit` | text | Free text, shown with values; not checked or converted. |
-| `description` | text | Display only. |
-| `why` | text or `{text, links: [..], date}` | Reason or research note. |
+| `description` | text | Display only: what the node represents and does, shown first on its card and as the hover hint on the canvas. |
+| `comment` | text (Markdown, multi-line) | Display only: the modeller's longer thoughts on the node (why it exists, where parameters come from, what it is meant to model). |
+| `why` | text or `{text, links: [..], date}` | Short reason or research note. |
 | `tags` | list of text | Stored and editable; no effect on any computation. |
 | `bounds` | `{min?, max?}` | Plausible range. Values outside produce the notice `range.violation` with the share below and above. **Values are not clipped.** |
 | `track` | bool | Keep this node's draws in the result. Outputs are always kept. |
 
-`name`, `description`, `why` and `tags` are excluded from the content hash: relabelling a node
+`name`, `description`, `comment`, `why` and `tags` are excluded from the content hash: relabelling a node
 never changes a number.
 
 ### Type-specific fields
@@ -193,7 +194,7 @@ scenarios:
 - **Allowed fields** per node type: `constant` `value`, `bounds`; `event` `p`, `bounds`;
   `choice` `options`; `derived` `expr`, `bounds`; `output` `expr`, `target`, `better`, `bounds`,
   `horizon`, `loss_reference`; `uncertain` `dist`, `input`, its parameters, `bounds`. Labels
-  (`name`, `unit`, `description`, `tags`, `track`) cannot be overridden
+  (`name`, `unit`, `description`, `comment`, `tags`, `track`) cannot be overridden
   (`scenario.field_invalid`); `type` neither (`scenario.type_change`).
 - **Change of family:** if an override sets `dist` or `input`, all old parameters are dropped and
   the override must give the complete parameter set (`input` falls back to `params`).
@@ -260,7 +261,10 @@ nodes writes a preset expression (`a + b`, `max(a, b)`, `min(a, b)`, `a * b`,
 `… + where(e, x, 0)`, a parameter `a` or `a * f`, `p: a`) or a correlation entry; deleting an
 edge removes one argument of such an expression. A free expression is never rewritten: the
 canvas opens it instead. Positions live in `layout` (see the file format above) and are shared
-by all scenarios; a scenario changes values only, never the structure.
+by all scenarios. A scenario adds or removes no node, but an overridden `expr` or parameter
+changes which edges exist: with a scenario selected, the canvas draws its effective model
+(edges from the overridden expressions), marks overridden nodes, frames the canvas and names
+the scenario in a banner. In every scenario, nodes that feed no output are drawn faded.
 
 ## Validation behaviour
 

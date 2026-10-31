@@ -174,3 +174,15 @@ def test_clearing_why_text_keeps_links() -> None:
     v = form.values(d, "k")
     v["why"] = ""
     assert form.apply(d, "k", v)["nodes"]["k"]["why"] == {"text": "", "links": ["https://x.org"]}
+
+
+def test_a_comment_keeps_its_lines_through_the_yaml_and_is_no_scenario_field() -> None:
+    text = (EXAMPLES / "t2_terminplan.yaml").read_text("utf-8")
+    d = load_data(text)
+    v = form.values(d, "b")
+    assert v["comment"] == ""
+    note = "Warum: Erfahrung aus Projekt X.\n\nQuelle: Workshop, Folie 3."
+    v["comment"] = note + "\n"
+    model = model_from_yaml(patch(text, form.apply(d, "b", v)))
+    assert model.nodes["b"].comment == note
+    assert model.nodes["a"].comment is None

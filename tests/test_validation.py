@@ -204,11 +204,13 @@ def test_list_items_must_be_numbers(values: str) -> None:
 def test_content_hash_ignores_ids_and_labels() -> None:
     base = (
         "schema_version: 1\nmodel: {mid}\ntitle: {title}\nnodes:\n"
-        "  a: {{type: constant, value: {v}, name: {name}}}\n  y: {{type: output, expr: a}}\n"
+        "  a: {{type: constant, value: {v}, name: {name}, comment: {c}}}\n"
+        "  y: {{type: output, expr: a}}\n"
     )
 
-    def h(mid: str = "m", title: str = "T", v: int = 1, name: str = "A") -> str:
-        return content_hash(model_from_yaml(base.format(mid=mid, title=title, v=v, name=name)))
+    def h(mid: str = "m", title: str = "T", v: int = 1, name: str = "A", c: str = "x") -> str:
+        text = base.format(mid=mid, title=title, v=v, name=name, c=c)
+        return content_hash(model_from_yaml(text))
 
-    assert h() == h(mid="kopie", title="Anders", name="Anderer Name")
+    assert h() == h(mid="kopie", title="Anders", name="Anderer Name", c="Lange Notiz")
     assert h() != h(v=2)

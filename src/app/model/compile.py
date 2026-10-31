@@ -94,7 +94,7 @@ def model_hash(model: Model) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-_LABELS = ("name", "description", "why", "tags")
+_LABELS = ("name", "description", "comment", "why", "tags")
 
 
 def content_hash(model: Model) -> str:
