@@ -24,8 +24,9 @@ CLAUDE.local.md
 # Runtime data
 /data/
 
-#examples
-/examples/
+# Local fusion research reports (not versioned; tutorials in examples/ are)
+/examples/Challenge *.md
+/examples/Hardest *.md
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 graft/
