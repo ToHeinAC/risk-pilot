@@ -1,0 +1,347 @@
+# Maßnahmenmodell 2607-07, Stand 2607-07_2
+# Modelldatei für risk-pilot (https://github.com/ToHeinAC/risk-pilot), schema_version 1.
+#
+# Aufbau:
+#   Schalter     constant 0/1 je Maßnahme (1 = aktiv). Im Hauptszenario „basis“ ist nichts aktiv;
+#                die Szenarien setzen Level 1 und die Varianten aus der Quelle.
+#   Kosten       constant je Maßnahme und zutreffender Kostenart (Level 0). Alle Werte sind 0:
+#                Platzhalter, bis Budgets erfasst sind (dann z. B. als uncertain mit P10/P50/P90).
+#   Wirkungen    derived 0/1 je Richtung einer Synergie oder Dysergie (A auf B und B auf A),
+#                aktiv, wenn beide Maßnahmen aktiv sind. Art und Höhe der Wirkung sind noch nicht modelliert.
+#   Prüfungen    derived 0/1 für jeden verletzten Ausschluss und jede fehlende Notwendigkeit.
+#   Outputs      Kosten je Kostenart und gesamt, Anzahl Synergien/Dysergien, Prüfgrößen.
+#
+# Offene Punkte der Quelle stehen in 2607-07_2.md unter „General“.
+schema_version: 1
+model: massnahmen_2607_07
+title: "Maßnahmenmodell 2607-07 (Stand _2)"
+description: "Rechtsrahmen, Freigabe-Optionen und Einzelmaßnahmen mit Kostenarten, Synergien, Dysergien, Ausschlüssen und Varianten. Budgets sind noch Platzhalter (0)."
+illustrative: true
+settings: {n: 1000, seed: 1}
+nodes:
+  # ---------- Level 1: Schalter (1 = aktiv)
+  l1_1_atg: {type: "constant", value: 0, name: "L1-1 AtG", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 1"], bounds: {min: 0, max: 1}, comment: "Atomgesetz"}
+  l1_2_strlschg: {type: "constant", value: 0, name: "L1-2 StrlSchG", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 1"], bounds: {min: 0, max: 1}, comment: "Strahlenschutzgesetz"}
+  # ---------- Level 2: Schalter (1 = aktiv)
+  l2_1_freigabe_standard: {type: "constant", value: 0, name: "L2-1 Freigabe standard", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 2"], bounds: {min: 0, max: 1}}
+  l2_2_freigabe_innovativ: {type: "constant", value: 0, name: "L2-2 Freigabe innovativ", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 2"], bounds: {min: 0, max: 1}}
+  l2_3_freigabe_efn: {type: "constant", value: 0, name: "L2-3 Freigabe EFN", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 2"], bounds: {min: 0, max: 1}}
+  # ---------- Level 3: Schalter (1 = aktiv)
+  l3_1_stoerstellen: {type: "constant", value: 0, name: "L3-1 Störstellensanierung (inkl. RBS)", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  l3_2_efn_10m2: {type: "constant", value: 0, name: "L3-2 EFN 10m²", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  l3_3_gammakamera: {type: "constant", value: 0, name: "L3-3 Qualifizierung neue Messtechnik (Gammakamera)", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  l3_4_vehikel: {type: "constant", value: 0, name: "L3-4 Ferngesteuertes Vehikel", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  l3_5_lueftung_umbau: {type: "constant", value: 0, name: "L3-5 Umbau Lüftungsanlage", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  l3_6_lueftung_einfach: {type: "constant", value: 0, name: "L3-6 Einfache Lüftung", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}, comment: "Entweder kleine Maßnahme und/oder mobile Lüftung."}
+  l3_7_schadstoff_vorlaufend: {type: "constant", value: 0, name: "L3-7 Schadstoffsanierung vorlaufend", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  l3_8_schadstoff_nachlaufend: {type: "constant", value: 0, name: "L3-8 Schadstoffsanierung nachlaufend", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}, comment: "Offene Frage aus der Quelle: Gibt es ein Szenario ohne Schadstoffsanierung?"}
+  l3_9_ext_expertise: {type: "constant", value: 0, name: "L3-9 Einbindung ext. Expertise", description: "Schalter: 1 = Maßnahme aktiv, 0 = nicht aktiv.", tags: ["Level 3"], bounds: {min: 0, max: 1}}
+  # ---------- Level 0: Kosten je Maßnahme und Kostenart (Platzhalter 0)
+  k_l2_1_b: {type: "constant", value: 0, name: "Kosten L2-1 Freigabe standard (Betrieb)", description: "Budget der Maßnahme L2-1 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L2-1"], bounds: {min: 0}}
+  k_l2_2_g: {type: "constant", value: 0, name: "Kosten L2-2 Freigabe innovativ (Genehmigung)", description: "Budget der Maßnahme L2-2 in der Kostenart L0-1 Genehmigung.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-1 Genehmigung", "L2-2"], bounds: {min: 0}}
+  k_l2_2_b: {type: "constant", value: 0, name: "Kosten L2-2 Freigabe innovativ (Betrieb)", description: "Budget der Maßnahme L2-2 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L2-2"], bounds: {min: 0}}
+  k_l2_2_i: {type: "constant", value: 0, name: "Kosten L2-2 Freigabe innovativ (Investment)", description: "Budget der Maßnahme L2-2 in der Kostenart L0-3 Investment.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-3 Investment", "L2-2"], bounds: {min: 0}}
+  k_l2_3_g: {type: "constant", value: 0, name: "Kosten L2-3 Freigabe EFN (Genehmigung)", description: "Budget der Maßnahme L2-3 in der Kostenart L0-1 Genehmigung.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-1 Genehmigung", "L2-3"], bounds: {min: 0}}
+  k_l3_1_b: {type: "constant", value: 0, name: "Kosten L3-1 Störstellensanierung (inkl. RBS) (Betrieb)", description: "Budget der Maßnahme L3-1 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-1"], bounds: {min: 0}}
+  k_l3_2_b: {type: "constant", value: 0, name: "Kosten L3-2 EFN 10m² (Betrieb)", description: "Budget der Maßnahme L3-2 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-2"], bounds: {min: 0}}
+  k_l3_3_b: {type: "constant", value: 0, name: "Kosten L3-3 Qualifizierung neue Messtechnik (Gammakamera) (Betrieb)", description: "Budget der Maßnahme L3-3 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-3"], bounds: {min: 0}}
+  k_l3_4_g: {type: "constant", value: 0, name: "Kosten L3-4 Ferngesteuertes Vehikel (Genehmigung)", description: "Budget der Maßnahme L3-4 in der Kostenart L0-1 Genehmigung.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-1 Genehmigung", "L3-4"], bounds: {min: 0}}
+  k_l3_4_b: {type: "constant", value: 0, name: "Kosten L3-4 Ferngesteuertes Vehikel (Betrieb)", description: "Budget der Maßnahme L3-4 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-4"], bounds: {min: 0}}
+  k_l3_4_i: {type: "constant", value: 0, name: "Kosten L3-4 Ferngesteuertes Vehikel (Investment)", description: "Budget der Maßnahme L3-4 in der Kostenart L0-3 Investment.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-3 Investment", "L3-4"], bounds: {min: 0}}
+  k_l3_5_g: {type: "constant", value: 0, name: "Kosten L3-5 Umbau Lüftungsanlage (Genehmigung)", description: "Budget der Maßnahme L3-5 in der Kostenart L0-1 Genehmigung.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-1 Genehmigung", "L3-5"], bounds: {min: 0}}
+  k_l3_5_b: {type: "constant", value: 0, name: "Kosten L3-5 Umbau Lüftungsanlage (Betrieb)", description: "Budget der Maßnahme L3-5 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-5"], bounds: {min: 0}}
+  k_l3_5_i: {type: "constant", value: 0, name: "Kosten L3-5 Umbau Lüftungsanlage (Investment)", description: "Budget der Maßnahme L3-5 in der Kostenart L0-3 Investment.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-3 Investment", "L3-5"], bounds: {min: 0}}
+  k_l3_6_i: {type: "constant", value: 0, name: "Kosten L3-6 Einfache Lüftung (Investment)", description: "Budget der Maßnahme L3-6 in der Kostenart L0-3 Investment.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-3 Investment", "L3-6"], bounds: {min: 0}}
+  k_l3_7_b: {type: "constant", value: 0, name: "Kosten L3-7 Schadstoffsanierung vorlaufend (Betrieb)", description: "Budget der Maßnahme L3-7 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-7"], bounds: {min: 0}}
+  k_l3_8_b: {type: "constant", value: 0, name: "Kosten L3-8 Schadstoffsanierung nachlaufend (Betrieb)", description: "Budget der Maßnahme L3-8 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-8"], bounds: {min: 0}}
+  k_l3_9_b: {type: "constant", value: 0, name: "Kosten L3-9 Einbindung ext. Expertise (Betrieb)", description: "Budget der Maßnahme L3-9 in der Kostenart L0-2 Betrieb.", comment: "Platzhalter: Budget noch nicht erfasst. Einheit beim Erfassen festlegen.", tags: ["L0-2 Betrieb", "L3-9"], bounds: {min: 0}}
+  # ---------- Synergien, je Richtung (0/1)
+  syn_l1_1_auf_l2_2: {type: "derived", expr: "l1_1_atg * l2_2_freigabe_innovativ", name: "Synergie L1-1 AtG → L2-2 Freigabe innovativ", description: "1, wenn beide aktiv sind: Wirkung von L1-1 auf L2-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L1-1", "auf L2-2"]}
+  syn_l2_2_auf_l1_1: {type: "derived", expr: "l2_2_freigabe_innovativ * l1_1_atg", name: "Synergie L2-2 Freigabe innovativ → L1-1 AtG", description: "1, wenn beide aktiv sind: Wirkung von L2-2 auf L1-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L2-2", "auf L1-1"]}
+  syn_l1_1_auf_l2_3: {type: "derived", expr: "l1_1_atg * l2_3_freigabe_efn", name: "Synergie L1-1 AtG → L2-3 Freigabe EFN", description: "1, wenn beide aktiv sind: Wirkung von L1-1 auf L2-3. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L1-1", "auf L2-3"]}
+  syn_l2_3_auf_l1_1: {type: "derived", expr: "l2_3_freigabe_efn * l1_1_atg", name: "Synergie L2-3 Freigabe EFN → L1-1 AtG", description: "1, wenn beide aktiv sind: Wirkung von L2-3 auf L1-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L2-3", "auf L1-1"]}
+  syn_l1_1_auf_l3_2: {type: "derived", expr: "l1_1_atg * l3_2_efn_10m2", name: "Synergie L1-1 AtG → L3-2 EFN 10m²", description: "1, wenn beide aktiv sind: Wirkung von L1-1 auf L3-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L1-1", "auf L3-2"]}
+  syn_l3_2_auf_l1_1: {type: "derived", expr: "l3_2_efn_10m2 * l1_1_atg", name: "Synergie L3-2 EFN 10m² → L1-1 AtG", description: "1, wenn beide aktiv sind: Wirkung von L3-2 auf L1-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-2", "auf L1-1"]}
+  syn_l1_1_auf_l3_3: {type: "derived", expr: "l1_1_atg * l3_3_gammakamera", name: "Synergie L1-1 AtG → L3-3 Qualifizierung neue Messtechnik (Gammakamera)", description: "1, wenn beide aktiv sind: Wirkung von L1-1 auf L3-3. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L1-1", "auf L3-3"]}
+  syn_l3_3_auf_l1_1: {type: "derived", expr: "l3_3_gammakamera * l1_1_atg", name: "Synergie L3-3 Qualifizierung neue Messtechnik (Gammakamera) → L1-1 AtG", description: "1, wenn beide aktiv sind: Wirkung von L3-3 auf L1-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-3", "auf L1-1"]}
+  syn_l1_1_auf_l3_5: {type: "derived", expr: "l1_1_atg * l3_5_lueftung_umbau", name: "Synergie L1-1 AtG → L3-5 Umbau Lüftungsanlage", description: "1, wenn beide aktiv sind: Wirkung von L1-1 auf L3-5. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L1-1", "auf L3-5"]}
+  syn_l3_5_auf_l1_1: {type: "derived", expr: "l3_5_lueftung_umbau * l1_1_atg", name: "Synergie L3-5 Umbau Lüftungsanlage → L1-1 AtG", description: "1, wenn beide aktiv sind: Wirkung von L3-5 auf L1-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-5", "auf L1-1"]}
+  syn_l1_2_auf_l3_6: {type: "derived", expr: "l1_2_strlschg * l3_6_lueftung_einfach", name: "Synergie L1-2 StrlSchG → L3-6 Einfache Lüftung", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L3-6. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L1-2", "auf L3-6"]}
+  syn_l3_6_auf_l1_2: {type: "derived", expr: "l3_6_lueftung_einfach * l1_2_strlschg", name: "Synergie L3-6 Einfache Lüftung → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L3-6 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-6", "auf L1-2"]}
+  syn_l2_1_auf_l3_2: {type: "derived", expr: "l2_1_freigabe_standard * l3_2_efn_10m2", name: "Synergie L2-1 Freigabe standard → L3-2 EFN 10m²", description: "1, wenn beide aktiv sind: Wirkung von L2-1 auf L3-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L2-1", "auf L3-2"]}
+  syn_l3_2_auf_l2_1: {type: "derived", expr: "l3_2_efn_10m2 * l2_1_freigabe_standard", name: "Synergie L3-2 EFN 10m² → L2-1 Freigabe standard", description: "1, wenn beide aktiv sind: Wirkung von L3-2 auf L2-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-2", "auf L2-1"]}
+  syn_l2_1_auf_l3_7: {type: "derived", expr: "l2_1_freigabe_standard * l3_7_schadstoff_vorlaufend", name: "Synergie L2-1 Freigabe standard → L3-7 Schadstoffsanierung vorlaufend", description: "1, wenn beide aktiv sind: Wirkung von L2-1 auf L3-7. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L2-1", "auf L3-7"]}
+  syn_l3_7_auf_l2_1: {type: "derived", expr: "l3_7_schadstoff_vorlaufend * l2_1_freigabe_standard", name: "Synergie L3-7 Schadstoffsanierung vorlaufend → L2-1 Freigabe standard", description: "1, wenn beide aktiv sind: Wirkung von L3-7 auf L2-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-7", "auf L2-1"]}
+  syn_l2_2_auf_l3_8: {type: "derived", expr: "l2_2_freigabe_innovativ * l3_8_schadstoff_nachlaufend", name: "Synergie L2-2 Freigabe innovativ → L3-8 Schadstoffsanierung nachlaufend", description: "1, wenn beide aktiv sind: Wirkung von L2-2 auf L3-8. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L2-2", "auf L3-8"]}
+  syn_l3_8_auf_l2_2: {type: "derived", expr: "l3_8_schadstoff_nachlaufend * l2_2_freigabe_innovativ", name: "Synergie L3-8 Schadstoffsanierung nachlaufend → L2-2 Freigabe innovativ", description: "1, wenn beide aktiv sind: Wirkung von L3-8 auf L2-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-8", "auf L2-2"]}
+  syn_l2_3_auf_l3_8: {type: "derived", expr: "l2_3_freigabe_efn * l3_8_schadstoff_nachlaufend", name: "Synergie L2-3 Freigabe EFN → L3-8 Schadstoffsanierung nachlaufend", description: "1, wenn beide aktiv sind: Wirkung von L2-3 auf L3-8. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L2-3", "auf L3-8"]}
+  syn_l3_8_auf_l2_3: {type: "derived", expr: "l3_8_schadstoff_nachlaufend * l2_3_freigabe_efn", name: "Synergie L3-8 Schadstoffsanierung nachlaufend → L2-3 Freigabe EFN", description: "1, wenn beide aktiv sind: Wirkung von L3-8 auf L2-3. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-8", "auf L2-3"]}
+  syn_l3_1_auf_l3_7: {type: "derived", expr: "l3_1_stoerstellen * l3_7_schadstoff_vorlaufend", name: "Synergie L3-1 Störstellensanierung (inkl. RBS) → L3-7 Schadstoffsanierung vorlaufend", description: "1, wenn beide aktiv sind: Wirkung von L3-1 auf L3-7. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-1", "auf L3-7"]}
+  syn_l3_7_auf_l3_1: {type: "derived", expr: "l3_7_schadstoff_vorlaufend * l3_1_stoerstellen", name: "Synergie L3-7 Schadstoffsanierung vorlaufend → L3-1 Störstellensanierung (inkl. RBS)", description: "1, wenn beide aktiv sind: Wirkung von L3-7 auf L3-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-7", "auf L3-1"]}
+  syn_l3_6_auf_l3_7: {type: "derived", expr: "l3_6_lueftung_einfach * l3_7_schadstoff_vorlaufend", name: "Synergie L3-6 Einfache Lüftung → L3-7 Schadstoffsanierung vorlaufend", description: "1, wenn beide aktiv sind: Wirkung von L3-6 auf L3-7. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-6", "auf L3-7"]}
+  syn_l3_7_auf_l3_6: {type: "derived", expr: "l3_7_schadstoff_vorlaufend * l3_6_lueftung_einfach", name: "Synergie L3-7 Schadstoffsanierung vorlaufend → L3-6 Einfache Lüftung", description: "1, wenn beide aktiv sind: Wirkung von L3-7 auf L3-6. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-7", "auf L3-6"]}
+  syn_l3_2_auf_l3_8: {type: "derived", expr: "l3_2_efn_10m2 * l3_8_schadstoff_nachlaufend", name: "Synergie L3-2 EFN 10m² → L3-8 Schadstoffsanierung nachlaufend", description: "1, wenn beide aktiv sind: Wirkung von L3-2 auf L3-8. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-2", "auf L3-8"]}
+  syn_l3_8_auf_l3_2: {type: "derived", expr: "l3_8_schadstoff_nachlaufend * l3_2_efn_10m2", name: "Synergie L3-8 Schadstoffsanierung nachlaufend → L3-2 EFN 10m²", description: "1, wenn beide aktiv sind: Wirkung von L3-8 auf L3-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-8", "auf L3-2"]}
+  syn_l3_5_auf_l3_8: {type: "derived", expr: "l3_5_lueftung_umbau * l3_8_schadstoff_nachlaufend", name: "Synergie L3-5 Umbau Lüftungsanlage → L3-8 Schadstoffsanierung nachlaufend", description: "1, wenn beide aktiv sind: Wirkung von L3-5 auf L3-8. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-5", "auf L3-8"]}
+  syn_l3_8_auf_l3_5: {type: "derived", expr: "l3_8_schadstoff_nachlaufend * l3_5_lueftung_umbau", name: "Synergie L3-8 Schadstoffsanierung nachlaufend → L3-5 Umbau Lüftungsanlage", description: "1, wenn beide aktiv sind: Wirkung von L3-8 auf L3-5. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-8", "auf L3-5"]}
+  syn_l3_2_auf_l3_3: {type: "derived", expr: "l3_2_efn_10m2 * l3_3_gammakamera", name: "Synergie L3-2 EFN 10m² → L3-3 Qualifizierung neue Messtechnik (Gammakamera)", description: "1, wenn beide aktiv sind: Wirkung von L3-2 auf L3-3. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-2", "auf L3-3"]}
+  syn_l3_3_auf_l3_2: {type: "derived", expr: "l3_3_gammakamera * l3_2_efn_10m2", name: "Synergie L3-3 Qualifizierung neue Messtechnik (Gammakamera) → L3-2 EFN 10m²", description: "1, wenn beide aktiv sind: Wirkung von L3-3 auf L3-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Synergie", "von L3-3", "auf L3-2"]}
+  # ---------- Dysergien, je Richtung (0/1)
+  dys_l1_1_auf_l3_6: {type: "derived", expr: "l1_1_atg * l3_6_lueftung_einfach", name: "Dysergie L1-1 AtG → L3-6 Einfache Lüftung", description: "1, wenn beide aktiv sind: Wirkung von L1-1 auf L3-6. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-1", "auf L3-6"]}
+  dys_l3_6_auf_l1_1: {type: "derived", expr: "l3_6_lueftung_einfach * l1_1_atg", name: "Dysergie L3-6 Einfache Lüftung → L1-1 AtG", description: "1, wenn beide aktiv sind: Wirkung von L3-6 auf L1-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L3-6", "auf L1-1"]}
+  dys_l1_2_auf_l2_2: {type: "derived", expr: "l1_2_strlschg * l2_2_freigabe_innovativ", name: "Dysergie L1-2 StrlSchG → L2-2 Freigabe innovativ", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L2-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-2", "auf L2-2"]}
+  dys_l2_2_auf_l1_2: {type: "derived", expr: "l2_2_freigabe_innovativ * l1_2_strlschg", name: "Dysergie L2-2 Freigabe innovativ → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L2-2 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L2-2", "auf L1-2"]}
+  dys_l1_2_auf_l2_3: {type: "derived", expr: "l1_2_strlschg * l2_3_freigabe_efn", name: "Dysergie L1-2 StrlSchG → L2-3 Freigabe EFN", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L2-3. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-2", "auf L2-3"]}
+  dys_l2_3_auf_l1_2: {type: "derived", expr: "l2_3_freigabe_efn * l1_2_strlschg", name: "Dysergie L2-3 Freigabe EFN → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L2-3 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L2-3", "auf L1-2"]}
+  dys_l1_2_auf_l3_2: {type: "derived", expr: "l1_2_strlschg * l3_2_efn_10m2", name: "Dysergie L1-2 StrlSchG → L3-2 EFN 10m²", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L3-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-2", "auf L3-2"]}
+  dys_l3_2_auf_l1_2: {type: "derived", expr: "l3_2_efn_10m2 * l1_2_strlschg", name: "Dysergie L3-2 EFN 10m² → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L3-2 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L3-2", "auf L1-2"]}
+  dys_l1_2_auf_l3_3: {type: "derived", expr: "l1_2_strlschg * l3_3_gammakamera", name: "Dysergie L1-2 StrlSchG → L3-3 Qualifizierung neue Messtechnik (Gammakamera)", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L3-3. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-2", "auf L3-3"]}
+  dys_l3_3_auf_l1_2: {type: "derived", expr: "l3_3_gammakamera * l1_2_strlschg", name: "Dysergie L3-3 Qualifizierung neue Messtechnik (Gammakamera) → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L3-3 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L3-3", "auf L1-2"]}
+  dys_l1_2_auf_l3_4: {type: "derived", expr: "l1_2_strlschg * l3_4_vehikel", name: "Dysergie L1-2 StrlSchG → L3-4 Ferngesteuertes Vehikel", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L3-4. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-2", "auf L3-4"]}
+  dys_l3_4_auf_l1_2: {type: "derived", expr: "l3_4_vehikel * l1_2_strlschg", name: "Dysergie L3-4 Ferngesteuertes Vehikel → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L3-4 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L3-4", "auf L1-2"]}
+  dys_l1_2_auf_l3_5: {type: "derived", expr: "l1_2_strlschg * l3_5_lueftung_umbau", name: "Dysergie L1-2 StrlSchG → L3-5 Umbau Lüftungsanlage", description: "1, wenn beide aktiv sind: Wirkung von L1-2 auf L3-5. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L1-2", "auf L3-5"]}
+  dys_l3_5_auf_l1_2: {type: "derived", expr: "l3_5_lueftung_umbau * l1_2_strlschg", name: "Dysergie L3-5 Umbau Lüftungsanlage → L1-2 StrlSchG", description: "1, wenn beide aktiv sind: Wirkung von L3-5 auf L1-2. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L3-5", "auf L1-2"]}
+  dys_l2_1_auf_l3_6: {type: "derived", expr: "l2_1_freigabe_standard * l3_6_lueftung_einfach", name: "Dysergie L2-1 Freigabe standard → L3-6 Einfache Lüftung", description: "1, wenn beide aktiv sind: Wirkung von L2-1 auf L3-6. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L2-1", "auf L3-6"]}
+  dys_l3_6_auf_l2_1: {type: "derived", expr: "l3_6_lueftung_einfach * l2_1_freigabe_standard", name: "Dysergie L3-6 Einfache Lüftung → L2-1 Freigabe standard", description: "1, wenn beide aktiv sind: Wirkung von L3-6 auf L2-1. Art und Höhe der Wirkung noch nicht modelliert.", tags: ["Dysergie", "von L3-6", "auf L2-1"]}
+  # ---------- Ausschlüsse (1 = verletzt)
+  aus_l3_7_l3_8: {type: "derived", expr: "l3_7_schadstoff_vorlaufend * l3_8_schadstoff_nachlaufend", name: "Ausschluss L3-7 Schadstoffsanierung vorlaufend + L3-8 Schadstoffsanierung nachlaufend", description: "1, wenn beide aktiv sind, also der Ausschluss verletzt ist.", tags: ["Ausschluss"]}
+  aus_l3_5_l3_7: {type: "derived", expr: "l3_5_lueftung_umbau * l3_7_schadstoff_vorlaufend", name: "Ausschluss L3-5 Umbau Lüftungsanlage + L3-7 Schadstoffsanierung vorlaufend", description: "1, wenn beide aktiv sind, also der Ausschluss verletzt ist.", tags: ["Ausschluss"]}
+  aus_l2_1_l2_2: {type: "derived", expr: "l2_1_freigabe_standard * l2_2_freigabe_innovativ", name: "Ausschluss L2-1 Freigabe standard + L2-2 Freigabe innovativ", description: "1, wenn beide aktiv sind, also der Ausschluss verletzt ist.", tags: ["Ausschluss"]}
+  aus_l2_1_l2_3: {type: "derived", expr: "l2_1_freigabe_standard * l2_3_freigabe_efn", name: "Ausschluss L2-1 Freigabe standard + L2-3 Freigabe EFN", description: "1, wenn beide aktiv sind, also der Ausschluss verletzt ist.", tags: ["Ausschluss"]}
+  aus_l2_1_l3_3: {type: "derived", expr: "l2_1_freigabe_standard * l3_3_gammakamera", name: "Ausschluss L2-1 Freigabe standard + L3-3 Qualifizierung neue Messtechnik (Gammakamera)", description: "1, wenn beide aktiv sind, also der Ausschluss verletzt ist.", tags: ["Ausschluss"]}
+  aus_l2_1_l3_4: {type: "derived", expr: "l2_1_freigabe_standard * l3_4_vehikel", name: "Ausschluss L2-1 Freigabe standard + L3-4 Ferngesteuertes Vehikel", description: "1, wenn beide aktiv sind, also der Ausschluss verletzt ist.", tags: ["Ausschluss"]}
+  # ---------- Notwendigkeiten (1 = Notwendigkeit fehlt)
+  fehlt_l3_7_l3_9: {type: "derived", expr: "l3_7_schadstoff_vorlaufend * (1 - l3_9_ext_expertise)", name: "L3-7 Schadstoffsanierung vorlaufend ohne L3-9 Einbindung ext. Expertise", description: "1, wenn L3-7 aktiv ist, die notwendige Maßnahme L3-9 aber nicht.", tags: ["Notwendigkeit"]}
+  fehlt_l3_8_l3_9: {type: "derived", expr: "l3_8_schadstoff_nachlaufend * (1 - l3_9_ext_expertise)", name: "L3-8 Schadstoffsanierung nachlaufend ohne L3-9 Einbindung ext. Expertise", description: "1, wenn L3-8 aktiv ist, die notwendige Maßnahme L3-9 aber nicht.", tags: ["Notwendigkeit"]}
+  # ---------- Outputs
+  kosten_genehmigung: {type: "derived", expr: "l2_2_freigabe_innovativ * k_l2_2_g + l2_3_freigabe_efn * k_l2_3_g + l3_4_vehikel * k_l3_4_g + l3_5_lueftung_umbau * k_l3_5_g", name: "Kosten Genehmigung (L0-1)", description: "Summe der Kostenart Genehmigung über alle aktiven Maßnahmen.", track: true}
+  kosten_betrieb: {type: "derived", expr: "l2_1_freigabe_standard * k_l2_1_b + l2_2_freigabe_innovativ * k_l2_2_b + l3_1_stoerstellen * k_l3_1_b + l3_2_efn_10m2 * k_l3_2_b + l3_3_gammakamera * k_l3_3_b + l3_4_vehikel * k_l3_4_b + l3_5_lueftung_umbau * k_l3_5_b + l3_7_schadstoff_vorlaufend * k_l3_7_b + l3_8_schadstoff_nachlaufend * k_l3_8_b + l3_9_ext_expertise * k_l3_9_b", name: "Kosten Betrieb (L0-2)", description: "Summe der Kostenart Betrieb über alle aktiven Maßnahmen.", track: true}
+  kosten_investment: {type: "derived", expr: "l2_2_freigabe_innovativ * k_l2_2_i + l3_4_vehikel * k_l3_4_i + l3_5_lueftung_umbau * k_l3_5_i + l3_6_lueftung_einfach * k_l3_6_i", name: "Kosten Investment (L0-3)", description: "Summe der Kostenart Investment über alle aktiven Maßnahmen.", track: true}
+  kosten_gesamt: {type: "output", expr: "kosten_genehmigung + kosten_betrieb + kosten_investment", name: "Kosten gesamt", description: "Summe aller Kostenarten der aktiven Maßnahmen (ohne Wirkung von Synergien und Dysergien).", better: "lower"}
+  anzahl_synergien: {type: "output", expr: "syn_l1_1_auf_l2_2 + syn_l2_2_auf_l1_1 + syn_l1_1_auf_l2_3 + syn_l2_3_auf_l1_1 + syn_l1_1_auf_l3_2 + syn_l3_2_auf_l1_1 + syn_l1_1_auf_l3_3 + syn_l3_3_auf_l1_1 + syn_l1_1_auf_l3_5 + syn_l3_5_auf_l1_1 + syn_l1_2_auf_l3_6 + syn_l3_6_auf_l1_2 + syn_l2_1_auf_l3_2 + syn_l3_2_auf_l2_1 + syn_l2_1_auf_l3_7 + syn_l3_7_auf_l2_1 + syn_l2_2_auf_l3_8 + syn_l3_8_auf_l2_2 + syn_l2_3_auf_l3_8 + syn_l3_8_auf_l2_3 + syn_l3_1_auf_l3_7 + syn_l3_7_auf_l3_1 + syn_l3_6_auf_l3_7 + syn_l3_7_auf_l3_6 + syn_l3_2_auf_l3_8 + syn_l3_8_auf_l3_2 + syn_l3_5_auf_l3_8 + syn_l3_8_auf_l3_5 + syn_l3_2_auf_l3_3 + syn_l3_3_auf_l3_2", name: "Anzahl Synergie-Wirkungen", description: "Zahl der aktiven Synergie-Wirkungen, ungewichtet; jede Richtung zählt einzeln, ein aktives Paar also 2.", better: "higher"}
+  anzahl_dysergien: {type: "output", expr: "dys_l1_1_auf_l3_6 + dys_l3_6_auf_l1_1 + dys_l1_2_auf_l2_2 + dys_l2_2_auf_l1_2 + dys_l1_2_auf_l2_3 + dys_l2_3_auf_l1_2 + dys_l1_2_auf_l3_2 + dys_l3_2_auf_l1_2 + dys_l1_2_auf_l3_3 + dys_l3_3_auf_l1_2 + dys_l1_2_auf_l3_4 + dys_l3_4_auf_l1_2 + dys_l1_2_auf_l3_5 + dys_l3_5_auf_l1_2 + dys_l2_1_auf_l3_6 + dys_l3_6_auf_l2_1", name: "Anzahl Dysergie-Wirkungen", description: "Zahl der aktiven Dysergie-Wirkungen, ungewichtet; jede Richtung zählt einzeln, ein aktives Paar also 2.", better: "lower"}
+  verletzte_ausschluesse: {type: "output", expr: "aus_l3_7_l3_8 + aus_l3_5_l3_7 + aus_l2_1_l2_2 + aus_l2_1_l2_3 + aus_l2_1_l3_3 + aus_l2_1_l3_4", name: "Verletzte Ausschlüsse", description: "Zahl der aktiven Paare, die sich laut Quelle ausschließen. Ziel: 0.", target: {le: 0}}
+  fehlende_notwendigkeiten: {type: "output", expr: "fehlt_l3_7_l3_9 + fehlt_l3_8_l3_9", name: "Fehlende Notwendigkeiten", description: "Zahl der aktiven Maßnahmen, deren notwendige Maßnahme fehlt. Ziel: 0.", target: {le: 0}}
+correlations: {}
+# Szenarien: je Rechtsrahmen (Level 1) ein Elternszenario, darunter die zehn Varianten aus der Quelle.
+scenarios:
+  atg:
+    name: "L1-1 AtG"
+    why: "Rechtsrahmen AtG gewählt (Level 1)."
+    overrides:
+      l1_1_atg: {value: 1, why: "Level-1-Wahl"}
+  strlschg:
+    name: "L1-2 StrlSchG"
+    why: "Rechtsrahmen StrlSchG gewählt (Level 1)."
+    overrides:
+      l1_2_strlschg: {value: 1, why: "Level-1-Wahl"}
+  atg_v01:
+    name: "AtG, V01 vorlaufend, bevorzugt"
+    why: "Variante V01 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V01 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V01 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V01 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V01 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V01 genannt"}
+  atg_v02:
+    name: "AtG, V02 vorlaufend, Alternative 1"
+    why: "Variante V02 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V02 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V02 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V02 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V02 genannt"}
+  atg_v03:
+    name: "AtG, V03 vorlaufend, Alternative 2"
+    why: "Variante V03 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V03 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V03 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V03 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V03 genannt"}
+  atg_v04:
+    name: "AtG, V04 vorlaufend, Alternative 3"
+    why: "Variante V04 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: atg
+    overrides:
+      l2_2_freigabe_innovativ: {value: 1, why: "in V04 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V04 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V04 genannt"}
+      l3_3_gammakamera: {value: 1, why: "in V04 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V04 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V04 genannt"}
+  atg_v05:
+    name: "AtG, V05 nachlaufend, bevorzugt"
+    why: "Variante V05 aus der Quelle, Herkunft L3-8 Schadstoffsanierung nachlaufend. Hinweis: In der Quelle ist die Liste durch ein Komma geteilt („L2-2 + L3-1 + L3-2, L3-3 + L3-4“). Hier als eine Kombination gelesen; Lesart nicht bestätigt."
+    parent: atg
+    overrides:
+      l2_2_freigabe_innovativ: {value: 1, why: "in V05 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V05 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V05 genannt"}
+      l3_3_gammakamera: {value: 1, why: "in V05 genannt"}
+      l3_4_vehikel: {value: 1, why: "in V05 genannt"}
+      l3_8_schadstoff_nachlaufend: {value: 1, why: "in V05 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  atg_v06:
+    name: "AtG, V06 nachlaufend, Alternative 1"
+    why: "Variante V06 aus der Quelle, Herkunft L3-8 Schadstoffsanierung nachlaufend."
+    parent: atg
+    overrides:
+      l2_2_freigabe_innovativ: {value: 1, why: "in V06 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V06 genannt"}
+      l3_3_gammakamera: {value: 1, why: "in V06 genannt"}
+      l3_4_vehikel: {value: 1, why: "in V06 genannt"}
+      l3_8_schadstoff_nachlaufend: {value: 1, why: "in V06 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  atg_v07:
+    name: "AtG, V07 nachlaufend, Alternative 2"
+    why: "Variante V07 aus der Quelle, Herkunft L3-8 Schadstoffsanierung nachlaufend. Hinweis: In der Quelle zweimal identisch als Alternative aufgeführt; hier einmal übernommen."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V07 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V07 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V07 genannt"}
+      l3_5_lueftung_umbau: {value: 1, why: "in V07 genannt"}
+      l3_8_schadstoff_nachlaufend: {value: 1, why: "in V07 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  atg_v08:
+    name: "AtG, V08 Freigabe standard, bevorzugt"
+    why: "Variante V08 aus der Quelle, Herkunft L2-1 Freigabe standard. Hinweis: Widerspruch in der Quelle: enthält L3-7 und L3-5, die sich ausschließen."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V08 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V08 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V08 genannt"}
+      l3_5_lueftung_umbau: {value: 1, why: "in V08 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V08 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V08 genannt"}
+  atg_v09:
+    name: "AtG, V09 Freigabe standard, Alternative 1"
+    why: "Variante V09 aus der Quelle, Herkunft L2-1 Freigabe standard. Hinweis: Widerspruch in der Quelle: enthält L3-7 und L3-5, die sich ausschließen. Nach Ergänzung von L3-9 identisch mit V08."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V09 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V09 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V09 genannt"}
+      l3_5_lueftung_umbau: {value: 1, why: "in V09 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V09 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  atg_v10:
+    name: "AtG, V10 Freigabe standard, Alternative 2"
+    why: "Variante V10 aus der Quelle, Herkunft L2-1 Freigabe standard."
+    parent: atg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V10 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V10 genannt"}
+      l3_6_lueftung_einfach: {value: 1, why: "in V10 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V10 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  strlschg_v01:
+    name: "StrlSchG, V01 vorlaufend, bevorzugt"
+    why: "Variante V01 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V01 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V01 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V01 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V01 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V01 genannt"}
+  strlschg_v02:
+    name: "StrlSchG, V02 vorlaufend, Alternative 1"
+    why: "Variante V02 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V02 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V02 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V02 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V02 genannt"}
+  strlschg_v03:
+    name: "StrlSchG, V03 vorlaufend, Alternative 2"
+    why: "Variante V03 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V03 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V03 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V03 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V03 genannt"}
+  strlschg_v04:
+    name: "StrlSchG, V04 vorlaufend, Alternative 3"
+    why: "Variante V04 aus der Quelle, Herkunft L3-7 Schadstoffsanierung vorlaufend."
+    parent: strlschg
+    overrides:
+      l2_2_freigabe_innovativ: {value: 1, why: "in V04 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V04 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V04 genannt"}
+      l3_3_gammakamera: {value: 1, why: "in V04 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V04 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V04 genannt"}
+  strlschg_v05:
+    name: "StrlSchG, V05 nachlaufend, bevorzugt"
+    why: "Variante V05 aus der Quelle, Herkunft L3-8 Schadstoffsanierung nachlaufend. Hinweis: In der Quelle ist die Liste durch ein Komma geteilt („L2-2 + L3-1 + L3-2, L3-3 + L3-4“). Hier als eine Kombination gelesen; Lesart nicht bestätigt."
+    parent: strlschg
+    overrides:
+      l2_2_freigabe_innovativ: {value: 1, why: "in V05 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V05 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V05 genannt"}
+      l3_3_gammakamera: {value: 1, why: "in V05 genannt"}
+      l3_4_vehikel: {value: 1, why: "in V05 genannt"}
+      l3_8_schadstoff_nachlaufend: {value: 1, why: "in V05 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  strlschg_v06:
+    name: "StrlSchG, V06 nachlaufend, Alternative 1"
+    why: "Variante V06 aus der Quelle, Herkunft L3-8 Schadstoffsanierung nachlaufend."
+    parent: strlschg
+    overrides:
+      l2_2_freigabe_innovativ: {value: 1, why: "in V06 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V06 genannt"}
+      l3_3_gammakamera: {value: 1, why: "in V06 genannt"}
+      l3_4_vehikel: {value: 1, why: "in V06 genannt"}
+      l3_8_schadstoff_nachlaufend: {value: 1, why: "in V06 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  strlschg_v07:
+    name: "StrlSchG, V07 nachlaufend, Alternative 2"
+    why: "Variante V07 aus der Quelle, Herkunft L3-8 Schadstoffsanierung nachlaufend. Hinweis: In der Quelle zweimal identisch als Alternative aufgeführt; hier einmal übernommen."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V07 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V07 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V07 genannt"}
+      l3_5_lueftung_umbau: {value: 1, why: "in V07 genannt"}
+      l3_8_schadstoff_nachlaufend: {value: 1, why: "in V07 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  strlschg_v08:
+    name: "StrlSchG, V08 Freigabe standard, bevorzugt"
+    why: "Variante V08 aus der Quelle, Herkunft L2-1 Freigabe standard. Hinweis: Widerspruch in der Quelle: enthält L3-7 und L3-5, die sich ausschließen."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V08 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V08 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V08 genannt"}
+      l3_5_lueftung_umbau: {value: 1, why: "in V08 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V08 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "in V08 genannt"}
+  strlschg_v09:
+    name: "StrlSchG, V09 Freigabe standard, Alternative 1"
+    why: "Variante V09 aus der Quelle, Herkunft L2-1 Freigabe standard. Hinweis: Widerspruch in der Quelle: enthält L3-7 und L3-5, die sich ausschließen. Nach Ergänzung von L3-9 identisch mit V08."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V09 genannt"}
+      l3_1_stoerstellen: {value: 1, why: "in V09 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V09 genannt"}
+      l3_5_lueftung_umbau: {value: 1, why: "in V09 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V09 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
+  strlschg_v10:
+    name: "StrlSchG, V10 Freigabe standard, Alternative 2"
+    why: "Variante V10 aus der Quelle, Herkunft L2-1 Freigabe standard."
+    parent: strlschg
+    overrides:
+      l2_1_freigabe_standard: {value: 1, why: "in V10 genannt"}
+      l3_2_efn_10m2: {value: 1, why: "in V10 genannt"}
+      l3_6_lueftung_einfach: {value: 1, why: "in V10 genannt"}
+      l3_7_schadstoff_vorlaufend: {value: 1, why: "in V10 genannt"}
+      l3_9_ext_expertise: {value: 1, why: "über Notwendigkeit ergänzt"}
