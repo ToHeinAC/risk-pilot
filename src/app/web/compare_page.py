@@ -9,7 +9,7 @@ from app.engine.simulate import N_MAX
 from app.errors import SimulationError
 from app.messages import render, t
 from app.model.schema import BASIS, OutputNode
-from app.present import figures, reading
+from app.present import export, figures, reading
 from app.present.compare import better_sentence, compare_rows, d_rows, direction_sentence
 from app.present.text import validity_line
 from app.present.validation import CheckResult, check_text
@@ -45,7 +45,13 @@ def _pair(base: RunView, other: RunView, sid: str, output: str) -> str:
                 f"compare_d_{output}_{sid}"
             )
             ui.label(t("compare.d_caption")).classes("rp-muted text-sm")
-            theme.plot(figures.histogram(c.d, unit, []), 260)
+
+            def stem(with_cdf: bool) -> str:
+                pair = f"{other.scenario_id}_gegen_{base.scenario_id}"
+                model = base.compiled.model.model
+                return export.figure_name(model, pair, f"{output}_differenz", with_cdf)
+
+            results_view.distribution_chart(c.d, unit, f"d_{output}_{sid}", stem, height=300)
 
     explain.block("compare", found, draw)
     return c.kind

@@ -307,10 +307,14 @@ UI: dict[str, dict[str, str]] = {
         "export.csv": "Kennzahlen (CSV)",
         "export.parquet": "Rohstichproben (Parquet)",
         "export.html": "Bericht (HTML)",
+        "export.with_cdf": "Kumulative Verteilung in den Diagrammen des Berichts",
         "fig.value": "Wert",
         "fig.value_unit": "Wert ({unit})",
         "fig.density": "Dichte",
         "fig.cdf": "Anteil ≤ Wert",
+        "fig.cdf_curve": "Kumulative Verteilung",
+        "fig.cdf_switch": "Kumulative Verteilung einblenden",
+        "fig.png": "Als PNG speichern",
         "fig.share": "Anteil",
         "fig.true": "trifft zu",
         "fig.false": "trifft nicht zu",
@@ -672,8 +676,9 @@ UI: dict[str, dict[str, str]] = {
         "explain.result.question": "Was sagt der Lauf über diese Ausgabe?",
         "explain.result.how": "**Lesart:** Die Karten oben sind die Antwort; die Sätze darunter "
         "lesen sie in "
-        "Modellsprache. Das Histogramm zeigt, wie oft welche Werte vorkommen, die "
-        "Verteilungskurve den Anteil der Iterationen bis zu einem Wert. Jede Zahl trägt "
+        "Modellsprache. Das Histogramm zeigt, wie oft welche Werte vorkommen; die "
+        "kumulative Verteilung (rechte Achse, abschaltbar) den Anteil der Iterationen bis zu "
+        "einem Wert, mit P5, Median und P95 als Linien. Jede Zahl trägt "
         "ihr Intervall: so genau ist sie bei diesem N.\n\n**Grenze:** Das Intervall misst "
         "nur die Simulationsunsicherheit, nicht ob die Eingaben stimmen; das Ergebnis gilt "
         "im Modell.",

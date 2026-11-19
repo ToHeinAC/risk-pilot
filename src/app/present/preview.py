@@ -14,7 +14,7 @@ from app.engine.simulate import simulate
 from app.errors import Issue, SimulationError
 from app.messages import render, t
 from app.model.compile import CompiledModel
-from app.present.figures import cdf, histogram
+from app.present.figures import histogram
 from app.present.text import number, percent
 
 PREVIEW_N = 20_000
@@ -88,6 +88,6 @@ def preview_rows(p: Preview, unit: str | None) -> list[tuple[str, str]]:
     ]
 
 
-def preview_figures(p: Preview, unit: str | None) -> tuple[Any, Any]:
-    """Density (histogram) and CDF of the node's draws."""
-    return histogram(p.samples, unit, []), cdf(p.samples, unit, [])
+def preview_figure(p: Preview, unit: str | None) -> Any:
+    """Histogram of the node's draws with the cumulative distribution on the right axis."""
+    return histogram(p.samples, unit, [])

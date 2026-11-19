@@ -1,8 +1,11 @@
 """Simulation and results pages of the new UI (M7 step 3)."""
 
+from typing import Any
+
+import pytest
 from nicegui import ui
 from nicegui.testing import User
-from web_util import drive, element, open_model, put, texts
+from web_util import drive, element, open_model, put, texts, until
 
 from app.adapters import files, runs, settings
 from app.messages import t
@@ -74,6 +77,55 @@ def test_results_offer_three_downloads() -> None:
             response = await user.download.next()
             assert response.content.lower().startswith(start.lower())
             assert response.content
+
+    drive(steps)
+
+
+def cdf_names(user: User, marker: str) -> list[str]:
+    chart = element(user, marker)
+    assert isinstance(chart, ui.plotly)
+    figure: Any = chart.figure
+    return [d.get("name") for d in figure["data"] if d.get("name") == "Kumulative Verteilung"]
+
+
+def test_histogram_shows_the_cdf_with_a_switch_and_png_export(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[Any, ...]] = []
+
+    def record(_self: ui.plotly, *args: Any, **_kw: Any) -> None:
+        calls.append(args)
+
+    monkeypatch.setattr(ui.plotly, "run_plot_method", record)
+
+    async def steps(user: User) -> None:
+        await open_model(user, "t2_terminplan")
+        await simulate(user, 2000)
+        assert cdf_names(user, "chart_ende") == ["Kumulative Verteilung"]
+        user.find(marker="png_ende").click()
+        await until(lambda: len(calls) == 1)
+        put(user, "cdf_switch_ende", False)
+        assert cdf_names(user, "chart_ende") == []
+        user.find(marker="png_ende").click()
+        await until(lambda: len(calls) == 2)
+
+    drive(steps)
+    assert [c[0] for c in calls] == ["downloadImage", "downloadImage"]
+    names = [c[1]["filename"] for c in calls]
+    assert names == [
+        "t2_terminplan_basis_ende_histogramm_kumulativ",
+        "t2_terminplan_basis_ende_histogramm",
+    ]
+
+
+def test_html_report_follows_the_export_switch() -> None:
+    async def steps(user: User) -> None:
+        await open_model(user, "t2_terminplan")
+        await simulate(user, 2000)
+        put(user, "export_cdf", False)
+        user.find(marker="export_html").click()
+        response = await user.download.next()
+        assert b"Kumulative Verteilung" not in response.content
 
     drive(steps)
 

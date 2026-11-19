@@ -199,10 +199,19 @@ class Logistic:
     modes: ClassVar[Mapping[str, tuple[ParamSpec, ...]]] = {
         "params": (ParamSpec("loc"), ParamSpec("scale"))
     }
-    def to_canonical(self, mode, p): return {k: np.asarray(v, dtype=np.float64) for k, v in p.items()}
-    def check(self, mode, p): return [violation("scale", "scale > 0", p["scale"] <= 0)]
-    def ppf(self, u, c): return np.asarray(c["loc"] + c["scale"] * np.log(u / (1 - u)))
-    def reference(self, c): return stats.logistic(loc=c["loc"], scale=c["scale"])
+
+    def to_canonical(self, mode, p):
+        return {k: np.asarray(v, dtype=np.float64) for k, v in p.items()}
+
+    def check(self, mode, p):
+        return [violation("scale", "scale > 0", p["scale"] <= 0)]
+
+    def ppf(self, u, c):
+        return np.asarray(c["loc"] + c["scale"] * np.log(u / (1 - u)))
+
+    def reference(self, c):
+        return stats.logistic(loc=c["loc"], scale=c["scale"])
+
 
 register(Logistic())
 ```

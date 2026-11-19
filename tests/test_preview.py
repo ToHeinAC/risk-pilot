@@ -42,11 +42,11 @@ def test_without_bounds_says_so() -> None:
     assert rows["Unzulässig (unter Untergrenze / über Obergrenze)"] == "keine Grenzen gesetzt"
 
 
-def test_figures_are_density_and_cdf() -> None:
+def test_figure_is_one_histogram_with_the_cdf_on_the_right_axis() -> None:
     c = compile_model(model_from_yaml(MODEL))
-    density, cdf = preview.preview_figures(preview.node_preview(c, "u", n=2000), None)
-    assert getattr(density, "data")[0].type == "bar"  # noqa: B009 - untyped plotly
-    assert getattr(cdf, "data")[0].type == "scatter"  # noqa: B009 - untyped plotly
+    fig = preview.preview_figure(preview.node_preview(c, "u", n=2000), None)
+    data = getattr(fig, "data")  # noqa: B009 - untyped plotly
+    assert [(tr.type, tr.yaxis) for tr in data] == [("bar", None), ("scatter", "y2")]
 
 
 def test_runtime_problem_is_reported() -> None:

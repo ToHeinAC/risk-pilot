@@ -3,6 +3,7 @@ sentences next to the charts, then all metrics. Used by the results page and sav
 
 # plotly ships without type stubs; its members are untyped for pyright.
 # pyright: reportUnknownMemberType=false
+from collections.abc import Callable
 from typing import Any
 
 from nicegui import ui
@@ -11,7 +12,7 @@ from app.analysis.stats import Summary
 from app.messages import render, t
 from app.model.compile import content_hash
 from app.model.schema import Model, OutputNode
-from app.present import figures, reading
+from app.present import export, figures, reading
 from app.present.references import Curve, has_reference, tutorial_reference
 from app.present.results import correlation_rows
 from app.present.text import (
@@ -130,11 +131,44 @@ def _sentences(run: RunView, output: str, summary: Summary, unit: str | None) ->
         note(t("result.all_beyond"))
 
 
-def _charts(x: Any, unit: str | None, pdf: list[Curve], cdf: list[Curve]) -> None:
-    with ui.row().classes("w-full gap-4 no-wrap max-lg:flex-wrap"):
-        for fig in (figures.histogram(x, unit, pdf), figures.cdf(x, unit, cdf)):
-            with ui.column().classes("rp-panel p-2 flex-1 min-w-0"):
-                theme.plot(fig, 300)
+PNG = {"format": "png", "width": 1100, "height": 650, "scale": 2}
+
+
+def distribution_chart(
+    x: Any,
+    unit: str | None,
+    key: str,
+    stem: Callable[[bool], str],
+    curves: tuple[list[Curve], list[Curve]] = ([], []),
+    height: int = 340,
+) -> None:
+    """Histogram with the cumulative distribution on the right axis (switch, default on) and a
+    PNG download of what is shown; ``stem(with_cdf)`` names the file, ``curves`` are the
+    reference density and CDF curves."""
+    pdf, cdf = curves
+
+    def shown(with_cdf: bool) -> dict[str, Any]:
+        return theme.options(figures.histogram(x, unit, pdf, cdf, with_cdf), height)
+
+    with ui.row().classes("w-full items-center justify-between gap-2"):
+        switch = ui.switch(t("fig.cdf_switch"), value=True).mark(f"cdf_switch_{key}")
+        png = ui.button(t("fig.png"), icon="image").props("flat dense no-caps")
+        png.mark(f"png_{key}")
+    chart = ui.plotly(shown(True)).classes("w-full").mark(f"chart_{key}")
+    switch.on_value_change(lambda e: chart.update_figure(shown(bool(e.value))))
+    png.on_click(
+        lambda: chart.run_plot_method(
+            "downloadImage", {**PNG, "filename": stem(bool(switch.value))}, timeout=10
+        )
+    )
+
+
+def _charts(run: RunView, name: str, unit: str | None, curves: tuple[list[Curve], ...]) -> None:
+    def stem(with_cdf: bool) -> str:
+        return export.figure_name(run.compiled.model.model, run.scenario_id, name, with_cdf)
+
+    with ui.column().classes("rp-panel p-2 w-full gap-1"):
+        distribution_chart(run.result.samples[name], unit, name, stem, (curves[0], curves[1]))
 
 
 def output(run: RunView, name: str) -> None:
@@ -166,7 +200,7 @@ def output(run: RunView, name: str) -> None:
                 metrics(metric_rows(summary, unit))
         for hint in precision_hints(summary):
             note(hint, "warning")
-        _charts(x, unit, pdf, cdf)
+        _charts(run, name, unit, (pdf, cdf))
 
     explain.block("result", found, draw)
 

@@ -161,7 +161,13 @@ def _sentences(report: Report, output: str) -> list[str]:
     return found
 
 
-def _output_html(report: Report, output: str) -> str:
+def figure_name(model_id: str, scenario_id: str, output: str, with_cdf: bool) -> str:
+    """File stem of an exported histogram; ``_kumulativ`` when the CDF is drawn in."""
+    kind = "histogramm_kumulativ" if with_cdf else "histogramm"
+    return file_name(model_id, scenario_id, f"{output}_{kind}")
+
+
+def _output_html(report: Report, output: str, with_cdf: bool) -> str:
     node = report.compiled.model.nodes[output]
     summary = report.summaries[output]
     x = report.result.samples[output]
@@ -169,8 +175,8 @@ def _output_html(report: Report, output: str) -> str:
     parts += [f"<p>{html.escape(text)}</p>" for text in _sentences(report, output)]
     parts.append(_table([t("ui.metric"), t("ui.value")], metric_rows(summary, node.unit)))
     if summary.share is None:
-        for fig in (figures.histogram(x, node.unit, []), figures.cdf(x, node.unit, [])):
-            parts.append(fig.to_html(full_html=False, include_plotlyjs=False))
+        fig = figures.histogram(x, node.unit, [], with_cdf=with_cdf)
+        parts.append(fig.to_html(full_html=False, include_plotlyjs=False))
     return "\n".join(parts)
 
 
@@ -181,8 +187,10 @@ STYLE = (
 )
 
 
-def report_html(report: Report) -> str:
-    """One HTML file: validity, metrics, figures and correlations per output, the model text."""
+def report_html(report: Report, with_cdf: bool = True) -> str:
+    """One HTML file: validity, metrics, figures and correlations per output, the model text.
+
+    ``with_cdf`` draws the cumulative distribution into each histogram."""
     model = report.compiled.model
     title = html.escape(model.title or model.model)
     parts = [
@@ -195,7 +203,7 @@ def report_html(report: Report) -> str:
     if corr:
         headers = [t(f"result.corr_{k}") for k in ("group", "pair", "target", "achieved")]
         parts += [f"<h2>{html.escape(t('result.corr_title'))}</h2>", _table(headers, list(corr))]
-    parts += [_output_html(report, output) for output in report.summaries]
+    parts += [_output_html(report, output, with_cdf) for output in report.summaries]
     parts += [
         f"<h2>{html.escape(t('export.model_text'))}</h2>",
         f"<pre>{html.escape(report.model_text)}</pre>",

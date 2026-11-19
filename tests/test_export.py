@@ -89,6 +89,12 @@ def test_html_report_is_standalone() -> None:
     assert "model: t4_portfolio" in html  # the model YAML at the end
 
 
+def test_html_report_with_and_without_cdf() -> None:
+    report = run("t2_terminplan.yaml")
+    assert "Kumulative Verteilung" in export.report_html(report)
+    assert "Kumulative Verteilung" not in export.report_html(report, with_cdf=False)
+
+
 def test_file_names() -> None:
     assert export.file_name("t2_terminplan", "basis", "kennzahlen.csv") == (
         "t2_terminplan_basis_kennzahlen.csv"

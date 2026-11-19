@@ -91,9 +91,14 @@ def apply() -> None:
     ui.query("body").classes("rp")
 
 
-def plot(fig: go.Figure, height: int) -> ui.plotly:
-    """A chart in the app's look: tokens above, no plotly toolbar."""
+def options(fig: go.Figure, height: int) -> dict[str, Any]:
+    """Plotly options in the app's look: tokens above, no plotly toolbar."""
     fig.update_layout(PLOT, height=height)
-    options: dict[str, Any] = fig.to_plotly_json()
-    options["config"] = {"displayModeBar": False, "responsive": True}
-    return ui.plotly(options).classes("w-full")
+    found: dict[str, Any] = fig.to_plotly_json()
+    found["config"] = {"displayModeBar": False, "responsive": True}
+    return found
+
+
+def plot(fig: go.Figure, height: int) -> ui.plotly:
+    """A chart in the app's look."""
+    return ui.plotly(options(fig, height)).classes("w-full")

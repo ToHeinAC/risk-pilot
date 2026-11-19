@@ -1,7 +1,9 @@
 """Scenario and comparison pages of the new UI (M7 step 4)."""
 
 from pathlib import Path
+from typing import Any
 
+from nicegui import ui
 from nicegui.testing import User
 from web_util import cells, drive, element, enabled, open_model, put, texts, until, value
 
@@ -152,6 +154,11 @@ def test_compare_page_t2() -> None:
         assert "in 0 % schlechter" in page  # B −3 Tage is never worse (M3 AK 6)
         assert "Szenario Hauptszenario" in page  # validity line of the reference
         assert any(row[0] == t("result.mean") for row in cells(user, "compare_ende_b_schneller"))
+        assert value(user, "cdf_switch_d_ende_b_schneller") is True
+        chart = element(user, "chart_d_ende_b_schneller")
+        assert isinstance(chart, ui.plotly)
+        figure: Any = chart.figure
+        assert any(d.get("yaxis") == "y2" for d in figure["data"])
 
     drive(steps)
 

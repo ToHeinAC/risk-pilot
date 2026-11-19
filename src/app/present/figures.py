@@ -12,8 +12,12 @@ from numpy.typing import NDArray
 
 from app.messages import t
 from app.present.references import Curve
+from app.present.text import number
 
 MAX_BINS = 200
+CDF_COLOUR = "#e07b39"  # second colour of the app's colorway (web/theme.py)
+MARKER_COLOUR = "#5b6676"
+QUANTILE_LINES = ((0.05, "P5"), (0.5, "Median"), (0.95, "P95"))
 CDF_POINTS = 2000
 THIN_ABOVE = 20_000
 
@@ -42,7 +46,14 @@ def _axis(unit: str | None) -> str:
     return t("fig.value_unit", unit=unit) if unit else t("fig.value")
 
 
-def histogram(x: NDArray[Any], unit: str | None, overlays: list[Curve]) -> go.Figure:
+def histogram(
+    x: NDArray[Any],
+    unit: str | None,
+    overlays: list[Curve],
+    cdf_overlays: list[Curve] | None = None,
+    with_cdf: bool = True,
+) -> go.Figure:
+    """Density histogram; ``with_cdf`` adds the cumulative distribution on a right axis."""
     values = np.asarray(x, dtype=np.float64)
     density, edges = np.histogram(values, bins=_bins(values), density=True)
     centers = (edges[:-1] + edges[1:]) / 2
@@ -50,7 +61,53 @@ def histogram(x: NDArray[Any], unit: str | None, overlays: list[Curve]) -> go.Fi
     fig.update_layout(bargap=0)
     for curve in overlays:
         fig.add_trace(go.Scatter(x=curve.x, y=curve.y, mode="lines", name=curve.label))
-    return layout(fig, _axis(unit), t("fig.density"))
+    layout(fig, _axis(unit), t("fig.density"))
+    if with_cdf:
+        _add_cdf(fig, values, cdf_overlays or [])
+    return fig
+
+
+def _add_cdf(fig: go.Figure, values: NDArray[np.float64], overlays: list[Curve]) -> None:
+    """Cumulative distribution on a right y axis (0 to 1) and P5, median, P95 lines."""
+    xs, probs = _ecdf(values)
+    fig.add_trace(
+        go.Scatter(x=xs, y=probs, mode="lines", name=t("fig.cdf_curve"), yaxis="y2").update(
+            line={"color": CDF_COLOUR, "width": 2}
+        )
+    )
+    for curve in overlays:
+        fig.add_trace(
+            go.Scatter(x=curve.x, y=curve.y, mode="lines", name=curve.label, yaxis="y2").update(
+                line={"dash": "dash", "width": 1.5}
+            )
+        )
+    for q, label in QUANTILE_LINES:
+        at = float(np.quantile(values, q))
+        fig.add_vline(x=at, line={"color": MARKER_COLOUR, "width": 1, "dash": "dot"})
+        fig.add_annotation(
+            x=at,
+            y=1,
+            xref="x",
+            yref="paper",
+            yanchor="bottom",
+            showarrow=False,
+            text=f"{label} {number(at)}",
+            font={"size": 10, "color": MARKER_COLOUR},
+        )
+    fig.update_layout(
+        yaxis2={
+            "title": t("fig.cdf"),
+            "overlaying": "y",
+            "side": "right",
+            "range": [0, 1],
+            "showgrid": False,
+            "zeroline": False,
+            "title_font": {"color": CDF_COLOUR},
+            "tickfont": {"color": CDF_COLOUR},
+        },
+        legend={"orientation": "h", "x": 0, "y": 1.1, "yanchor": "bottom"},
+        margin={"r": 50, "t": 60},
+    )
 
 
 def _ecdf(x: NDArray[Any]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
@@ -60,16 +117,6 @@ def _ecdf(x: NDArray[Any]) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         index = np.unique(np.linspace(0, values.size - 1, CDF_POINTS + 1).astype(int))
         values, probs = values[index], probs[index]
     return values, probs
-
-
-def cdf(x: NDArray[Any], unit: str | None, overlays: list[Curve]) -> go.Figure:
-    values, probs = _ecdf(x)
-    fig = go.Figure(go.Scatter(x=values, y=probs, mode="lines", name=t("fig.simulation")))
-    for curve in overlays:
-        fig.add_trace(
-            go.Scatter(x=curve.x, y=curve.y, mode="lines", name=curve.label, line_dash="dash")
-        )
-    return layout(fig, _axis(unit), t("fig.cdf"))
 
 
 def compare_cdfs(

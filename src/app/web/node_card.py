@@ -273,10 +273,9 @@ def preview(edit: ModelEdit, node_id: str) -> None:
         return
     shown = previews.preview_of(compiled, node_id, edit.trial[node_id])
     unit = compiled.model.nodes[node_id].unit
-    density, cdf = previews.preview_figures(shown, unit)
-    for fig in (density, cdf):
-        fig.update_layout(margin={"l": 30, "r": 10, "t": 30, "b": 30})
-        theme.plot(fig, 190)
+    fig = previews.preview_figure(shown, unit)
+    fig.update_layout(margin={"l": 30, "r": 45, "t": 55, "b": 30})
+    theme.plot(fig, 260)
     with ui.grid(columns=2).classes("w-full gap-x-4 gap-y-0 text-sm"):
         for metric, shown_value in previews.preview_rows(shown, unit):
             ui.label(metric).classes("rp-muted")

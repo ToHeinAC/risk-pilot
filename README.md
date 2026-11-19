@@ -60,6 +60,9 @@ works too.
   uncertain node (density, CDF, mean, median, P5/P95, share outside `bounds`). Form edits patch
   the YAML text in place, so comments and layout stay. "Neues leeres Modell" on the start page.
   The results page exports metrics as CSV, raw samples as Parquet and a standalone HTML report.
+  Histograms carry the cumulative distribution on a right axis with P5/median/P95 lines; a
+  switch per chart hides it, and each chart downloads as PNG as shown (file suffix `_kumulativ`
+  with the curve). A switch in the export row decides whether the HTML report draws it in.
 - **Self-explaining UI** (M8, [spec](docs/specs/m8-ux-selbsterklaerung.md)): every page starts
   with its purpose and the next step for the current state; every evaluation (results,
   comparison, each analysis tab) explains its question, a reading example from the open model,

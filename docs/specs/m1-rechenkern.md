@@ -435,22 +435,32 @@ Notice = {code, node_id | None, share | None, params: dict}   (Hinweis, kein Abb
 
 ```python
 # model/yaml_io.py
-def model_from_yaml(text: str) -> Model: ...            # ModelError bei Syntax/Schema
+def model_from_yaml(text: str) -> Model: ...  # ModelError bei Syntax/Schema
+
 
 # adapters/files.py
-def load_model(path: Path) -> Model: ...                # liest UTF-8, ruft model_from_yaml
+def load_model(path: Path) -> Model: ...  # liest UTF-8, ruft model_from_yaml
+
 
 # model/compile.py
-def compile_model(model: Model) -> CompiledModel: ...   # ModelError mit allen Issues
+def compile_model(model: Model) -> CompiledModel: ...  # ModelError mit allen Issues
+
 
 # engine/simulate.py
-def simulate(compiled: CompiledModel, n: int | None = None,
-             seed: int | None = None) -> SimulationResult: ...
+def simulate(
+    compiled: CompiledModel, n: int | None = None, seed: int | None = None
+) -> SimulationResult: ...
+
 
 # analysis/stats.py
-def summarize(x: NDArray[np.float64] | NDArray[np.bool_], *,
-              quantiles: Sequence[float] = (0.05, 0.1, 0.5, 0.9, 0.95),
-              target: Target | None = None, conf: float = 0.95) -> Summary: ...
+def summarize(
+    x: NDArray[np.float64] | NDArray[np.bool_],
+    *,
+    quantiles: Sequence[float] = (0.05, 0.1, 0.5, 0.9, 0.95),
+    target: Target | None = None,
+    conf: float = 0.95,
+) -> Summary: ...
+
 
 # dists/registry.py, expr/functions.py
 def register(family: Family) -> None: ...

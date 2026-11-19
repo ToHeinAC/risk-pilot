@@ -30,6 +30,7 @@ def _exports(run: RunView) -> None:
         return export.file_name(run.compiled.model.model, run.scenario_id, kind)
 
     ui.label(t("export.title")).classes("text-lg font-semibold")
+    with_cdf = ui.switch(t("export.with_cdf"), value=True).mark("export_cdf")
     with ui.row().classes("gap-2"):
         _download(
             t("export.csv"),
@@ -45,7 +46,7 @@ def _exports(run: RunView) -> None:
         )
         _download(
             t("export.html"),
-            lambda: export.report_html(report).encode("utf-8"),
+            lambda: export.report_html(report, bool(with_cdf.value)).encode("utf-8"),
             name("bericht.html"),
             "export_html",
         )
