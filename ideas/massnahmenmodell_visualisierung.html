@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maßnahmenmodell 2607-07_8 – Visualisierungen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f0; --surface:#fbfcfc; --surface2:#e4e9ea; --text:#17222e; --muted:#5a6773; --line:#cdd5da; --grid:#d9e0e3;
+  --l1:#3d4fb8; --l2:#0d7c72; --l3:#a35f00; --l4:#a3367a; --l0:#7b4bb0;
+  --syn:#2b8a3e; --dys:#d9480f; --exc:#c92a2a; --req:#1971c2; --pre:#8a949e;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#11161b; --surface:#192027; --surface2:#222b33; --text:#e4e9ee; --muted:#97a3ae; --line:#323d47; --grid:#232c34;
+    --l1:#8d9bff; --l2:#41c2b4; --l3:#efa63e; --l4:#f083c0; --l0:#b893f0;
+    --syn:#51cf66; --dys:#ff8a4c; --exc:#ff6b6b; --req:#4dabf7; --pre:#7d8892;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 "Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.code{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--req);outline-offset:2px}
+
+header.top{background:var(--surface);border-bottom:1px solid var(--line);padding:22px 28px 0}
+.head-inner{max-width:1480px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-end;justify-content:space-between}
+h1{font-size:23px;font-weight:650;font-stretch:85%;letter-spacing:-.01em;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.tabs{display:flex;gap:4px}
+.tab{appearance:none;border:0;background:none;color:var(--muted);font-weight:550;font-size:14px;padding:12px 14px 11px;border-bottom:3px solid transparent;cursor:pointer}
+.tab .k{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;background:var(--surface2);font-size:12px;margin-right:6px}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
+.tab.active .k{background:var(--text);color:var(--surface)}
+
+main{max-width:1480px;margin:0 auto;padding:22px 28px 48px}
+.view{display:none}.view.active{display:block}
+.lead{color:var(--muted);margin:0 0 16px;max-width:78ch}
+.lead b{color:var(--text);font-weight:600}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:12px;font-size:13.5px}
+.tog{display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.sw{display:inline-block;width:24px;height:0;border-top:3px solid}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 10px;cursor:pointer}
+.btn:hover{background:var(--surface2)}
+select{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.panel h3{margin:0 0 10px;font-size:14px;font-weight:650}
+.note{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+
+/* ---------- A: Netzwerk ---------- */
+.net-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:1150px){.net-layout{grid-template-columns:1fr}}
+.canvas-wrap{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
+#net{display:block;width:100%;min-width:920px;height:auto}
+.edge{fill:none;stroke-width:1.7;opacity:.72;transition:opacity .15s,stroke-width .15s}
+.edge.dim{opacity:.05}
+.edge.strong{opacity:1;stroke-width:2.6}
+.node{cursor:pointer;transition:opacity .15s}
+.node.dim{opacity:.2}
+.node .box{fill:var(--surface);stroke:var(--line);stroke-width:1}
+.node:hover .box{stroke:var(--muted)}
+.node.sel .box{stroke:var(--text);stroke-width:2}
+.node.inv .box{stroke-width:2;stroke-dasharray:4 3}
+svg.radial{display:block;width:100%;min-width:640px;height:auto}
+.node:focus,.rnode:focus{outline:none}
+.node:focus-visible .box{stroke:var(--req);stroke-width:2}
+.rnode:focus-visible circle{stroke:var(--req);stroke-width:3}
+.rnode{cursor:pointer;transition:opacity .15s}
+.rnode.dim{opacity:.2}
+.rnode circle{stroke:var(--surface);stroke-width:2}
+.rnode.sel circle{stroke:var(--text);stroke-width:3}
+.rnode.inv circle{stroke:var(--text);stroke-width:2;stroke-dasharray:3 2}
+.rnode:hover circle{stroke:var(--muted)}
+.rlabel{font:500 13px "Archivo",system-ui,sans-serif;fill:var(--text);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.rlabel .rid{font:500 11px "IBM Plex Mono",monospace;fill:var(--muted)}
+.lvarc{fill:none;stroke-width:6;stroke-linecap:round;opacity:.75}
+.lvtext{font:650 13px "Archivo",system-ui,sans-serif;letter-spacing:.01em;paint-order:stroke;stroke:var(--surface);stroke-width:4px}
+.band{stroke:var(--line);stroke-width:1}
+.orbit{fill:none;stroke:var(--line);stroke-dasharray:3 4}
+.nid{font:500 11px "IBM Plex Mono",monospace;fill:var(--muted)}
+.nname{font:550 13px "Archivo",system-ui,sans-serif;fill:var(--text)}
+.bdg{font:600 9.5px "IBM Plex Mono",monospace}
+.colhead{font:600 13px "Archivo",system-ui,sans-serif;fill:var(--muted)}
+.detail h2{font-size:18px;margin:2px 0 2px;font-weight:650}
+.detail .lv{font-size:12.5px;color:var(--muted)}
+.detail h4{font-size:12.5px;font-weight:650;margin:14px 0 4px;display:flex;align-items:center;gap:7px}
+.detail h4 .sw{width:16px}
+.detail p{margin:6px 0}
+.chip{display:inline-flex;align-items:baseline;gap:6px;border:1px solid var(--line);border-left-width:3px;background:var(--surface2);border-radius:5px;padding:2px 8px;font-size:12.5px;cursor:pointer;margin:2px 4px 2px 0;text-align:left;line-height:1.35}
+.chip .cid{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.chip.lv1{border-left-color:var(--l1)}.chip.lv2{border-left-color:var(--l2)}.chip.lv3{border-left-color:var(--l3)}.chip.lv4{border-left-color:var(--l4)}.chip.lv0{border-left-color:var(--l0)}
+.kb{display:inline-block;font:600 11px "IBM Plex Mono",monospace;padding:1px 6px;border-radius:4px;background:var(--l0);color:var(--surface);margin-right:4px}
+.kb.off{background:none;color:var(--muted);border:1px solid var(--line)}
+.empty{color:var(--muted);font-size:13px}
+
+/* ---------- B: Konfigurator ---------- */
+.cfg-layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1000px){.cfg-layout{grid-template-columns:1fr}}
+.steps h3{margin-top:16px}.steps h3:first-child{margin-top:0}
+.step-n{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;background:var(--text);color:var(--surface);font-size:12px;margin-right:6px}
+.opt{display:flex;gap:9px;align-items:flex-start;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:6px;padding:6px 8px;cursor:pointer}
+.opt:hover{background:var(--surface2)}
+.opt .dot{flex:none;width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);margin-top:3px}
+.opt.cur{border-color:var(--line);background:var(--surface2)}
+.opt.cur .dot{border-color:var(--text);background:radial-gradient(var(--text) 0 3px,transparent 4px)}
+.opt .sm{display:block;font-size:12px;color:var(--muted)}
+.opt .warn{color:var(--dys)}
+.vgroup{font-size:12px;font-weight:650;color:var(--muted);margin:10px 0 2px 8px}
+.vgroup:first-child{margin-top:0}
+.dirs{display:block;font-size:11.5px;color:var(--muted);margin-left:14px}
+.dirrow{margin-bottom:4px}
+.dirrow .dirs{margin-left:2px}
+.mx td.xconf{box-shadow:inset 0 0 0 2px var(--exc)}
+.tbl td.bad{font-weight:700}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:13.5px}
+.chk:hover{background:var(--surface2)}
+.chk input{margin-top:3px}
+.chk.req{color:var(--muted);cursor:default}
+.chk .cid{font:500 11px "IBM Plex Mono",monospace;color:var(--muted);min-width:34px}
+.cfg-main{display:grid;gap:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.board{grid-template-columns:1fr}}
+.board h4{margin:0 0 6px;font-size:12.5px;font-weight:650;color:var(--muted)}
+.bchip{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left-width:4px;border-radius:6px;background:var(--surface);padding:6px 9px;margin-bottom:6px;cursor:pointer;opacity:.42;font-size:13px;line-height:1.3}
+.bchip .cid{font:500 11px "IBM Plex Mono",monospace;color:var(--muted);display:block}
+.bchip.on,.bchip.auto{opacity:1}
+.bchip.lv1{border-left-color:var(--l1)}.bchip.lv2{border-left-color:var(--l2)}.bchip.lv3{border-left-color:var(--l3)}.bchip.lv4{border-left-color:var(--l4)}
+.bchip.on.lv1{background:color-mix(in srgb,var(--l1) 13%,var(--surface))}
+.bchip.on.lv2{background:color-mix(in srgb,var(--l2) 13%,var(--surface))}
+.bchip.on.lv3{background:color-mix(in srgb,var(--l3) 14%,var(--surface))}
+.bchip.on.lv4{background:color-mix(in srgb,var(--l4) 13%,var(--surface))}
+.bchip.auto{border-style:dashed;border-left-style:solid}
+.bchip.conflict{box-shadow:0 0 0 2px var(--exc)}
+.bchip.locked{cursor:default}
+.checks{list-style:none;margin:0;padding:0;font-size:13.5px}
+.checks li{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+.checks li:last-child{border-bottom:0}
+.checks .ic{flex:none;width:18px;text-align:center;font-weight:700}
+.ok{color:var(--syn)}.bad{color:var(--exc)}.inf{color:var(--req)}.wrn{color:var(--dys)}
+.score{display:flex;gap:18px;align-items:baseline;margin-bottom:8px}
+.score .n{font-size:30px;font-weight:650;font-stretch:80%;line-height:1}
+.score .lbl{font-size:12.5px;color:var(--muted)}
+.pairs{list-style:none;margin:0;padding:0;font-size:13px}
+.pairs li{padding:3px 0}
+.pairs .t{font-weight:700;display:inline-block;width:14px}
+.tbl{border-collapse:collapse;width:100%;font-size:13px}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-weight:650;color:var(--muted);font-size:12.5px}
+.tbl td.c{text-align:center}
+.tbl tfoot td{font-weight:650;border-bottom:0}
+.tbl tr.cur td{background:var(--surface2)}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:var(--surface2)}
+.dotk{color:var(--l0);font-size:15px}
+.ph{color:var(--muted);font-style:italic}
+.scroll{overflow-x:auto}
+
+/* ---------- C: Matrix ---------- */
+.mx{border-collapse:collapse;font-size:13px}
+.mx th,.mx td{border:1px solid var(--line);min-width:38px;height:32px;text-align:center;padding:0 4px}
+.mx thead th{font:500 11px "IBM Plex Mono",monospace;color:var(--muted);background:var(--surface);position:sticky;top:0}
+.mx th.rh{text-align:left;padding:0 12px 0 8px;white-space:nowrap;font-weight:500;background:var(--surface);position:sticky;left:0;z-index:1}
+.mx th.rh .cid{font:500 11px "IBM Plex Mono",monospace;color:var(--muted);margin-right:8px}
+.mx td{background:var(--surface);font-weight:700;cursor:default}
+.mx td.diag{background:var(--surface2)}
+.mx td.syn{background:color-mix(in srgb,var(--syn) 20%,var(--surface));color:var(--syn)}
+.mx td.dys{background:color-mix(in srgb,var(--dys) 20%,var(--surface));color:var(--dys)}
+.mx td.exc{background:color-mix(in srgb,var(--exc) 20%,var(--surface));color:var(--exc)}
+.mx td.req{background:color-mix(in srgb,var(--req) 18%,var(--surface));color:var(--req)}
+.mx td.pre{background:color-mix(in srgb,var(--pre) 18%,var(--surface));color:var(--pre)}
+.mx td.k0{color:var(--l0)}
+.mx td.mem2{background:color-mix(in srgb,var(--l2) 22%,var(--surface));color:var(--l2)}
+.mx td.mem3{background:color-mix(in srgb,var(--l3) 24%,var(--surface));color:var(--l3)}
+.mx td.mem1{background:color-mix(in srgb,var(--l1) 20%,var(--surface));color:var(--l1)}
+.mx td.auto{color:var(--muted)}
+.mx td.sum{font-weight:600;color:var(--muted)}
+.mx .gsep{border-left:2px solid var(--muted)}
+.mx tr.gtop>*{border-top:2px solid var(--muted)}
+.mx .hl{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--text) 9%,transparent)}
+.mx .hlx{outline:2px solid var(--text);outline-offset:-2px}
+.lvbar1{border-left:4px solid var(--l1)!important}.lvbar2{border-left:4px solid var(--l2)!important}.lvbar3{border-left:4px solid var(--l3)!important}.lvbar4{border-left:4px solid var(--l4)!important}
+.info-line{min-height:26px;font-size:13.5px;margin:4px 0 10px;padding:4px 10px;border-radius:6px;background:var(--surface);border:1px solid var(--line);display:inline-block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.legend b{font-weight:700}
+h3.sec{font-size:15px;font-weight:650;margin:28px 0 8px}
+
+details.open{margin-top:30px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+details.open summary{cursor:pointer;font-weight:650}
+details.open ol{margin:10px 0 2px;padding-left:22px;font-size:13.5px;max-width:95ch}
+details.open li{margin:4px 0}
+footer{max-width:1480px;margin:0 auto;padding:0 28px 30px;color:var(--muted);font-size:12.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:640px){header.top,main{padding-left:14px;padding-right:14px}.tab{padding:10px 8px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="head-inner">
+    <div>
+      <h1>Maßnahmenmodell 2607-07, Stand _8</h1>
+      <p class="sub">Fünf Sichten auf dasselbe Datenmodell: Struktur, Szenarien, Beziehungsdichte, Kreis und Schalen</p>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Visualisierungsvorschläge">
+      <button class="tab active" role="tab" data-view="net"><span class="k">A</span>Ebenen-Netzwerk</button>
+      <button class="tab" role="tab" data-view="cfg"><span class="k">B</span>Szenario-Konfigurator</button>
+      <button class="tab" role="tab" data-view="mx"><span class="k">C</span>Beziehungsmatrix</button>
+      <button class="tab" role="tab" data-view="circ"><span class="k">D</span>Kreisdiagramm</button>
+      <button class="tab" role="tab" data-view="shell"><span class="k">E</span>Schalenmodell</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ===================== A ===================== -->
+  <section id="view-net" class="view active" role="tabpanel">
+    <p class="lead">Alle Maßnahmen nach Level angeordnet, Kostenarten (Level 0) als Kennzeichen <b>G</b>, <b>B</b>, <b>I</b> auf jeder Karte. Klicken Sie eine Maßnahme an, um nur ihre Beziehungen zu sehen; Beziehungstypen lassen sich einzeln ein- und ausblenden.</p>
+    <div class="toolbar" id="net-toolbar"></div>
+    <div class="net-layout">
+      <div class="canvas-wrap"><svg id="net" viewBox="0 0 1200 560" role="img" aria-label="Netzwerk der Maßnahmen und ihrer Beziehungen"></svg></div>
+      <aside class="panel detail" id="net-detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- ===================== B ===================== -->
+  <section id="view-cfg" class="view" role="tabpanel">
+    <p class="lead">Ein Szenario zusammenstellen: Level 1 wählen und Maßnahmen an- oder abwählen, oder unten einen Weg übernehmen. Die Prüfung zeigt verletzte Ausschlüsse und ob jede aktive Maßnahme ab Level 2 über eine Verknüpfung erreichbar ist, und listet die aktiven Synergien und Dysergien. Die Kostentabelle ist das Gerüst, an das später Budgets angehängt werden.</p>
+    <div class="cfg-layout">
+      <div class="panel steps">
+        <h3><span class="step-n">1</span>Level 1</h3>
+        <div id="cfg-l1"></div>
+        <p class="note">L1-1 und L1-2 schließen sich gegenseitig aus.</p>
+        <h3><span class="step-n">2</span>Maßnahmen an- oder abwählen</h3>
+        <div id="cfg-extra"></div>
+      </div>
+      <div class="cfg-main">
+        <div class="panel"><h3>Aktive Maßnahmen</h3><div id="cfg-board" class="board"></div>
+          <p class="note">Roter Rahmen: an einem verletzten Ausschluss beteiligt oder aktiv, aber ohne aktive Maßnahme, von der eine Verknüpfung zu ihr führt. Karten sind anklickbar.</p></div>
+        <div class="grid2">
+          <div class="panel"><h3>Prüfung</h3><div id="cfg-check"></div></div>
+          <div class="panel"><h3>Synergien und Dysergien im Szenario</h3><div id="cfg-syn"></div></div>
+        </div>
+        <div class="panel"><h3>Kostenarten je Maßnahme (Level 0)</h3><div id="cfg-cost" class="scroll"></div></div>
+        <div class="panel"><h3>Alle Wege im Vergleich</h3><div id="cfg-cmp" class="scroll"></div>
+          <p class="note">Wege sind aus den Verknüpfungen abgeleitet: Start in Level 1, je Level höchstens eine Maßnahme, Ende in Level 3 oder 4. Zählung ungewichtet je Richtung: ein aktives Paar zählt 2. Die Werte entsprechen den Outputs der risk-pilot-Datei. Zeile anklicken, um den Weg zu übernehmen.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== C ===================== -->
+  <section id="view-mx" class="view" role="tabpanel">
+    <p class="lead">Jede Beziehung als Zelle: Zeilen und Spalten sind die Maßnahmen, rechts die Kostenarten und die Summen je Zeile. Synergien und Dysergien wirken in beide Richtungen; eine Zelle zeigt die Wirkung der Zeile auf die Spalte, die gespiegelte Zelle die Gegenrichtung. Überfahren Sie eine Zelle, um die Beziehung im Klartext zu lesen.</p>
+    <div class="toolbar" id="mx-toolbar"></div>
+    <div class="info-line" id="mx-info">Zelle überfahren, um die Beziehung zu lesen.</div>
+    <div class="scroll"><table class="mx" id="mx"></table></div>
+    <div class="legend">
+      <span><b style="color:var(--syn)">+</b> Synergie: Zeile wirkt auf Spalte</span><span><b style="color:var(--dys)">−</b> Dysergie: Zeile wirkt auf Spalte</span>
+      <span><b style="color:var(--exc)">×</b> Ausschluss</span><span><b style="color:var(--pre)">▸</b> Verknüpfung Zeile → Spalte</span><span><b style="color:var(--pre)">◂</b> Verknüpfung Spalte → Zeile</span><span><b style="color:var(--l0)">●</b> Kostenbeitrag</span>
+    </div>
+    <h3 class="sec">Wege und ihre Maßnahmen</h3>
+    <div class="scroll"><table class="mx" id="mxv"></table></div>
+    <div class="legend"><span><b>■</b> Maßnahme liegt auf dem Weg</span><span>Syn. und Dys.: Wirkungen je Richtung</span></div>
+  </section>
+
+  <!-- ===================== D ===================== -->
+  <section id="view-circ" class="view" role="tabpanel">
+    <p class="lead">Alle Maßnahmen liegen auf einem Kreis, gruppiert nach Level. Jede Linie läuft über den Bündelungspunkt ihres Levels und, wenn sie zwei Level verbindet, durch die Mitte. So entstehen Bündel, die zeigen, welche Level wie stark miteinander verbunden sind. Das Verfahren heißt hierarchische Kantenbündelung (Holten 2006); der Regler stellt die Bündelungsstärke ein, bei 0 sind alle Linien gerade.</p>
+    <div class="toolbar" id="circ-toolbar"></div>
+    <div class="net-layout">
+      <div class="canvas-wrap"><svg id="circ" class="radial" role="img" aria-label="Kreisdiagramm der Maßnahmen und ihrer Beziehungen"></svg></div>
+      <aside class="panel detail" id="circ-detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- ===================== E ===================== -->
+  <section id="view-shell" class="view" role="tabpanel">
+    <p class="lead">Aufgebaut wie die Schichten einer Atmosphäre: Der gesetzliche Rahmen bildet den Kern, jedes weitere Level liegt eine Schale weiter außen. Verknüpfungen führen von innen nach außen, ein Weg ist eine Bahn vom Kern zur äußeren Schale. Die Lage auf jeder Schale ist so gewählt, dass verknüpfte Maßnahmen möglichst nah beieinander liegen.</p>
+    <div class="toolbar" id="shell-toolbar"></div>
+    <div class="net-layout">
+      <div class="canvas-wrap"><svg id="shell" class="radial" role="img" aria-label="Schalenmodell der Maßnahmen und ihrer Beziehungen"></svg></div>
+      <aside class="panel detail" id="shell-detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <details class="open">
+    <summary>Offene Punkte</summary>
+    <ol id="open-list"></ol>
+  </details>
+</main>
+<footer>Alle Inhalte stammen aus dem Objekt <span class="code">MODEL</span> im Quelltext dieser Datei. Budgetfelder (<span class="code">massnahmen[].budget</span>, <span class="code">synergie[].effekt</span> und <span class="code">dysergie[].effekt</span> je Richtung) sind als leere Platzhalter angelegt und werden noch nicht ausgewertet. Dieselbe Datenbasis steckt in <span class="code">2607-07_8.md</span> und in der risk-pilot-Modelldatei <span class="code">massnahmen_2607_07.yaml</span>; die Knoten-IDs stehen in <span class="code">massnahmen[].node</span>.</footer>
+
+<script>
+/* =====================================================================
+   DATENMODELL – einzige Quelle für alle drei Sichten.
+   Erzeugt aus derselben Datenbasis wie die Markdown-Datei und massnahmen_2607_07.yaml.
+   Für das spätere Budget-/Risikomodell:
+     massnahmen[].budget   : { 'L0-1': null, ... } je zutreffender Kostenart
+     synergie[].effekt     : Platzhalter für die Wirkung je Richtung (von → auf)
+     dysergie[].effekt     : dito
+     massnahmen[].node     : Knoten-ID in der risk-pilot-Modelldatei
+   ===================================================================== */
+const MODEL = {
+  stand: "2607-07_8",
+  levels: {"1": "Level 1: gesetzlicher Rahmen", "2": "Level 2: Freigabe", "3": "Level 3: bauliche Veränderungen", "4": "Level 4: sonstige Bausteine"},
+  kostenarten: [
+    {"id": "L0-1", "key": "G", "name": "Genehmigung", "info": "Genehmigungskosten. Die Genehmigung ist fallspezifisch abzustimmen; von einer (Pilot-)Genehmigung kann aber eine Strahlwirkung auf andere Verfahren ausgehen, also Synergien."},
+    {"id": "L0-2", "key": "B", "name": "Betrieb", "info": "Betriebskosten, die anfallen, um mit einer Maßnahme oder Technik das gewünschte Ziel zu erreichen."},
+    {"id": "L0-3", "key": "I", "name": "Investment", "info": "Initiales Investment ohne Genehmigung (die als L0-1 separat geführt wird), um ein Verfahren überhaupt nutzen zu können. Investitionskosten sind in der Regel auf andere Verfahren übertragbar bzw. fallen dann nicht erneut an."}
+  ],
+  massnahmen: [
+    {"id": "L1-1", "level": 1, "name": "AtG", "langname": "Atomgesetz", "kosten": [], "node": "l1_1_atg"},
+    {"id": "L1-2", "level": 1, "name": "StrlSchG", "langname": "Strahlenschutzgesetz", "kosten": [], "node": "l1_2_strlschg"},
+    {"id": "L2-1", "level": 2, "name": "Freigabe standard", "kosten": ["L0-2"], "node": "l2_1_freigabe_standard"},
+    {"id": "L2-2", "level": 2, "name": "Freigabe innovativ", "kosten": ["L0-1", "L0-2", "L0-3"], "node": "l2_2_freigabe_innovativ"},
+    {"id": "L2-3", "level": 2, "name": "Freigabe EFN", "kosten": ["L0-1"], "node": "l2_3_freigabe_efn"},
+    {"id": "L3-1", "level": 3, "name": "Störstellensanierung (inkl. RBS)", "kosten": ["L0-2"], "node": "l3_1_stoerstellen"},
+    {"id": "L3-2", "level": 3, "name": "Umbau Lüftungsanlage", "kosten": ["L0-1", "L0-2", "L0-3"], "node": "l3_2_lueftung_umbau"},
+    {"id": "L3-3", "level": 3, "name": "Einfache Lüftung", "kosten": ["L0-3"], "info": "Entweder kleine Maßnahme und/oder mobile Lüftung.", "node": "l3_3_lueftung_einfach"},
+    {"id": "L3-4", "level": 3, "name": "Schadstoffsanierung vorlaufend", "kosten": ["L0-2"], "node": "l3_4_schadstoff_vorlaufend"},
+    {"id": "L3-5", "level": 3, "name": "Schadstoffsanierung nachlaufend", "kosten": ["L0-2"], "info": "Offene Frage aus der Quelle: Gibt es ein Szenario ohne Schadstoffsanierung?", "node": "l3_5_schadstoff_nachlaufend"},
+    {"id": "L4-1", "level": 4, "name": "EFN 10m²", "kosten": ["L0-2"], "node": "l4_1_efn_10m2"},
+    {"id": "L4-2", "level": 4, "name": "Qualifizierung neue Messtechnik (Gammakamera)", "kosten": ["L0-2"], "node": "l4_2_gammakamera"},
+    {"id": "L4-3", "level": 4, "name": "Ferngesteuertes Vehikel", "kosten": ["L0-1", "L0-2", "L0-3"], "node": "l4_3_vehikel"},
+    {"id": "L4-4", "level": 4, "name": "Einbindung ext. FG-Expertise", "kosten": ["L0-2"], "node": "l4_4_ext_expertise"}
+  ],
+  beziehungen: {
+    verknuepfung: [["L1-1", "L2-1"], ["L1-1", "L2-2"], ["L1-1", "L2-3"], ["L1-2", "L2-1"], ["L1-2", "L2-2"], ["L1-2", "L2-3"], ["L2-1", "L3-1"], ["L2-1", "L3-2"], ["L2-1", "L3-4"], ["L2-1", "L3-5"], ["L2-2", "L3-1"], ["L2-2", "L3-3"], ["L2-2", "L3-5"], ["L2-2", "L3-4"], ["L2-3", "L3-1"], ["L2-3", "L3-3"], ["L2-1", "L4-1"], ["L2-2", "L4-2"], ["L2-2", "L4-4"], ["L2-3", "L4-4"], ["L3-1", "L4-1"], ["L3-3", "L4-2"], ["L3-3", "L4-3"], ["L3-5", "L4-2"], ["L3-5", "L4-3"]],  // [von, nach], in ein tieferes Level
+    notwendig: [],   // derzeit keine definiert
+    ausschluss: [["L1-1", "L1-2"], ["L2-1", "L2-2"], ["L2-1", "L2-3"], ["L2-2", "L2-3"], ["L3-2", "L3-3"], ["L3-4", "L3-5"]],  // schließen sich gegenseitig aus
+    synergie: [  // je Richtung, effekt = Platzhalter
+      {"von": "L1-1", "auf": "L2-2", "effekt": null},
+      {"von": "L2-2", "auf": "L1-1", "effekt": null},
+      {"von": "L1-1", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L1-1", "effekt": null},
+      {"von": "L1-2", "auf": "L2-1", "effekt": null},
+      {"von": "L2-1", "auf": "L1-2", "effekt": null},
+      {"von": "L1-2", "auf": "L3-3", "effekt": null},
+      {"von": "L3-3", "auf": "L1-2", "effekt": null},
+      {"von": "L2-1", "auf": "L3-4", "effekt": null},
+      {"von": "L3-4", "auf": "L2-1", "effekt": null},
+      {"von": "L2-1", "auf": "L3-2", "effekt": null},
+      {"von": "L3-2", "auf": "L2-1", "effekt": null},
+      {"von": "L2-2", "auf": "L3-5", "effekt": null},
+      {"von": "L3-5", "auf": "L2-2", "effekt": null},
+      {"von": "L2-2", "auf": "L3-1", "effekt": null},
+      {"von": "L3-1", "auf": "L2-2", "effekt": null},
+      {"von": "L2-2", "auf": "L3-3", "effekt": null},
+      {"von": "L3-3", "auf": "L2-2", "effekt": null},
+      {"von": "L2-3", "auf": "L3-1", "effekt": null},
+      {"von": "L3-1", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L3-5", "effekt": null},
+      {"von": "L3-5", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L3-3", "effekt": null},
+      {"von": "L3-3", "auf": "L2-3", "effekt": null},
+      {"von": "L2-1", "auf": "L4-1", "effekt": null},
+      {"von": "L4-1", "auf": "L2-1", "effekt": null},
+      {"von": "L2-2", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L2-2", "effekt": null},
+      {"von": "L2-2", "auf": "L4-4", "effekt": null},
+      {"von": "L4-4", "auf": "L2-2", "effekt": null},
+      {"von": "L2-3", "auf": "L4-4", "effekt": null},
+      {"von": "L4-4", "auf": "L2-3", "effekt": null},
+      {"von": "L3-1", "auf": "L4-1", "effekt": null},
+      {"von": "L4-1", "auf": "L3-1", "effekt": null},
+      {"von": "L3-1", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L3-1", "effekt": null},
+      {"von": "L3-3", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L3-3", "effekt": null},
+      {"von": "L3-3", "auf": "L4-3", "effekt": null},
+      {"von": "L4-3", "auf": "L3-3", "effekt": null},
+      {"von": "L3-3", "auf": "L4-1", "effekt": null},
+      {"von": "L4-1", "auf": "L3-3", "effekt": null},
+      {"von": "L4-2", "auf": "L4-3", "effekt": null},
+      {"von": "L4-3", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L4-4", "effekt": null},
+      {"von": "L4-4", "auf": "L4-2", "effekt": null},
+      {"von": "L4-3", "auf": "L4-4", "effekt": null},
+      {"von": "L4-4", "auf": "L4-3", "effekt": null},
+      {"von": "L4-1", "auf": "L4-4", "effekt": null},
+      {"von": "L4-4", "auf": "L4-1", "effekt": null}
+    ],
+    dysergie: [  // je Richtung, effekt = Platzhalter
+      {"von": "L1-2", "auf": "L2-2", "effekt": null},
+      {"von": "L2-2", "auf": "L1-2", "effekt": null},
+      {"von": "L1-2", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L1-2", "effekt": null},
+      {"von": "L2-1", "auf": "L3-3", "effekt": null},
+      {"von": "L3-3", "auf": "L2-1", "effekt": null},
+      {"von": "L2-1", "auf": "L3-5", "effekt": null},
+      {"von": "L3-5", "auf": "L2-1", "effekt": null},
+      {"von": "L2-2", "auf": "L3-2", "effekt": null},
+      {"von": "L3-2", "auf": "L2-2", "effekt": null},
+      {"von": "L2-2", "auf": "L3-4", "effekt": null},
+      {"von": "L3-4", "auf": "L2-2", "effekt": null},
+      {"von": "L2-3", "auf": "L3-2", "effekt": null},
+      {"von": "L3-2", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L3-4", "effekt": null},
+      {"von": "L3-4", "auf": "L2-3", "effekt": null},
+      {"von": "L2-1", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L2-1", "effekt": null},
+      {"von": "L2-1", "auf": "L4-3", "effekt": null},
+      {"von": "L4-3", "auf": "L2-1", "effekt": null},
+      {"von": "L2-3", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L4-1", "effekt": null},
+      {"von": "L4-1", "auf": "L2-3", "effekt": null},
+      {"von": "L2-3", "auf": "L4-3", "effekt": null},
+      {"von": "L4-3", "auf": "L2-3", "effekt": null},
+      {"von": "L3-2", "auf": "L4-2", "effekt": null},
+      {"von": "L4-2", "auf": "L3-2", "effekt": null},
+      {"von": "L3-2", "auf": "L4-3", "effekt": null},
+      {"von": "L4-3", "auf": "L3-2", "effekt": null},
+      {"von": "L3-4", "auf": "L4-3", "effekt": null},
+      {"von": "L4-3", "auf": "L3-4", "effekt": null}
+    ],
+  },
+  wege: [
+    {"id": "W01", "massnahmen": ["L1-1", "L2-1", "L3-1"]},
+    {"id": "W02", "massnahmen": ["L1-1", "L2-1", "L3-1", "L4-1"]},
+    {"id": "W03", "massnahmen": ["L1-1", "L2-1", "L3-2"]},
+    {"id": "W04", "massnahmen": ["L1-1", "L2-1", "L3-4"]},
+    {"id": "W05", "massnahmen": ["L1-1", "L2-1", "L3-5"]},
+    {"id": "W06", "massnahmen": ["L1-1", "L2-1", "L3-5", "L4-2"]},
+    {"id": "W07", "massnahmen": ["L1-1", "L2-1", "L3-5", "L4-3"]},
+    {"id": "W08", "massnahmen": ["L1-1", "L2-1", "L4-1"]},
+    {"id": "W09", "massnahmen": ["L1-1", "L2-2", "L3-1"]},
+    {"id": "W10", "massnahmen": ["L1-1", "L2-2", "L3-1", "L4-1"]},
+    {"id": "W11", "massnahmen": ["L1-1", "L2-2", "L3-3"]},
+    {"id": "W12", "massnahmen": ["L1-1", "L2-2", "L3-3", "L4-2"]},
+    {"id": "W13", "massnahmen": ["L1-1", "L2-2", "L3-3", "L4-3"]},
+    {"id": "W14", "massnahmen": ["L1-1", "L2-2", "L3-4"]},
+    {"id": "W15", "massnahmen": ["L1-1", "L2-2", "L3-5"]},
+    {"id": "W16", "massnahmen": ["L1-1", "L2-2", "L3-5", "L4-2"]},
+    {"id": "W17", "massnahmen": ["L1-1", "L2-2", "L3-5", "L4-3"]},
+    {"id": "W18", "massnahmen": ["L1-1", "L2-2", "L4-2"]},
+    {"id": "W19", "massnahmen": ["L1-1", "L2-2", "L4-4"]},
+    {"id": "W20", "massnahmen": ["L1-1", "L2-3", "L3-1"]},
+    {"id": "W21", "massnahmen": ["L1-1", "L2-3", "L3-1", "L4-1"]},
+    {"id": "W22", "massnahmen": ["L1-1", "L2-3", "L3-3"]},
+    {"id": "W23", "massnahmen": ["L1-1", "L2-3", "L3-3", "L4-2"]},
+    {"id": "W24", "massnahmen": ["L1-1", "L2-3", "L3-3", "L4-3"]},
+    {"id": "W25", "massnahmen": ["L1-1", "L2-3", "L4-4"]},
+    {"id": "W26", "massnahmen": ["L1-2", "L2-1", "L3-1"]},
+    {"id": "W27", "massnahmen": ["L1-2", "L2-1", "L3-1", "L4-1"]},
+    {"id": "W28", "massnahmen": ["L1-2", "L2-1", "L3-2"]},
+    {"id": "W29", "massnahmen": ["L1-2", "L2-1", "L3-4"]},
+    {"id": "W30", "massnahmen": ["L1-2", "L2-1", "L3-5"]},
+    {"id": "W31", "massnahmen": ["L1-2", "L2-1", "L3-5", "L4-2"]},
+    {"id": "W32", "massnahmen": ["L1-2", "L2-1", "L3-5", "L4-3"]},
+    {"id": "W33", "massnahmen": ["L1-2", "L2-1", "L4-1"]},
+    {"id": "W34", "massnahmen": ["L1-2", "L2-2", "L3-1"]},
+    {"id": "W35", "massnahmen": ["L1-2", "L2-2", "L3-1", "L4-1"]},
+    {"id": "W36", "massnahmen": ["L1-2", "L2-2", "L3-3"]},
+    {"id": "W37", "massnahmen": ["L1-2", "L2-2", "L3-3", "L4-2"]},
+    {"id": "W38", "massnahmen": ["L1-2", "L2-2", "L3-3", "L4-3"]},
+    {"id": "W39", "massnahmen": ["L1-2", "L2-2", "L3-4"]},
+    {"id": "W40", "massnahmen": ["L1-2", "L2-2", "L3-5"]},
+    {"id": "W41", "massnahmen": ["L1-2", "L2-2", "L3-5", "L4-2"]},
+    {"id": "W42", "massnahmen": ["L1-2", "L2-2", "L3-5", "L4-3"]},
+    {"id": "W43", "massnahmen": ["L1-2", "L2-2", "L4-2"]},
+    {"id": "W44", "massnahmen": ["L1-2", "L2-2", "L4-4"]},
+    {"id": "W45", "massnahmen": ["L1-2", "L2-3", "L3-1"]},
+    {"id": "W46", "massnahmen": ["L1-2", "L2-3", "L3-1", "L4-1"]},
+    {"id": "W47", "massnahmen": ["L1-2", "L2-3", "L3-3"]},
+    {"id": "W48", "massnahmen": ["L1-2", "L2-3", "L3-3", "L4-2"]},
+    {"id": "W49", "massnahmen": ["L1-2", "L2-3", "L3-3", "L4-3"]},
+    {"id": "W50", "massnahmen": ["L1-2", "L2-3", "L4-4"]}
+  ],  // abgeleitet: je Level höchstens eine Maßnahme
+  offenePunkte: ["Synergien ohne Verknüpfung zwischen beiden Maßnahmen (nicht mitgezählt: Paare innerhalb eines Levels und Paare mit Level 1, das nur mit Level 2 verknüpft ist): L2-3 Freigabe EFN und L3-5 Schadstoffsanierung nachlaufend; L3-1 Störstellensanierung (inkl. RBS) und L4-2 Qualifizierung neue Messtechnik (Gammakamera); L3-3 Einfache Lüftung und L4-1 EFN 10m². Die Synergien sind übernommen; fehlen dort Verknüpfungen?", "Kombinationen innerhalb eines Levels: In Level 1 und Level 2 ist durch die Ausschlüsse höchstens eine Maßnahme aktiv. In Level 3 schließen sich nur Umbau Lüftungsanlage und einfache Lüftung sowie die beiden Schadstoffsanierungen aus; ob die übrigen Kombinationen erlaubt sind (z. B. Störstellensanierung zusammen mit einer Schadstoffsanierung), ist nicht festgelegt. Für Level 4 gibt es keine Ausschlüsse.", "Wege sind aus den Verknüpfungen abgeleitet: Start in Level 1, je Level höchstens eine Maßnahme, Ende in Level 3 oder 4. Ein Weg darf vor einer möglichen Fortsetzung in Level 4 enden. Kombinationen mehrerer Maßnahmen in Level 3 oder 4 sind deshalb in keinem Weg enthalten, ebenso die Synergien innerhalb von Level 4.", "Wege von Level 2 direkt nach Level 4 enthalten keine bauliche Veränderung und damit auch keine Schadstoffsanierung. Ob es ein Szenario ohne Schadstoffsanierung gibt, ist eine offene Frage (siehe L3-5).", "Notwendigkeiten und Varianten sind derzeit nicht definiert.", "Die Wirkung je Richtung einer Synergie oder Dysergie ist noch offen."]
+};
+MODEL.massnahmen.forEach(m => m.budget = Object.fromEntries(m.kosten.map(k => [k, null])));
+
+/* =====================================================================
+   ABLEITUNGEN
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const M = Object.fromEntries(MODEL.massnahmen.map(m => [m.id, m]));
+const K = Object.fromEntries(MODEL.kostenarten.map(k => [k.id, k]));
+const R = MODEL.beziehungen;
+const IDS = MODEL.massnahmen.map(m => m.id);
+const LEVELS = [...new Set(MODEL.massnahmen.map(m => m.level))];
+const WEGE = MODEL.wege;
+const WG = Object.fromEntries(WEGE.map(w => [w.id, w]));
+const pk = (a, b) => a < b ? a + '|' + b : b + '|' + a;
+const pairsOf = dir => { const seen = new Set(), out = [];
+  dir.forEach(({von, auf}) => { const k = pk(von, auf); if (!seen.has(k)) { seen.add(k); out.push({ a:k.split('|')[0], b:k.split('|')[1] }); } });
+  return out; };
+const SYNP = pairsOf(R.synergie), DYSP = pairsOf(R.dysergie);
+const SYN = new Set(SYNP.map(s => pk(s.a, s.b)));
+const DYS = new Set(DYSP.map(s => pk(s.a, s.b)));
+const EXC = new Set(R.ausschluss.map(([a, b]) => pk(a, b)));
+const REQ = new Set(R.notwendig.map(([a, b]) => a + '>' + b));
+const LNK = new Set(R.verknuepfung.map(([a, b]) => a + '>' + b));
+const nm = id => M[id] ? M[id].name : K[id].name;
+const lvOf = id => M[id] ? M[id].level : 0;
+const lvName = lv => MODEL.levels[lv] || 'Level ' + lv;
+const chip = id => `<button class="chip lv${lvOf(id)}" data-go="${id}"><span class="cid">${id}</span>${nm(id)}</button>`;
+const wegText = w => w.massnahmen.map(id => nm(id)).join(' → ');
+const predsOf = id => R.verknuepfung.filter(([, b]) => b === id).map(([a]) => a);
+const WEG_GRUPPEN = Object.entries(WEGE.reduce((g, w) => { (g[w.massnahmen.slice(0, 2).map(nm).join(' → ')] ||= []).push(w); return g; }, {}));
+
+function relsOf(id) {
+  const r = { pre:[], succ:[], req:[], reqBy:[], exc:[], syn:[], dys:[] };
+  R.verknuepfung.forEach(([a, b]) => { if (b === id) r.pre.push(a); if (a === id) r.succ.push(b); });
+  R.notwendig.forEach(([a, b]) => { if (a === id) r.req.push(b); if (b === id) r.reqBy.push(a); });
+  EXC.forEach(k => { const [a, b] = k.split('|'); if (a === id) r.exc.push(b); if (b === id) r.exc.push(a); });
+  R.synergie.forEach(({von, auf}) => { if (von === id) r.syn.push(auf); });
+  R.dysergie.forEach(({von, auf}) => { if (von === id) r.dys.push(auf); });
+  return r;
+}
+function closure(list) {              // ergänzt Notwendigkeiten transitiv (derzeit keine definiert)
+  const a = new Set(list), added = new Set();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    R.notwendig.forEach(([x, y]) => { if (a.has(x) && !a.has(y)) { a.add(y); added.add(y); changed = true; } });
+  }
+  return { a, added };
+}
+function evaluate(a) {
+  return {
+    syn: R.synergie.filter(s => a.has(s.von) && a.has(s.auf)),   // je Richtung
+    dys: R.dysergie.filter(s => a.has(s.von) && a.has(s.auf)),
+    synP: SYNP.filter(s => a.has(s.a) && a.has(s.b)),            // je Paar
+    dysP: DYSP.filter(s => a.has(s.a) && a.has(s.b)),
+    exc: [...EXC].map(k => k.split('|')).filter(([x, y]) => a.has(x) && a.has(y)),
+    ohneWeg: [...a].filter(id => M[id] && predsOf(id).length && !predsOf(id).some(p => a.has(p)))
+  };
+}
+
+/* =====================================================================
+   TABS UND OFFENE PUNKTE
+   ===================================================================== */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + t.dataset.view));
+}));
+$('#open-list').innerHTML = MODEL.offenePunkte.map(p => `<li>${p}</li>`).join('');
+
+/* =====================================================================
+   A – EBENEN-NETZWERK
+   ===================================================================== */
+const TYPES = {
+  pre: { label:'Verknüpfung',        color:'var(--pre)', directed:true },
+  req: { label:'Notwendigkeit',      color:'var(--req)', directed:true },
+  exc: { label:'Ausschluss',         color:'var(--exc)', dash:'7 4' },
+  syn: { label:'Synergie ⇄',         color:'var(--syn)', bidir:true },
+  dys: { label:'Dysergie ⇄',         color:'var(--dys)', dash:'2 4', bidir:true },
+  l0:  { label:'Kostenbeitrag (L0)', color:'var(--l0)',  dash:'1 3' }
+};
+const EDGES = [];
+R.verknuepfung.forEach(([a, b]) => EDGES.push({ t:'pre', a, b }));
+R.notwendig.forEach(([a, b]) => EDGES.push({ t:'req', a, b }));
+[...EXC].forEach(k => { const [a, b] = k.split('|'); EDGES.push({ t:'exc', a, b }); });
+SYNP.forEach(s => EDGES.push({ t:'syn', a:s.a, b:s.b }));   // eine Linie, Pfeile an beiden Enden
+DYSP.forEach(s => EDGES.push({ t:'dys', a:s.a, b:s.b }));
+MODEL.massnahmen.forEach(m => m.kosten.forEach(k => EDGES.push({ t:'l0', a:m.id, b:k })));
+(() => {                                // parallele Linien zwischen demselben Paar auffächern
+  const groups = {};
+  EDGES.forEach(e => (groups[pk(e.a, e.b)] ||= []).push(e));
+  Object.values(groups).forEach(g => g.forEach((e, i) => e.off = (i - (g.length - 1) / 2) * 7));
+})();
+function laneEdges(pos) {               // Linien über ein Level hinweg laufen durch die Lücken der Spalte dazwischen
+  const lanes = {};
+  EDGES.forEach(e => {
+    const la = lvOf(e.a), lb = lvOf(e.b);
+    if (!la || !lb || Math.abs(la - lb) < 2) return;
+    const mid = Math.min(la, lb) + 1;
+    const col = IDS.filter(id => M[id].level === mid).map(id => pos[id]).sort((p, q) => p.y - q.y);
+    const gaps = [col[0].y - 12, ...col.map(p => p.y + p.h + (STEP - H) / 2)];
+    const yc = (pos[e.a].y + pos[e.a].h / 2 + pos[e.b].y + pos[e.b].h / 2) / 2;
+    e.lane = gaps.reduce((best, g) => Math.abs(g - yc) < Math.abs(best - yc) ? g : best, gaps[0]);
+    e.midX = [col[0].x, col[0].x + col[0].w];
+    (lanes[e.lane] ||= []).push(e);
+  });
+  Object.values(lanes).forEach(g => g.forEach((e, i) => e.laneOff = (i - (g.length - 1) / 2) * 5));
+}
+const USED_TYPES = Object.keys(TYPES).filter(t => EDGES.some(e => e.t === t));
+
+const W = 200, H = 56, TOP = 60, STEP = 80;
+const COLX = { 1:20, 2:310, 3:620, 4:930 }, L0X = 1245, VB_W = 1380;
+const ROWY = r => TOP + r * STEP;
+const FIXY = { 'L1-1':ROWY(1), 'L1-2':ROWY(3), 'L2-1':ROWY(0.5), 'L2-2':ROWY(2), 'L2-3':ROWY(3.5) };
+const POS = {};
+MODEL.massnahmen.forEach(m => {
+  const idx = +m.id.split('-')[1] - 1;
+  POS[m.id] = { x:COLX[m.level], y:FIXY[m.id] ?? ROWY(m.level === 4 ? idx + 0.5 : idx), w:W, h:H, col:m.level };
+});
+MODEL.kostenarten.forEach((k, i) => POS[k.id] = { x:L0X, y:ROWY(1 + i) + 3, w:120, h:50, col:9 });
+const VB_H = Math.max(...Object.values(POS).map(p => p.y + p.h)) + 30;
+laneEdges(POS);
+
+function edgePath(pa, pb, off = 0, e = {}) {
+  if (e.lane !== undefined) {                      // über ein Level hinweg: durch die Lücke führen
+    let L = pa, Rr = pb, rev = false;
+    if (pa.col > pb.col) { L = pb; Rr = pa; rev = true; }
+    const x1 = L.x + L.w, y1 = L.y + L.h / 2 + off, x2 = Rr.x, y2 = Rr.y + Rr.h / 2 + off;
+    const xa = e.midX[0] - 14, xb = e.midX[1] + 14, ly = e.lane + e.laneOff;
+    return rev ? `M${x2},${y2} C${x2 - 50},${y2} ${xb + 50},${ly} ${xb},${ly} L${xa},${ly} C${xa - 50},${ly} ${x1 + 50},${y1} ${x1},${y1}`
+               : `M${x1},${y1} C${x1 + 50},${y1} ${xa - 50},${ly} ${xa},${ly} L${xb},${ly} C${xb + 50},${ly} ${x2 - 50},${y2} ${x2},${y2}`;
+  }
+  if (pa.col === pb.col) {                         // gleiche Spalte: Bogen rechts
+    const x1 = pa.x + pa.w, y1 = pa.y + pa.h / 2 + off, x2 = pb.x + pb.w, y2 = pb.y + pb.h / 2 + off;
+    const o = Math.min(85, 34 + Math.abs(y2 - y1) * .3);
+    return `M${x1},${y1} C${x1 + o},${y1} ${x2 + o},${y2} ${x2},${y2}`;
+  }
+  let L = pa, Rr = pb, rev = false;
+  if (pa.col > pb.col) { L = pb; Rr = pa; rev = true; }
+  const x1 = L.x + L.w, y1 = L.y + L.h / 2 + off, x2 = Rr.x, y2 = Rr.y + Rr.h / 2 + off, dx = (x2 - x1) * .5;
+  return rev ? `M${x2},${y2} C${x2 - dx},${y2} ${x1 + dx},${y1} ${x1},${y1}`
+             : `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+}
+function wrap(s, n) {
+  const lines = [''];
+  s.split(' ').forEach(w => {
+    const cur = lines[lines.length - 1];
+    if (cur && (cur + ' ' + w).length > n) lines.push(w); else lines[lines.length - 1] = (cur + ' ' + w).trim();
+  });
+  return lines.length > 2 ? [lines[0], lines.slice(1).join(' ')] : lines;
+}
+function edgeTitle(e) {
+  if (e.t === 'pre') return `Verknüpfung: ${e.a} ${nm(e.a)} → ${e.b} ${nm(e.b)}`;
+  if (e.t === 'req') return `${e.a} ${nm(e.a)} benötigt ${e.b} ${nm(e.b)}`;
+  if (e.t === 'l0')  return `${e.a} ${nm(e.a)} verursacht Kosten: ${nm(e.b)}`;
+  if (TYPES[e.t].bidir) return `${e.t === 'syn' ? 'Synergie' : 'Dysergie'} in beide Richtungen: ${e.a} ${nm(e.a)} → ${e.b} ${nm(e.b)} und ${e.b} → ${e.a}`;
+  return `${TYPES[e.t].label}: ${e.a} ${nm(e.a)} und ${e.b} ${nm(e.b)}`;
+}
+function nodeSvg(id) {
+  const p = POS[id];
+  if (!M[id]) {
+    return `<g class="node" data-id="${id}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${id} ${nm(id)}">
+      <rect class="box" width="${p.w}" height="${p.h}" rx="8"/><rect width="4" height="${p.h - 8}" y="4" rx="2" style="fill:var(--l0)"/>
+      <text class="nid" x="14" y="19">${id}</text><text class="nname" x="14" y="37">${nm(id)}</text></g>`;
+  }
+  const m = M[id];
+  const badges = MODEL.kostenarten.map((k, i) => {
+    const on = m.kosten.includes(k.id), cx = p.w - 48 + i * 17;
+    return `<circle cx="${cx}" cy="15" r="7.5" style="${on ? 'fill:var(--l0)' : 'fill:none;stroke:var(--line)'}"/>
+            <text class="bdg" x="${cx}" y="18.3" text-anchor="middle" style="fill:${on ? 'var(--surface)' : 'var(--muted)'}">${k.key}</text>`;
+  }).join('');
+  const lines = wrap(m.name, 24).map((l, i) => `<text class="nname" x="14" y="${34 + i * 14.5}">${l}</text>`).join('');
+  return `<g class="node" data-id="${id}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${id} ${m.name}">
+    <title>${id} ${m.name}</title>
+    <rect class="box" width="${p.w}" height="${p.h}" rx="8"/><rect width="4" height="${p.h - 8}" y="4" rx="2" style="fill:var(--l${m.level})"/>
+    <text class="nid" x="14" y="17">${id}</text>${badges}${lines}</g>`;
+}
+function renderNet() {
+  const markers = ['pre', 'req', 'syn', 'dys'].map(t => `<marker id="ar-${t}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="${TYPES[t].bidir ? 6 : 7}" markerHeight="${TYPES[t].bidir ? 6 : 7}" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:${TYPES[t].color}"/></marker>`).join('');
+  let s = `<defs>${markers}<pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" style="fill:var(--grid)"/></pattern></defs>`;
+  s += `<rect width="${VB_W}" height="${VB_H}" fill="url(#grid)"/>`;
+  s += LEVELS.map(lv => `<text class="colhead" x="${COLX[lv]}" y="38">${lvName(lv)}</text>`).join('') + `<text class="colhead" x="${L0X}" y="38">Level 0: Kostenarten</text>`;
+  s += '<g>' + EDGES.map((e, i) => {
+    const T = TYPES[e.t];
+    return `<path class="edge" data-i="${i}" d="${edgePath(POS[e.a], POS[e.b], e.off, e)}" style="stroke:${T.color};${T.dash ? 'stroke-dasharray:' + T.dash : ''}" ${T.directed ? `marker-end="url(#ar-${e.t})"` : ''}${T.bidir ? `marker-start="url(#ar-${e.t})" marker-end="url(#ar-${e.t})"` : ''}><title>${edgeTitle(e)}</title></path>`;
+  }).join('') + '</g>';
+  s += '<g>' + [...IDS, ...MODEL.kostenarten.map(k => k.id)].map(nodeSvg).join('') + '</g>';
+  $('#net').setAttribute('viewBox', `0 0 ${VB_W} ${VB_H}`);
+  $('#net').innerHTML = s;
+}
+const net = { hidden:new Set(['l0']), focus:null, weg:'' };
+function applyNet() {
+  const vis = e => !net.hidden.has(e.t);
+  let keepN = null, keepE = null, inW = new Set();
+  if (net.focus) {
+    const f = net.focus; keepN = new Set([f]);
+    EDGES.forEach(e => { if (vis(e) && (e.a === f || e.b === f)) { keepN.add(e.a); keepN.add(e.b); } });
+    keepE = e => e.a === f || e.b === f;
+  } else if (net.weg) {
+    keepN = new Set(WG[net.weg].massnahmen); inW = keepN;
+    keepE = e => keepN.has(e.a) && keepN.has(e.b);
+  }
+  document.querySelectorAll('#net .edge').forEach(p => {
+    const e = EDGES[p.dataset.i];
+    p.style.display = vis(e) ? '' : 'none';
+    p.classList.toggle('dim', !!keepE && !keepE(e));
+    p.classList.toggle('strong', !!keepE && keepE(e));
+  });
+  document.querySelectorAll('#net .node').forEach(g => {
+    const id = g.dataset.id;
+    g.classList.toggle('dim', !!keepN && !keepN.has(id));
+    g.classList.toggle('sel', id === net.focus);
+    g.classList.toggle('inv', !net.focus && inW.has(id));
+  });
+  renderDetail();
+}
+function relBlock(t, label, ids, self) {
+  if (!ids.length) return '';
+  const T = TYPES[t];
+  const body = T.bidir
+    ? ids.map(x => `<div class="dirrow">${chip(x)}<span class="dirs">Wirkung ${self} → ${x} und ${x} → ${self}: offen</span></div>`).join('')
+    : ids.map(chip).join('');
+  return `<h4><span class="sw" style="border-top-color:${T.color};${T.dash ? 'border-top-style:dashed' : ''}"></span>${label}</h4>${body}`;
+}
+function renderDetail(state = net, el = $('#net-detail')) {
+  const id = state.focus;
+  if (!id) {
+    if (state.weg) {
+      const w = WG[state.weg], ev = evaluate(new Set(w.massnahmen));
+      el.innerHTML = `<div class="lv">Weg entlang der Verknüpfungen</div><h2>${w.id}</h2>
+        <h4>Maßnahmen</h4>${w.massnahmen.map(chip).join('')}
+        <h4>Synergien und Dysergien auf dem Weg</h4>
+        ${ev.synP.length + ev.dysP.length ? `<ul class="pairs">${ev.synP.map(s => pairLi(s, 'ok', '+')).join('')}${ev.dysP.map(s => pairLi(s, 'wrn', '−')).join('')}</ul>` : '<p class="empty">keine</p>'}`;
+      return;
+    }
+    const c = t => EDGES.filter(e => e.t === t).length;
+    el.innerHTML = `<h3>Keine Maßnahme ausgewählt</h3>
+      <p class="empty">Klicken Sie eine Karte an, um Beziehungen und Kostenarten zu sehen, oder heben Sie oben einen Weg hervor.</p>
+      <h4>Umfang (Stand ${MODEL.stand})</h4>
+      <p class="empty">${IDS.length} Maßnahmen in ${LEVELS.length} Leveln, ${MODEL.kostenarten.length} Kostenarten<br>
+      ${c('pre')} Verknüpfungen, daraus ${WEGE.length} Wege<br>
+      ${c('syn')} Synergien und ${c('dys')} Dysergien, jeweils in beide Richtungen (${R.synergie.length} bzw. ${R.dysergie.length} Wirkungen)<br>
+      ${c('exc')} Ausschlüsse</p>`;
+    return;
+  }
+  if (!M[id]) {
+    const k = K[id], users = MODEL.massnahmen.filter(m => m.kosten.includes(id)).map(m => m.id);
+    el.innerHTML = `<div class="lv">Level 0, Kostenart</div><h2><span class="code">${id}</span> ${k.name}</h2><p>${k.info}</p>
+      <h4>Maßnahmen mit diesem Kostenbeitrag (${users.length})</h4>${users.map(chip).join('')}`;
+    return;
+  }
+  const m = M[id], r = relsOf(id), ws = WEGE.filter(w => w.massnahmen.includes(id));
+  const none = !r.pre.length && !r.succ.length && !r.syn.length && !r.dys.length && !r.exc.length && !r.req.length && !r.reqBy.length;
+  el.innerHTML = `<div class="lv">${lvName(m.level)}</div><h2><span class="code">${id}</span> ${m.name}</h2>
+    ${m.langname ? `<p>${m.langname}</p>` : ''}${m.info ? `<p class="note">${m.info}</p>` : ''}
+    <h4>Kostenarten</h4>${MODEL.kostenarten.map(k => `<span class="kb ${m.kosten.includes(k.id) ? '' : 'off'}" title="${k.name}">${k.key}</span>`).join('')}
+    ${m.kosten.length ? '' : '<span class="empty">keine Angabe in der Quelle</span>'}
+    ${relBlock('pre', 'Verknüpft von', r.pre)}${relBlock('pre', 'Verknüpft mit', r.succ)}
+    ${relBlock('req', 'Benötigt', r.req)}${relBlock('req', 'Wird benötigt von', r.reqBy)}
+    ${relBlock('exc', 'Schließt aus', r.exc)}${relBlock('syn', 'Synergie in beide Richtungen', r.syn, id)}${relBlock('dys', 'Dysergie in beide Richtungen', r.dys, id)}
+    ${none ? '<p class="note">Noch keine Verknüpfungen, Synergien oder Dysergien definiert.</p>' : ''}
+    <h4>In Wegen</h4>${ws.length ? ws.map(w => `<button class="chip" data-weg="${w.id}" title="${wegText(w)}">${w.id}</button>`).join('') : '<span class="empty">in keinem Weg</span>'}`;
+}
+function initNet() {
+  $('#net-toolbar').innerHTML = USED_TYPES.map(t => { const T = TYPES[t];
+    return `<label class="tog"><input type="checkbox" data-t="${t}" ${net.hidden.has(t) ? '' : 'checked'}><span class="sw" style="border-top-color:${T.color};${T.dash ? 'border-top-style:dashed' : ''}"></span>${T.label}</label>`; }).join('') +
+    `<label class="tog">Weg hervorheben <select id="net-weg"><option value="">keiner</option>${WEG_GRUPPEN.map(([k, ws]) => `<optgroup label="${k}">${ws.map(w => `<option value="${w.id}">${w.id} ${w.massnahmen.slice(2).map(nm).join(' → ')}</option>`).join('')}</optgroup>`).join('')}</select></label>
+     <button class="btn" id="net-reset">Auswahl aufheben</button>`;
+  $('#net-toolbar').addEventListener('change', e => {
+    if (e.target.dataset.t) { e.target.checked ? net.hidden.delete(e.target.dataset.t) : net.hidden.add(e.target.dataset.t); }
+    if (e.target.id === 'net-weg') { net.weg = e.target.value; net.focus = null; }
+    applyNet();
+  });
+  $('#net-reset').addEventListener('click', () => { net.focus = null; net.weg = ''; $('#net-weg').value = ''; applyNet(); });
+  const pick = target => {
+    const g = target.closest('.node');
+    net.focus = g ? (net.focus === g.dataset.id ? null : g.dataset.id) : null;
+    applyNet();
+  };
+  $('#net').addEventListener('click', e => pick(e.target));
+  $('#net').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.node')) { e.preventDefault(); pick(e.target); } });
+  $('#net-detail').addEventListener('click', e => {
+    const go = e.target.closest('[data-go]'), ww = e.target.closest('[data-weg]');
+    if (go) { net.focus = go.dataset.go; applyNet(); }
+    if (ww) { net.focus = null; net.weg = ww.dataset.weg; $('#net-weg').value = net.weg; applyNet(); }
+  });
+  renderNet(); applyNet();
+}
+
+/* =====================================================================
+   B – SZENARIO-KONFIGURATOR
+   ===================================================================== */
+const OPTIONAL = IDS.filter(id => M[id].level >= 2);
+const SCHADSTOFF = IDS.filter(id => /^Schadstoffsanierung/.test(M[id].name));
+const cmpFilter = { l1:'', l2:'' };
+const cfg = { l1:WEGE[0].massnahmen[0], weg:WEGE[0].id, sel:new Set(WEGE[0].massnahmen.slice(1)) };
+const keyOf = (l1, list) => [l1, ...[...list].sort()].join(',');
+function useWeg(id) { const w = WG[id]; cfg.weg = id; cfg.l1 = w.massnahmen[0]; cfg.sel = new Set(w.massnahmen.slice(1)); }
+function matchWeg() { const k = keyOf(cfg.l1, cfg.sel); const hit = WEGE.find(w => keyOf(w.massnahmen[0], w.massnahmen.slice(1)) === k); cfg.weg = hit ? hit.id : ''; }
+function scenario(l1, sel) { const c = closure([l1, ...sel]); return { ...c, ...evaluate(c.a) }; }
+const pairLi = (s, cls, sym) => `<li><span class="t ${cls}">${sym}</span>${s.a} ${nm(s.a)} ⇄ ${s.b} ${nm(s.b)}<span class="dirs">${s.a} → ${s.b} und ${s.b} → ${s.a}</span></li>`;
+
+function renderCfg() {
+  const sc = scenario(cfg.l1, cfg.sel), a = sc.a;
+  const problem = new Set([...sc.exc.flat(), ...sc.ohneWeg]);
+
+  $('#cfg-l1').innerHTML = IDS.filter(id => M[id].level === 1).map(id => `<button class="opt ${cfg.l1 === id ? 'cur' : ''}" data-l1="${id}"><span class="dot"></span><span><span class="code">${id}</span> ${M[id].name}<span class="sm">${M[id].langname || ''}</span></span></button>`).join('');
+  $('#cfg-extra').innerHTML = LEVELS.filter(lv => lv >= 2).map(lv => `<div class="vgroup">${lvName(lv)}</div>` + IDS.filter(id => M[id].level === lv).map(id => {
+    const pr = predsOf(id), reach = !pr.length || pr.some(p => a.has(p));
+    return `<label class="chk"><input type="checkbox" data-tog="${id}" ${a.has(id) ? 'checked' : ''}><span class="cid">${id}</span><span>${M[id].name}${!reach ? ' <span class="sm warn">keine aktive Verknüpfung</span>' : ''}</span></label>`;
+  }).join('')).join('');
+
+  $('#cfg-board').innerHTML = LEVELS.map(lv => `<div><h4>${lvName(lv)}</h4>${IDS.filter(id => M[id].level === lv).map(id => {
+    const cls = ['bchip', 'lv' + lv];
+    if (a.has(id)) cls.push(sc.added.has(id) ? 'auto' : 'on');
+    if (problem.has(id)) cls.push('conflict');
+    return `<button class="${cls.join(' ')}" data-board="${id}"><span class="cid">${id}</span>${M[id].name}</button>`;
+  }).join('')}</div>`).join('');
+
+  const checks = [];
+  sc.ohneWeg.forEach(x => checks.push(['bad', '✕', `${x} ${nm(x)} ist aktiv, aber keine der Maßnahmen, von denen eine Verknüpfung zu ihr führt (${predsOf(x).join(', ')}).`]));
+  sc.exc.forEach(([x, y]) => checks.push(['bad', '✕', `Ausschluss verletzt: ${x} ${nm(x)} und ${y} ${nm(y)}`]));
+  if (!sc.ohneWeg.length && !sc.exc.length) checks.push(['ok', '✓', 'Kein Ausschluss verletzt, und alle aktiven Maßnahmen ab Level 2 sind über eine Verknüpfung erreichbar.']);
+  if (sc.added.size) checks.push(['inf', 'i', `Über Notwendigkeit ergänzt: ${[...sc.added].map(x => x + ' ' + nm(x)).join(', ')}`]);
+  [3, 4].forEach(lv => { const on = IDS.filter(id => M[id].level === lv && a.has(id));
+    if (on.length > 1 && !sc.exc.some(([x, y]) => on.includes(x) && on.includes(y)))
+      checks.push(['wrn', '!', `Mehrere Maßnahmen in ${lvName(lv)} aktiv (${on.join(', ')}). Kein Ausschluss verbietet das, ob die Kombination erlaubt ist, ist aber nicht festgelegt.`]); });
+  if (!SCHADSTOFF.some(x => a.has(x))) checks.push(['wrn', '!', 'Keine Schadstoffsanierung aktiv. Ob es ein solches Szenario gibt, ist eine offene Frage.']);
+  checks.push(cfg.weg ? ['inf', 'i', `Entspricht Weg ${cfg.weg}.`] : ['inf', 'i', 'Entspricht keinem der abgeleiteten Wege.']);
+  $('#cfg-check').innerHTML = `<ul class="checks">${checks.map(([c, i, t]) => `<li><span class="ic ${c}">${i}</span><span>${t}</span></li>`).join('')}</ul>`;
+
+  $('#cfg-syn').innerHTML = `<div class="score"><div><div class="n ok">${sc.syn.length}</div><div class="lbl">Synergie-Wirkungen<br>aus ${sc.synP.length} Paaren</div></div>
+      <div><div class="n wrn">${sc.dys.length}</div><div class="lbl">Dysergie-Wirkungen<br>aus ${sc.dysP.length} Paaren</div></div></div>
+    <ul class="pairs">${sc.synP.map(s => pairLi(s, 'ok', '+')).join('')}${sc.dysP.map(s => pairLi(s, 'wrn', '−')).join('')}</ul>
+    ${sc.synP.length + sc.dysP.length ? '' : '<p class="empty">Keine Paare aktiv.</p>'}`;
+
+  const act = IDS.filter(id => a.has(id));
+  const cnt = k => act.filter(id => M[id].kosten.includes(k)).length;
+  $('#cfg-cost').innerHTML = `<table class="tbl"><thead><tr><th>Maßnahme</th>${MODEL.kostenarten.map(k => `<th class="c" title="${k.info}">${k.name}</th>`).join('')}<th>Budget</th><th>Knoten in risk-pilot</th></tr></thead>
+    <tbody>${act.map(id => `<tr><td><span class="code" style="color:var(--muted)">${id}</span> ${M[id].name}</td>${MODEL.kostenarten.map(k => `<td class="c">${M[id].kosten.includes(k.id) ? '<span class="dotk">●</span>' : ''}</td>`).join('')}
+      <td class="ph">${M[id].kosten.length ? 'noch nicht erfasst' : 'keine Kostenart in der Quelle'}</td><td class="code" style="font-size:12px;color:var(--muted)">${M[id].node}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Anzahl Beiträge</td>${MODEL.kostenarten.map(k => `<td class="c">${cnt(k.id)}</td>`).join('')}<td></td><td></td></tr></tfoot></table>
+    <p class="note">Laut Beschreibung in L0-1 und L0-3 sind vor allem Genehmigungs- und Investitionskosten übertragbar. Dort dürften Synergien später am stärksten wirken; die Paare sind aber noch keiner Kostenart zugeordnet.</p>`;
+
+  const f1 = cmpFilter.l1, f2 = cmpFilter.l2;
+  const shown = WEGE.filter(w => (!f1 || w.massnahmen[0] === f1) && (!f2 || w.massnahmen[1] === f2));
+  const sel = (key, lv) => `<select data-filter="${key}"><option value="">alle</option>${IDS.filter(id => M[id].level === lv).map(id => `<option value="${id}" ${cmpFilter[key] === id ? 'selected' : ''}>${id} ${nm(id)}</option>`).join('')}</select>`;
+  $('#cfg-cmp').innerHTML = `<div class="toolbar">Level 1 ${sel('l1', 1)} Level 2 ${sel('l2', 2)} <span class="note">${shown.length} von ${WEGE.length} Wegen</span></div>
+    <table class="tbl"><thead><tr><th>Weg</th>${LEVELS.map(lv => `<th>${lvName(lv)}</th>`).join('')}<th class="c">Synergie-<br>Wirkungen</th><th class="c">Dysergie-<br>Wirkungen</th></tr></thead><tbody>${
+    shown.map(w => { const s = scenario(w.massnahmen[0], w.massnahmen.slice(1));
+      return `<tr class="click ${cfg.weg === w.id ? 'cur' : ''}" data-cmp="${w.id}"><td class="code">${w.id}</td>${LEVELS.map(lv => { const id = w.massnahmen.find(x => M[x].level === lv);
+        return id ? `<td><span class="code" style="color:var(--muted)">${id}</span> ${nm(id)}</td>` : '<td class="ph">–</td>'; }).join('')}
+        <td class="c ok">${s.syn.length}</td><td class="c wrn">${s.dys.length}</td></tr>`; }).join('')}</tbody></table>`;
+}
+
+function initCfg() {
+  $('#view-cfg').addEventListener('click', e => {
+    const t = e.target.closest('[data-l1],[data-board],[data-cmp]');
+    if (!t) return;
+    const d = t.dataset;
+    if (d.l1) { cfg.l1 = d.l1; matchWeg(); }
+    if (d.cmp) useWeg(d.cmp);
+    if (d.board) {
+      const id = d.board;
+      if (M[id].level === 1) cfg.l1 = id; else cfg.sel.has(id) ? cfg.sel.delete(id) : cfg.sel.add(id);
+      matchWeg();
+    }
+    renderCfg();
+  });
+  $('#view-cfg').addEventListener('change', e => {
+    if (e.target.dataset.filter) { cmpFilter[e.target.dataset.filter] = e.target.value; renderCfg(); return; }
+    const id = e.target.dataset.tog; if (!id) return;
+    e.target.checked ? cfg.sel.add(id) : cfg.sel.delete(id);
+    matchWeg(); renderCfg();
+  });
+  renderCfg();
+}
+
+/* =====================================================================
+   C – BEZIEHUNGSMATRIX
+   ===================================================================== */
+const mxHidden = new Set();
+const MXT = Object.fromEntries(['syn', 'dys', 'exc', 'req', 'pre'].filter(t => USED_TYPES.includes(t)).map(t => [t, TYPES[t].label.replace(' ⇄', '')]));
+function mxRels(a, b) {
+  const k = pk(a, b), out = [], A = `${a} ${nm(a)}`, B = `${b} ${nm(b)}`;
+  if (SYN.has(k)) out.push(['syn', '+', `Synergie: Wirkung von ${A} auf ${B} (Gegenrichtung in Zeile ${b}, Spalte ${a})`]);
+  if (DYS.has(k)) out.push(['dys', '−', `Dysergie: Wirkung von ${A} auf ${B} (Gegenrichtung in Zeile ${b}, Spalte ${a})`]);
+  if (EXC.has(k)) out.push(['exc', '×', `Ausschluss: ${A} und ${B}`]);
+  if (REQ.has(a + '>' + b)) out.push(['req', '→', `${A} benötigt ${B}`]);
+  if (REQ.has(b + '>' + a)) out.push(['req', '←', `${B} benötigt ${A}`]);
+  if (LNK.has(a + '>' + b)) out.push(['pre', '▸', `Verknüpfung ${A} → ${B}`]);
+  if (LNK.has(b + '>' + a)) out.push(['pre', '◂', `Verknüpfung ${B} → ${A}`]);
+  return out.filter(x => !mxHidden.has(x[0]));
+}
+function renderMx() {
+  const sep = (list, i) => i > 0 && M[list[i]].level !== M[list[i - 1]].level;
+  let h = `<thead><tr><th class="rh"></th>${IDS.map((id, i) => `<th data-c="${id}" class="${sep(IDS, i) ? 'gsep' : ''}" title="${nm(id)}">${id}</th>`).join('')}
+    ${MODEL.kostenarten.map((k, i) => `<th data-c="${k.id}" class="${i === 0 ? 'gsep' : ''}" title="${k.name}">${k.key}</th>`).join('')}
+    <th class="gsep" data-c="S+" title="Synergie-Partner">Σ+</th><th data-c="S-" title="Dysergie-Partner">Σ−</th></tr></thead><tbody>`;
+  IDS.forEach((r, ri) => {
+    const m = M[r];
+    h += `<tr class="${sep(IDS, ri) ? 'gtop' : ''}"><th class="rh lvbar${m.level}" data-r="${r}"><span class="cid">${r}</span>${m.name}</th>`;
+    IDS.forEach((c, ci) => {
+      const g = sep(IDS, ci) ? ' gsep' : '';
+      if (r === c) { h += `<td class="diag${g}" data-r="${r}" data-c="${c}"></td>`; return; }
+      const rel = mxRels(r, c);
+      h += `<td class="${rel.length ? rel[0][0] : ''}${g}" data-r="${r}" data-c="${c}" data-info="${rel.map(x => x[2]).join('; ') || `${r} und ${c}: keine Beziehung definiert`}">${rel.map(x => x[1]).join('')}</td>`;
+    });
+    MODEL.kostenarten.forEach((k, i) => {
+      const on = m.kosten.includes(k.id);
+      h += `<td class="k0${i === 0 ? ' gsep' : ''}" data-r="${r}" data-c="${k.id}" data-info="${r} ${m.name}: ${on ? 'verursacht' : 'keine Angabe zu'} Kosten der Art ${k.name}">${on ? '●' : ''}</td>`;
+    });
+    const r0 = relsOf(r);
+    h += `<td class="sum gsep" data-r="${r}" data-c="S+" data-info="${r} wirkt auf ${r0.syn.length} Maßnahmen mit Synergie (und erhält von ihnen eine Wirkung zurück)">${r0.syn.length || ''}</td><td class="sum" data-r="${r}" data-c="S-" data-info="${r} wirkt auf ${r0.dys.length} Maßnahmen mit Dysergie (und erhält von ihnen eine Wirkung zurück)">${r0.dys.length || ''}</td></tr>`;
+  });
+  $('#mx').innerHTML = h + '</tbody>';
+
+  const cols = IDS.filter(id => WEGE.some(w => w.massnahmen.includes(id)));
+  let v = `<thead><tr><th class="rh">Weg</th>${cols.map((id, i) => `<th data-c="${id}" class="${sep(cols, i) ? 'gsep' : ''}" title="${nm(id)}">${id}</th>`).join('')}<th class="gsep">Syn.</th><th>Dys.</th></tr></thead><tbody>`;
+  WEGE.forEach((w, wi) => {
+    const ev = evaluate(new Set(w.massnahmen));
+    const newGroup = wi > 0 && w.massnahmen[0] !== WEGE[wi - 1].massnahmen[0];
+    v += `<tr class="${newGroup ? 'gtop' : ''}"><th class="rh lvbar1" data-r="${w.id}"><span class="cid">${w.id}</span>${wegText(w)}</th>${cols.map((id, i) => {
+      const on = w.massnahmen.includes(id);
+      return `<td class="${on ? 'mem' + M[id].level : ''}${sep(cols, i) ? ' gsep' : ''}" data-r="${w.id}" data-c="${id}" data-info="${w.id} ${on ? 'enthält' : 'enthält nicht'} ${id} ${nm(id)}">${on ? '■' : ''}</td>`;
+    }).join('')}<td class="sum gsep ok" data-r="${w.id}" data-info="${w.id}: ${ev.syn.length} Synergie-Wirkungen">${ev.syn.length || ''}</td><td class="sum wrn" data-r="${w.id}" data-info="${w.id}: ${ev.dys.length} Dysergie-Wirkungen">${ev.dys.length || ''}</td></tr>`;
+  });
+  $('#mxv').innerHTML = v + '</tbody>';
+}
+function initMx() {
+  $('#mx-toolbar').innerHTML = 'Anzeigen: ' + Object.entries(MXT).map(([t, l]) =>
+    `<label class="tog"><input type="checkbox" data-mt="${t}" checked><span class="sw" style="border-top-color:${TYPES[t].color}"></span>${l}</label>`).join('');
+  $('#mx-toolbar').addEventListener('change', e => {
+    const t = e.target.dataset.mt; if (!t) return;
+    e.target.checked ? mxHidden.delete(t) : mxHidden.add(t);
+    renderMx();
+  });
+  ['#mx', '#mxv'].forEach(sel => {
+    const tb = $(sel);
+    const clear = () => tb.querySelectorAll('.hl,.hlx').forEach(x => x.classList.remove('hl', 'hlx'));
+    tb.addEventListener('mouseover', e => {
+      clear();
+      const cell = e.target.closest('td[data-r]'); if (!cell) return;
+      const { r, c } = cell.dataset;
+      tb.querySelectorAll(`[data-r="${r}"]`).forEach(x => x.classList.add('hl'));
+      if (c) tb.querySelectorAll(`[data-c="${c}"]`).forEach(x => x.classList.add('hl'));
+      cell.classList.add('hlx');
+      $('#mx-info').textContent = cell.dataset.info || '';
+    });
+    tb.addEventListener('mouseleave', clear);
+  });
+  renderMx();
+}
+
+/* =====================================================================
+   GEMEINSAM FÜR D UND E: Werkzeugleiste, Hervorhebung, Detailpanel
+   ===================================================================== */
+const RTYPES = USED_TYPES.filter(t => t !== 'l0');
+const REDGES = EDGES.filter(e => e.t !== 'l0');
+const svgEl = (tag, attrs) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(' ')}/>`;
+const polar = (r, a) => [r * Math.cos(a), r * Math.sin(a)];
+const f1 = v => Math.round(v * 10) / 10;
+function markerDefs(prefix) {
+  return ['pre', 'req', 'syn', 'dys'].map(t => `<marker id="${prefix}-${t}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:${TYPES[t].color}"/></marker>`).join('');
+}
+function edgeAttrs(e, prefix) {
+  const T = TYPES[e.t];
+  return `style="stroke:${T.color};${T.dash ? 'stroke-dasharray:' + T.dash : ''}" ${T.directed ? `marker-end="url(#${prefix}-${e.t})"` : ''}${T.bidir ? `marker-start="url(#${prefix}-${e.t})" marker-end="url(#${prefix}-${e.t})"` : ''}`;
+}
+function wegOptions() {
+  return `<option value="">keiner</option>${WEG_GRUPPEN.map(([k, ws]) => `<optgroup label="${k}">${ws.map(w => `<option value="${w.id}">${w.id} ${w.massnahmen.slice(2).map(nm).join(' → ')}</option>`).join('')}</optgroup>`).join('')}`;
+}
+function radialView(cfg) {
+  const st = { hidden:new Set(), focus:null, weg:'', ...cfg };
+  st.apply = () => {
+    const vis = e => !st.hidden.has(e.t);
+    let keepN = null, keepE = null, inW = new Set();
+    if (st.focus) {
+      keepN = new Set([st.focus]);
+      REDGES.forEach(e => { if (vis(e) && (e.a === st.focus || e.b === st.focus)) { keepN.add(e.a); keepN.add(e.b); } });
+      keepE = e => e.a === st.focus || e.b === st.focus;
+    } else if (st.weg) {
+      keepN = new Set(WG[st.weg].massnahmen); inW = keepN;
+      keepE = e => keepN.has(e.a) && keepN.has(e.b);
+    }
+    st.svg.querySelectorAll('.edge').forEach(p => {
+      const e = REDGES[p.dataset.i];
+      p.style.display = vis(e) ? '' : 'none';
+      p.classList.toggle('dim', !!keepE && !keepE(e));
+      p.classList.toggle('strong', !!keepE && keepE(e));
+    });
+    st.svg.querySelectorAll('.rnode').forEach(g => {
+      const id = g.dataset.id;
+      g.classList.toggle('dim', !!keepN && !keepN.has(id));
+      g.classList.toggle('sel', id === st.focus);
+      g.classList.toggle('inv', !st.focus && inW.has(id));
+    });
+    renderDetail(st, st.detail);
+  };
+  st.tb.innerHTML = RTYPES.map(t => { const T = TYPES[t];
+      return `<label class="tog"><input type="checkbox" data-t="${t}" checked><span class="sw" style="border-top-color:${T.color};${T.dash ? 'border-top-style:dashed' : ''}"></span>${T.label}</label>`; }).join('') +
+    (st.extra || '') + `<label class="tog">Weg hervorheben <select data-wegsel>${wegOptions()}</select></label><button class="btn" data-reset>Auswahl aufheben</button>`;
+  st.tb.addEventListener('change', e => {
+    const d = e.target.dataset;
+    if (d.t) e.target.checked ? st.hidden.delete(d.t) : st.hidden.add(d.t);
+    if ('wegsel' in d) { st.weg = e.target.value; st.focus = null; }
+    st.apply();
+  });
+  st.tb.addEventListener('input', e => { if (st.onInput && st.onInput(e)) { st.draw(); st.apply(); } });
+  st.tb.addEventListener('click', e => { if (e.target.closest('[data-reset]')) { st.focus = null; st.weg = ''; st.tb.querySelector('[data-wegsel]').value = ''; st.apply(); } });
+  const pick = t => { const g = t.closest('.rnode'); st.focus = g ? (st.focus === g.dataset.id ? null : g.dataset.id) : null; st.apply(); };
+  st.svg.addEventListener('click', e => pick(e.target));
+  st.svg.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.rnode')) { e.preventDefault(); pick(e.target); } });
+  st.detail.addEventListener('click', e => {
+    const go = e.target.closest('[data-go]'), ww = e.target.closest('[data-weg]');
+    if (go && M[go.dataset.go]) { st.focus = go.dataset.go; st.apply(); }
+    if (ww) { st.focus = null; st.weg = ww.dataset.weg; st.tb.querySelector('[data-wegsel]').value = st.weg; st.apply(); }
+  });
+  st.draw(); st.apply();
+  return st;
+}
+function nodeLabel(id, x, y, anchor, rot = 0) {
+  return `<text class="rlabel" x="${f1(x)}" y="${f1(y)}" text-anchor="${anchor}" dominant-baseline="middle" ${rot ? `transform="rotate(${f1(rot)} ${f1(x)} ${f1(y)})"` : ''}><tspan class="rid">${id}</tspan> ${nm(id)}</text>`;
+}
+
+/* =====================================================================
+   D – KREISDIAGRAMM MIT HIERARCHISCHER KANTENBÜNDELUNG (nach Holten 2006)
+   Blätter = Maßnahmen auf dem Kreis, innere Knoten = Level, Wurzel = Mitte.
+   Jede Linie folgt dem Pfad Maßnahme → Level → (Mitte) → Level → Maßnahme
+   als B-Spline; beta steuert die Bündelungsstärke.
+   ===================================================================== */
+const CR = 300, CGAP = 1.3;
+const CPOS = {}, CHUB = {};
+(() => {
+  const slots = IDS.length + LEVELS.length * CGAP, step = 2 * Math.PI / slots;
+  let slot = CGAP / 2;
+  LEVELS.forEach(lv => {
+    const ids = IDS.filter(id => M[id].level === lv), a0 = -Math.PI / 2 + slot * step;
+    ids.forEach((id, i) => { const a = a0 + i * step; CPOS[id] = { a, x:polar(CR, a)[0], y:polar(CR, a)[1] }; });
+    const am = a0 + (ids.length - 1) * step / 2;
+    CHUB[lv] = { a:am, a0:a0 - step * .45, a1:a0 + (ids.length - 1) * step + step * .45, p:polar(CR * .42, am) };
+    slot += ids.length + CGAP;
+  });
+})();
+function basisPath(pts) {                 // uniformer kubischer B-Spline (wie d3.curveBasis)
+  let d = '', x0, y0, x1, y1, n = 0;
+  const pt = (x, y) => { d += `C${f1((2 * x0 + x1) / 3)},${f1((2 * y0 + y1) / 3)} ${f1((x0 + 2 * x1) / 3)},${f1((y0 + 2 * y1) / 3)} ${f1((x0 + 4 * x1 + x) / 6)},${f1((y0 + 4 * y1 + y) / 6)}`; };
+  pts.forEach(([x, y]) => {
+    if (n === 0) d += `M${f1(x)},${f1(y)}`;
+    else if (n === 2) { d += `L${f1((5 * x0 + x1) / 6)},${f1((5 * y0 + y1) / 6)}`; pt(x, y); }
+    else if (n > 2) pt(x, y);
+    n++; x0 = x1; y0 = y1; x1 = x; y1 = y;
+  });
+  if (n >= 3) pt(x1, y1);
+  d += `L${f1(x1)},${f1(y1)}`;
+  return d;
+}
+function circlePath(e, beta) {
+  const la = lvOf(e.a), lb = lvOf(e.b);
+  const end = id => polar(CR - 10, CPOS[id].a);
+  const ctrl = [end(e.a), CHUB[la].p, ...(la !== lb ? [[0, 0], CHUB[lb].p] : []), end(e.b)];
+  const b = Math.max(0, beta - Math.abs(e.off || 0) * .02);     // parallele Linien leicht unterschiedlich bündeln
+  const [p0, pn] = [ctrl[0], ctrl[ctrl.length - 1]], n = ctrl.length - 1;
+  return basisPath(ctrl.map(([x, y], i) => [b * x + (1 - b) * (p0[0] + i / n * (pn[0] - p0[0])), b * y + (1 - b) * (p0[1] + i / n * (pn[1] - p0[1]))]));
+}
+function initCircle() {
+  const VB = 625;
+  radialView({
+    svg:$('#circ'), tb:$('#circ-toolbar'), detail:$('#circ-detail'), beta:.85,
+    extra:`<label class="tog">Bündelung <input type="range" min="0" max="100" value="85" data-beta style="width:110px"></label>`,
+    onInput(e) { if ('beta' in e.target.dataset) { this.beta = e.target.value / 100; return true; } },
+    draw() {
+      const arcPath = (r, a0, a1) => { const [x0, y0] = polar(r, a0), [x1, y1] = polar(r, a1); return `M${f1(x0)},${f1(y0)} A${r},${r} 0 ${a1 - a0 > Math.PI ? 1 : 0},1 ${f1(x1)},${f1(y1)}`; };
+      let s = `<defs>${markerDefs('cm')}${LEVELS.map(lv => { const h = CHUB[lv], mid = (h.a0 + h.a1) / 2, lower = Math.sin(mid) > .2;
+        return `<path id="carc${lv}" d="${lower ? arcPath(CR - 46, h.a1, h.a0).replace(' 0,1 ', ' 0,0 ') : arcPath(CR - 38, h.a0, h.a1)}"/>`; }).join('')}</defs>`;
+      s += LEVELS.map(lv => { const h = CHUB[lv];
+        return `<path d="${arcPath(CR + 6, h.a0, h.a1)}" class="lvarc" style="stroke:var(--l${lv})"/>
+          <text class="lvtext" style="fill:var(--l${lv})"><textPath href="#carc${lv}" startOffset="50%" text-anchor="middle">${lvName(lv).replace(/^Level \d+: /, '')}</textPath></text>`; }).join('');
+      s += '<g>' + REDGES.map((e, i) => `<path class="edge" data-i="${i}" d="${circlePath(e, this.beta)}" ${edgeAttrs(e, 'cm')}><title>${edgeTitle(e)}</title></path>`).join('') + '</g>';
+      s += IDS.map(id => { const { a, x, y } = CPOS[id], deg = a * 180 / Math.PI, left = Math.cos(a) < 0, [lx, ly] = polar(CR + 18, a);
+        return `<g class="rnode" data-id="${id}" tabindex="0" role="button" aria-label="${id} ${nm(id)}"><title>${id} ${nm(id)}</title>
+          <circle cx="${f1(x)}" cy="${f1(y)}" r="7" style="fill:var(--l${M[id].level})"/>${nodeLabel(id, lx, ly, left ? 'end' : 'start', left ? deg + 180 : deg)}</g>`; }).join('');
+      this.svg.setAttribute('viewBox', `${-VB} ${-VB + 20} ${2 * VB} ${2 * VB - 40}`);
+      this.svg.innerHTML = s;
+    }
+  });
+}
+
+/* =====================================================================
+   E – SCHALENMODELL („Atmosphäre“): Level 1 als Kern, jedes weitere Level
+   eine Schale weiter außen. Winkel je Schale so gewählt, dass verknüpfte
+   Maßnahmen möglichst nah beieinander liegen (alle Reihenfolgen und
+   Drehungen je Schale durchprobiert).
+   ===================================================================== */
+const SHELL_R = { 1:58, 2:170, 3:285, 4:400 };
+const SHELL_BAND = { 1:[0, 112], 2:[112, 228], 3:[228, 342], 4:[342, 455] };
+const SPOS = {};
+(() => {
+  const angDist = (x, y) => { const d = Math.abs(((x - y) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI); return d; };
+  const weight = { pre:1, syn:.35, dys:.35, exc:0, req:1 };
+  const perms = arr => arr.length <= 1 ? [arr] : arr.flatMap((x, i) => perms([...arr.slice(0, i), ...arr.slice(i + 1)]).map(p => [x, ...p]));
+  const l1 = IDS.filter(id => M[id].level === 1);
+  l1.forEach((id, i) => SPOS[id] = { a:Math.PI + i * 2 * Math.PI / l1.length });
+  LEVELS.filter(lv => lv > 1).forEach(lv => {
+    const ids = IDS.filter(id => M[id].level === lv), step = 2 * Math.PI / ids.length;
+    const rel = REDGES.filter(e => (ids.includes(e.a) && SPOS[e.b]) || (ids.includes(e.b) && SPOS[e.a]));
+    let best = null;
+    perms(ids).forEach(order => {
+      for (let k = 0; k < 24; k++) {
+        const rot = k * step / 24 - Math.PI / 2, ang = Object.fromEntries(order.map((id, i) => [id, rot + i * step]));
+        const cost = rel.reduce((c, e) => c + (weight[e.t] || 0) * angDist(ang[e.a] ?? SPOS[e.a].a, ang[e.b] ?? SPOS[e.b].a), 0);
+        if (!best || cost < best.cost - 1e-9) best = { cost, ang };
+      }
+    });
+    Object.entries(best.ang).forEach(([id, a]) => SPOS[id] = { a });
+  });
+  IDS.forEach(id => { const [x, y] = polar(SHELL_R[M[id].level], SPOS[id].a); Object.assign(SPOS[id], { x, y, r:SHELL_R[M[id].level] }); });
+})();
+function shellPath(e) {
+  const A = SPOS[e.a], B = SPOS[e.b], off = (e.off || 0) * .9;
+  const rm = A.r === B.r ? A.r * .7 : (A.r + B.r) / 2;
+  const c1 = polar(rm, A.a + off / rm), c2 = polar(rm, B.a + off / rm);
+  const shrink = (p, c, d) => { const dx = c[0] - p[0], dy = c[1] - p[1], l = Math.hypot(dx, dy) || 1; return [p[0] + dx / l * d, p[1] + dy / l * d]; };
+  const p0 = shrink([A.x, A.y], c1, 11), p3 = shrink([B.x, B.y], c2, 11);
+  return `M${f1(p0[0])},${f1(p0[1])} C${f1(c1[0])},${f1(c1[1])} ${f1(c2[0])},${f1(c2[1])} ${f1(p3[0])},${f1(p3[1])}`;
+}
+function initShells() {
+  radialView({
+    svg:$('#shell'), tb:$('#shell-toolbar'), detail:$('#shell-detail'),
+    draw() {
+      const top = r => `M${-r},0 A${r},${r} 0 0,1 ${r},0`;
+      let s = `<defs>${markerDefs('sm')}${LEVELS.map(lv => `<path id="sband${lv}" d="${top(SHELL_BAND[lv][1] - 14)}"/>`).join('')}</defs>`;
+      s += [...LEVELS].reverse().map(lv => `<circle r="${SHELL_BAND[lv][1]}" class="band" style="fill:color-mix(in srgb, var(--l${lv}) ${lv === 1 ? 16 : 9}%, var(--surface))"/>`).join('');
+      s += LEVELS.map(lv => `<circle r="${SHELL_R[lv]}" class="orbit"/>`).join('');
+      s += LEVELS.map(lv => `<text class="lvtext" style="fill:var(--l${lv})"><textPath href="#sband${lv}" startOffset="50%" text-anchor="middle">${lvName(lv)}</textPath></text>`).join('');
+      s += '<g>' + REDGES.map((e, i) => `<path class="edge" data-i="${i}" d="${shellPath(e)}" ${edgeAttrs(e, 'sm')}><title>${edgeTitle(e)}</title></path>`).join('') + '</g>';
+      s += IDS.map(id => { const { a, x, y } = SPOS[id], lv = M[id].level, c = Math.cos(a), sn = Math.sin(a);
+        const lines = wrap(nm(id), 22), anchor = lv === 1 ? 'middle' : c > .25 ? 'start' : c < -.25 ? 'end' : 'middle';
+        const dx = lv === 1 ? 0 : anchor === 'middle' ? 0 : 13 * Math.sign(c), dy = lv === 1 ? 20 : anchor === 'middle' ? (sn > 0 ? 18 : -16 - 13 * lines.length) : -6.5 * lines.length;
+        return `<g class="rnode" data-id="${id}" tabindex="0" role="button" aria-label="${id} ${nm(id)}"><title>${id} ${nm(id)}</title>
+          <circle cx="${f1(x)}" cy="${f1(y)}" r="8" style="fill:var(--l${lv})"/>
+          <text class="rlabel" x="${f1(x + dx)}" y="${f1(y + dy)}" text-anchor="${anchor}" dominant-baseline="middle"><tspan class="rid">${id}</tspan>${lines.map((l, i) => `<tspan x="${f1(x + dx)}" dy="${i === 0 ? 13 : 13}">${l}</tspan>`).join('')}</text></g>`; }).join('');
+      this.svg.setAttribute('viewBox', '-600 -480 1200 960');
+      this.svg.innerHTML = s;
+    }
+  });
+}
+
+initNet(); initCfg(); initMx(); initCircle(); initShells();
+
+</script>
+</body>
+</html>
